@@ -1,28 +1,30 @@
+import Phaser from 'phaser';
+import PlayScene from './scenes/Play';
+import PreloadScene from './scenes/Preload';
 
-import Phaser from "phaser";
+const WIDTH = 1280;
+const HEIGHT = 600;
+
+const SHARED_CONFIG = {
+  width: WIDTH,
+  height: HEIGHT
+}
+
+const Scenes = [PreloadScene, PlayScene];
+const createScene = Scene => new Scene(SHARED_CONFIG);
+const initScenes = () => Scenes.map(createScene);
 
 const config = {
-  type: Phaser.AUTO,
-  width: 800,
-  height: 600,
-  physics: {
-    default: 'arcade',
+  type: Phaser.AUTO, // webGL is default
+  ...SHARED_CONFIG,
+  pixelArt: true,
+  physics: { // interaction of your objects
+    default: 'arcade', // arcade phsyics plugin manages physics simulation like gravity, velocity, etc
     arcade: {
-      gravity: { y: 200 }
+      debug: true
     }
   },
-  scene: {
-    preload: preload,
-    create: create
-  }
-};
+  scene: initScenes()
+}
 
 new Phaser.Game(config);
-
-function preload () {
-  this.load.image('sky', 'assets/sky.png');
-}
-
-function create () {
-  this.add.image(400, 300, 'sky');
-}
