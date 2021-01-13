@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import initAnimations from './playerAnims';
 
 class Player extends Phaser.Physics.Arcade.Sprite {
   constructor(scene, x, y) {
@@ -9,30 +10,46 @@ class Player extends Phaser.Physics.Arcade.Sprite {
     scene.physics.add.existing(this);
 
     this.init();
+    this.initEvents();
   }
 
   init() {
-    this.gravity = 500;
+    this.gravity = 700;
     this.playerSpeed = 200;
+    this.cursors = this.scene.input.keyboard.createCursorKeys();
 
     this.body.setGravityY(this.gravity);
     this.setCollideWorldBounds(true);
 
-    this.cursors = this.scene.input.keyboard.createCursorKeys();
+    initAnimations(this.scene.anims);
   }
 
-  preUpdate(time, delta) {
-    super.preUpdate(time, delta);
+  initEvents() {
+    this.scene.events.on(Phaser.Scenes.Events.UPDATE, this.update, this)
+  }
 
-    const { left, right } = this.cursors;
+  update() {
+    const { left, right, up, space } = this.cursors;
+    const onFloor = this.body.onFloor();
 
     if (left.isDown) {
       this.setVelocityX(-this.playerSpeed);
+      this.setFlipX(true);
     } else if (right.isDown) {
       this.setVelocityX(this.playerSpeed);
+      this.setFlipX(false);
     } else {
       this.setVelocityX(0);
     }
+
+    if ((space.isDown || up.isDown) && onFloor) {
+      this.setVelocityY(-this.playerSpeed * 2);
+    }
+
+    this.body.velocity.x !== 0 ?
+      this.play('run', true) : this.play('idle', true);
+    // second param - ignore if its playing
+    // this.play('idle', true);
   }
 }
 
