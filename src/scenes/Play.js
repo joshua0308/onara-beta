@@ -1,5 +1,6 @@
 // import Phaser from 'phaser';
 import Player from '../entities/Player.js';
+import OtherPlayer from '../entities/OtherPlayer.js';
 class Play extends Phaser.Scene {
   constructor(config) {
     super('PlayScene');
@@ -9,18 +10,37 @@ class Play extends Phaser.Scene {
   create() {
     const map = this.createMap();
     const layers = this.createLayers(map);
-    const playerZones = this.getPlayerZones(layers.playerZones);
-    const player = this.createPlayer(playerZones.start);
+    this.playerZones = this.getPlayerZones(layers.playerZones);
+    const player = this.createPlayer(this.playerZones.start);
+    const socket = this.createSocket();
 
-    // player.addCollider(layers.platformsColliders);
     this.createPlayerColliders(player, {
       colliders: {
         platformsColliders: layers.platformsColliders
       }
     })
-
-    this.createEndOfLevel(playerZones.end, player);
+    
+    this.createEndOfLevel(this.playerZones.end, player);
     this.setupFollowupCameraOn(player);
+
+  }
+
+  createSocket() {
+    // sockets
+    const socket = io();
+
+    // receive live players in the room
+    socket.on('currentPlayers', (players) => {
+      console.log('Current players: ', players)
+    })
+
+    // receive info about newly connected players
+    socket.on('newPlayer', (player) => {
+      console.log('New player: ', player)
+      this.createOtherPlayer(player.playerId)
+    })
+
+    return socket;
   }
 
   createMap() {
@@ -47,9 +67,18 @@ class Play extends Phaser.Scene {
     return { environment, platforms, platformsColliders, playerZones }
   }
 
-  createPlayer(start) {
-    const player = new Player(this, start.x, start.y);
+  createPlayer() {
+    const player = new Player(this, this.playerZones.start.x, this.playerZones.start.y);
     return player;
+  }
+
+  createOtherPlayer(playerId) {
+    // const otherPlayer = new OtherPlayer(this, this.playerZones.start.x, this.playerZones.start.y);
+    const otherPlayer = this.add.sprite(this.playerZones.start.x, this.playerZones.start.y, 'player', 0).setOrigin(0.5, 1);
+    // eslint-disable-next-line no-console
+
+    otherPlayer.playerId = playerId;
+    return otherPlayer;
   }
 
   createPlayerColliders(player, { colliders }) {

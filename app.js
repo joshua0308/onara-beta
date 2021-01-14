@@ -6,13 +6,33 @@ const io = require('socket.io')(http);
 
 const PORT = 3000;
 
-io.on('connection', socket => {
-  console.log('a user connected: ', socket.id)
+const players = {};
 
+io.on('connection', socket => {
+  console.log('a user connected: ', socket.id);
+
+  // add player to the object keyed by socket.id
+  players[socket.id] = {
+    playerId: socket.id
+  };
+
+  socket.emit('currentPlayers', players);
+
+  socket.broadcast.emit('newPlayer', players[socket.id]);
+
+  socket.on('playerMovement', movementData => {
+    players[socket.id].x = movementData.x;
+    players[socket.id].y = movementData.y;
+
+    socket.broadcast.emit('playerMoved', players[socket.id]);
+  })
+  
   socket.on('disconnect', () => {
     console.log('user disconnected: ', socket.id)
-    io.emit('disconnect', socket.id)
-  })
+    delete players[socket.id];
+
+    io.emit('playerDisconnect', socket.id)
+  });
 })
 
 app.get('/', (req, res) => {
