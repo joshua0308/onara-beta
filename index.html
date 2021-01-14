@@ -2,6 +2,13 @@
 <html>
   <head>
     <meta charset="utf-8">
+    <!-- download phaser and socket.io on the client side -->
+    <script src="//cdn.jsdelivr.net/npm/phaser@3.16.2/dist/phaser.min.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+      var socket = io();
+    </script>
+
     <style>
       body {
         margin: 200px;
@@ -11,5 +18,7 @@
     </style>
   </head>
   <body>
+    <!-- entrypoint to the game files -->
+    <script type="module" src="src/index.js"></script>
   </body>
 </html>

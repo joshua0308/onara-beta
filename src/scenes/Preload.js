@@ -1,4 +1,4 @@
-import Phaser from 'phaser';
+// import Phaser from 'phaser';
 
 class Preload extends Phaser.Scene {
   constructor() {

@@ -1,5 +1,5 @@
-import Phaser from 'phaser';
-import Player from '../entities/Player';
+// import Phaser from 'phaser';
+import Player from '../entities/Player.js';
 class Play extends Phaser.Scene {
   constructor(config) {
     super('PlayScene');
