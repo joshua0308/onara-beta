@@ -1,6 +1,8 @@
 import Phaser from 'phaser';
 import initAnimations from './playerAnims';
 
+import collidable from '../mixins/collidable';
+
 class Player extends Phaser.Physics.Arcade.Sprite {
   constructor(scene, x, y) {
     super(scene, x, y, 'player');
@@ -9,20 +11,23 @@ class Player extends Phaser.Physics.Arcade.Sprite {
     scene.add.existing(this);
     scene.physics.add.existing(this);
 
+    // Mixins
+    Object.assign(this, collidable);
+
     this.init();
     this.initEvents();
   }
 
   init() {
     this.gravity = 500;
-    this.playerSpeed = 150;
+    this.playerSpeed = 200;
     this.jumpCount = 0;
     this.consecutiveJumps = 1;
-
     this.cursors = this.scene.input.keyboard.createCursorKeys();
 
     this.body.setGravityY(this.gravity);
     this.setCollideWorldBounds(true);
+    this.setOrigin(0.5, 1);
 
     initAnimations(this.scene.anims);
   }
@@ -63,6 +68,10 @@ class Player extends Phaser.Physics.Arcade.Sprite {
     // second param - ignore if its playing
     // this.play('idle', true);
   }
+
+  // addCollider(otherGameObject, callback) {
+  //   this.scene.physics.add.collider(this, otherGameObject, callback, null, this);
+  // }
 }
 
 export default Player;
