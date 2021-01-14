@@ -3,8 +3,10 @@ import initAnimations from './playerAnims.js';
 import collidable from '../mixins/collidable.js';
 
 class Player extends Phaser.Physics.Arcade.Sprite {
-  constructor(scene, x, y) {
+  constructor(scene, x, y, socket) {
     super(scene, x, y, 'player');
+
+    this.socket = socket;
 
     // add existing context - this will add image and set gravity
     scene.add.existing(this);
@@ -15,6 +17,7 @@ class Player extends Phaser.Physics.Arcade.Sprite {
 
     this.init();
     this.initEvents();
+    this.socket.emit('playerMovement', { x, y, flipX: false })
   }
 
   init() {
@@ -60,17 +63,26 @@ class Player extends Phaser.Physics.Arcade.Sprite {
       this.jumpCount = 0;
     }
 
+    let x = this.x;
+    let y = this.y;
+    let flipX = this.flipX;
+
+    if (this.oldPosition && (x !== this.oldPosition.x || y !== this.oldPosition.y)) {
+      this.socket.emit('playerMovement', { x, y, flipX })
+    }
+
     onFloor ?
       this.body.velocity.x !== 0 ?
         this.play('run', true) : this.play('idle', true) :
       this.play('jump', true);
-    // second param - ignore if its playing
-    // this.play('idle', true);
-  }
+    // second param - ignore animation if its playing
 
-  // addCollider(otherGameObject, callback) {
-  //   this.scene.physics.add.collider(this, otherGameObject, callback, null, this);
-  // }
+    this.oldPosition = {
+      x: this.x,
+      y: this.y,
+      flipX: this.flipX
+    }
+  }
 }
 
 export default Player;

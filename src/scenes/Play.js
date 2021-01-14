@@ -1,6 +1,5 @@
 // import Phaser from 'phaser';
 import Player from '../entities/Player.js';
-import OtherPlayer from '../entities/OtherPlayer.js';
 class Play extends Phaser.Scene {
   constructor(config) {
     super('PlayScene');
@@ -10,37 +9,67 @@ class Play extends Phaser.Scene {
   create() {
     const map = this.createMap();
     const layers = this.createLayers(map);
-    this.playerZones = this.getPlayerZones(layers.playerZones);
-    const player = this.createPlayer(this.playerZones.start);
     const socket = this.createSocket();
+    this.playerZones = this.getPlayerZones(layers.playerZones);
+    const player = this.createPlayer();
+
+    this.otherPlayers = this.physics.add.group();
 
     this.createPlayerColliders(player, {
       colliders: {
         platformsColliders: layers.platformsColliders
       }
     })
-    
+
     this.createEndOfLevel(this.playerZones.end, player);
+    this.setupSocket();
     this.setupFollowupCameraOn(player);
 
   }
 
-  createSocket() {
-    // sockets
-    const socket = io();
-
+  setupSocket() {
     // receive live players in the room
-    socket.on('currentPlayers', (players) => {
-      console.log('Current players: ', players)
+    this.socket.on('currentPlayers', (players) => {
+      const socketId = this.socket.id;
+
+      Object.keys(players).forEach(id => {
+        if (id !== socketId) {
+          this.createOtherPlayer(players[id], false);
+        }
+      })
     })
 
     // receive info about newly connected players
-    socket.on('newPlayer', (player) => {
+    this.socket.on('newPlayer', (player) => {
       console.log('New player: ', player)
-      this.createOtherPlayer(player.playerId)
+      this.createOtherPlayer(player, true)
     })
 
-    return socket;
+    // player movement
+    this.socket.on('playerMoved', playerInfo => {
+      this.otherPlayers.getChildren().forEach(otherPlayer => {
+        if (playerInfo.playerId === otherPlayer.playerId) {
+          otherPlayer.setPosition(playerInfo.x, playerInfo.y);
+          otherPlayer.flipX = playerInfo.flipX;
+        }
+      })
+    })
+
+    this.socket.on('playerDisconnect', playerId => {
+      this.otherPlayers.getChildren().forEach(player => {
+        if (playerId === player.playerId) {
+          player.destroy();
+        }
+      })
+    })
+  }
+  createSocket() {
+    // sockets
+    this.socket = io();
+
+
+
+    return this.socket;
   }
 
   createMap() {
@@ -68,16 +97,18 @@ class Play extends Phaser.Scene {
   }
 
   createPlayer() {
-    const player = new Player(this, this.playerZones.start.x, this.playerZones.start.y);
+    const player = new Player(this, this.playerZones.start.x, this.playerZones.start.y, this.socket);
     return player;
   }
 
-  createOtherPlayer(playerId) {
-    // const otherPlayer = new OtherPlayer(this, this.playerZones.start.x, this.playerZones.start.y);
-    const otherPlayer = this.add.sprite(this.playerZones.start.x, this.playerZones.start.y, 'player', 0).setOrigin(0.5, 1);
-    // eslint-disable-next-line no-console
+  createOtherPlayer(player, isNew) {
+    const x = isNew ? this.playerZones.x : player.x;
+    const y = isNew ? this.playerZones.y : player.y;
 
-    otherPlayer.playerId = playerId;
+    const otherPlayer = this.add.sprite(x, y, 'player', 0).setOrigin(0.5, 1);
+    otherPlayer.playerId = player.playerId;
+    this.otherPlayers.add(otherPlayer);
+
     return otherPlayer;
   }
 

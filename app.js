@@ -23,10 +23,11 @@ io.on('connection', socket => {
   socket.on('playerMovement', movementData => {
     players[socket.id].x = movementData.x;
     players[socket.id].y = movementData.y;
+    players[socket.id].flipX = movementData.flipX;
 
     socket.broadcast.emit('playerMoved', players[socket.id]);
   })
-  
+
   socket.on('disconnect', () => {
     console.log('user disconnected: ', socket.id)
     delete players[socket.id];
