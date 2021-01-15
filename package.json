@@ -8,8 +8,6 @@
   },
   "scripts": {
     "start": "node app.js",
-    "build": "webpack --config webpack.prod.js",
-    "dev": "webpack-dev-server --config webpack.common.js --watch",
     "server": "nodemon app.js"
   },
   "author": "",
