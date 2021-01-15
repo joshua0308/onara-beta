@@ -24,6 +24,7 @@ io.on('connection', socket => {
     players[socket.id].x = movementData.x;
     players[socket.id].y = movementData.y;
     players[socket.id].flipX = movementData.flipX;
+    players[socket.id].motion = movementData.motion;
 
     socket.broadcast.emit('playerMoved', players[socket.id]);
   })
@@ -36,11 +37,11 @@ io.on('connection', socket => {
   });
 })
 
-app.get('/', (req, res) => {
+app.get('/status', (req, res) => {
   res.send('hi')
 })
 
-app.get('/game', (req, res) => {
+app.get('/', (req, res) => {
   res.sendFile(__dirname + '/index.html');
 })
 

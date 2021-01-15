@@ -41,7 +41,6 @@ class Play extends Phaser.Scene {
 
     // receive info about newly connected players
     this.socket.on('newPlayer', (player) => {
-      console.log('New player: ', player)
       this.createOtherPlayer(player, true)
     })
 
@@ -51,6 +50,7 @@ class Play extends Phaser.Scene {
         if (playerInfo.playerId === otherPlayer.playerId) {
           otherPlayer.setPosition(playerInfo.x, playerInfo.y);
           otherPlayer.flipX = playerInfo.flipX;
+          otherPlayer.play(playerInfo.motion, true);
         }
       })
     })
@@ -86,11 +86,6 @@ class Play extends Phaser.Scene {
     const playerZones = map.getObjectLayer('player_zones');
 
     // collide player with platform
-    // there are two ways to achieve collision with platforms
-    // 1. based on tile number
-    // platformsColliders.setCollisionByExclusion(-1, true);
-
-    // 2. based on tile property
     platformsColliders.setCollisionByProperty({ collides: true });
 
     return { environment, platforms, platformsColliders, playerZones }
