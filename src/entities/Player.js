@@ -15,9 +15,13 @@ class Player extends Phaser.Physics.Arcade.Sprite {
     // Mixins
     Object.assign(this, collidable);
 
+    // allow mouseover event listener
+    this.setInteractive();
+
     this.init();
     this.initEvents();
-    this.socket.emit('playerMovement', { x, y, flipX: false })
+    this.motion = 'idle';
+    this.socket.emit('playerMovement', { x, y, flipX: false, motion: this.motion })
   }
 
   init() {

@@ -13,6 +13,13 @@ class Play extends Phaser.Scene {
     this.playerZones = this.getPlayerZones(layers.playerZones);
     const player = this.createPlayer();
 
+
+
+    player.on('pointerover', pointer => {
+      // eslint-disable-next-line no-console
+      console.log("debug: me", this.playerId);
+    })
+
     this.otherPlayers = this.physics.add.group();
 
     this.createPlayerColliders(player, {
@@ -45,19 +52,19 @@ class Play extends Phaser.Scene {
     })
 
     // player movement
-    this.socket.on('playerMoved', playerInfo => {
+    this.socket.on('playerMoved', otherPlayerInfo => {
       this.otherPlayers.getChildren().forEach(otherPlayer => {
-        if (playerInfo.playerId === otherPlayer.playerId) {
-          otherPlayer.setPosition(playerInfo.x, playerInfo.y);
-          otherPlayer.flipX = playerInfo.flipX;
-          otherPlayer.play(playerInfo.motion, true);
+        if (otherPlayerInfo.playerId === otherPlayer.playerId) {
+          otherPlayer.setPosition(otherPlayerInfo.x, otherPlayerInfo.y);
+          otherPlayer.flipX = otherPlayerInfo.flipX;
+          otherPlayer.play(otherPlayerInfo.motion, true);
         }
       })
     })
 
-    this.socket.on('playerDisconnect', playerId => {
+    this.socket.on('playerDisconnect', otherPlayerId => {
       this.otherPlayers.getChildren().forEach(player => {
-        if (playerId === player.playerId) {
+        if (otherPlayerId === player.playerId) {
           player.destroy();
         }
       })
@@ -66,9 +73,9 @@ class Play extends Phaser.Scene {
   createSocket() {
     // sockets
     this.socket = io();
-
-
-
+    this.socket.on('connect', () => {
+      this.playerId = this.socket.id;
+    })
     return this.socket;
   }
 
@@ -102,6 +109,12 @@ class Play extends Phaser.Scene {
 
     const otherPlayer = this.add.sprite(x, y, 'player', 0).setOrigin(0.5, 1);
     otherPlayer.playerId = player.playerId;
+    otherPlayer.setInteractive();
+    otherPlayer.on('pointerover', pointer => {
+      // eslint-disable-next-line no-console
+      console.log("debug: other player", otherPlayer.playerId);
+    })
+
     this.otherPlayers.add(otherPlayer);
 
     return otherPlayer;
