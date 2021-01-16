@@ -2,9 +2,6 @@
 import PlayScene from './scenes/Play.js';
 import PreloadScene from './scenes/Preload.js';
 
-// const socket = io();
-// // eslint-disable-next-line no-console
-// console.log("debug: socket", socket);
 // 1600px
 const MAP_WIDTH = 1600;
 

@@ -11,6 +11,7 @@ const players = {};
 io.on('connection', socket => {
   console.log('a user connected: ', socket.id);
 
+  // GAME SOCKETS
   // add player to the object keyed by socket.id
   players[socket.id] = {
     playerId: socket.id
@@ -35,7 +36,21 @@ io.on('connection', socket => {
 
     io.emit('playerDisconnect', socket.id)
   });
+
+  // ROOM SOCKETS (VIDEO)
+  socket.on('join-room', (roomId, myUserId) => {
+    socket.join(roomId);
+
+    // broadcast to the room that i joined
+    socket.to(roomId).broadcast.emit('user-connected', myUserId);
+
+    socket.on('disconnect', () => {
+      socket.to(roomId).broadcast.emit('user-disconnected', myUserId)
+    })
+  })
 })
+
+app.set('view engine', 'ejs');
 
 app.get('/status', (req, res) => {
   res.send('hi')
@@ -45,9 +60,13 @@ app.get('/', (req, res) => {
   res.sendFile(__dirname + '/index.html');
 })
 
+app.get('/room/:roomId', (req, res) => {
+  res.render('room', { roomId: req.params.roomId })
+})
 
 app.use('/src', express.static(__dirname + '/src'));
-app.use('/assets', express.static(__dirname + '/assets'));
+app.use('/assets', express.static(__dirname + '/public/assets'));
+app.use('/public', express.static(__dirname + '/public'));
 
 // need to use http to listen in order for socket.io to work on the client side
 http.listen(PORT, () => console.log(`listening on port ${PORT}...`))
