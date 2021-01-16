@@ -22,6 +22,7 @@ const initScenes = () => Scenes.map(createScene);
 const config = {
   type: Phaser.AUTO, // webGL is default
   ...SHARED_CONFIG,
+  parent: 'game-wrapper',
   pixelArt: true,
   physics: { // interaction of your objects
     default: 'arcade', // arcade phsyics plugin manages physics simulation like gravity, velocity, etc

@@ -57,7 +57,7 @@ class Play extends Phaser.Scene {
         if (otherPlayerInfo.playerId === otherPlayer.playerId) {
           otherPlayer.setPosition(otherPlayerInfo.x, otherPlayerInfo.y);
           otherPlayer.flipX = otherPlayerInfo.flipX;
-          // otherPlayer.play(otherPlayerInfo.motion, true);
+          otherPlayer.play(otherPlayerInfo.motion, true);
         }
       })
     })
