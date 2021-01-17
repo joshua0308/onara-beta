@@ -151,3 +151,9 @@ const setPlayVideo = () => {
   `
   document.querySelector('.main__video_button').innerHTML = html;
 }
+
+const leaveMeeting = () => {
+  // eslint-disable-next-line no-console
+  console.log("debug: window.location", window.location);
+  window.location.href = window.location.origin;
+}
