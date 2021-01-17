@@ -6,14 +6,15 @@ const videoGrid = document.getElementById('video-grid');
 const peer = new Peer();
 
 const peers = {};
-
+let myVideoStream;
 const myVideoElement = document.createElement('video');
 myVideoElement.muted = true;
 
 navigator.mediaDevices.getUserMedia({
   video: true,
   audio: true
-}).then(myVideoStream => {
+}).then(stream => {
+  myVideoStream = stream;
   addVideoStream(myVideoElement, myVideoStream);
 
   // when I receive a call from the other user,
@@ -36,16 +37,36 @@ navigator.mediaDevices.getUserMedia({
     connectToOtherUser(otherUserId, myVideoStream);
   })
 
-  socket.on('user-disconnected', disconnectedUserId => {
-    if (peers[disconnectedUserId]) {
-      peers[disconnectedUserId].close();
-    }
+  // once my video is ready, jion the socket channel with room id
+  let myUserId;
+  peer.on('open', userId => {
+    // eslint-disable-next-line no-console
+    console.log("debug: userId", userId);
+    myUserId = userId;
+    socket.emit('join-room', ROOM_ID, userId);
   })
 
-  // once my video is ready, jion the socket channel with room id
-  peer.on('open', myUserId => {
-    socket.emit('join-room', ROOM_ID, myUserId);
+  // CHAT
+  let text = $("input");
+
+  $('html').keydown(function(e) {
+    // when press enter send message
+    if (e.which == 13 && text.val().length !== 0) {
+      socket.emit('message', { text: text.val(), userId: myUserId });
+      text.val('')
+    }
+  });
+
+  socket.on("createMessage", ({ text, userId }) => {
+    $("ul").append(`<li class="message"><b>${userId}</b><br/>${text}</li>`);
+    scrollToBottom()
   })
+})
+
+socket.on('user-disconnected', disconnectedUserId => {
+  if (peers[disconnectedUserId]) {
+    peers[disconnectedUserId].close();
+  }
 })
 
 function connectToOtherUser(otherUserId, myVideoStream) {
@@ -69,4 +90,9 @@ function addVideoStream(videoElement, stream) {
     videoElement.play();
   })
   videoGrid.append(videoElement);
+}
+
+function scrollToBottom() {
+  var d = $('.main__chat_window');
+  d.scrollTop(d.prop("scrollHeight"));
 }

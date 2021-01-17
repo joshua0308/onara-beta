@@ -41,12 +41,18 @@ io.on('connection', socket => {
   socket.on('join-room', (roomId, myUserId) => {
     socket.join(roomId);
 
-    // broadcast to the room that i joined
+    // broadcast to the rocreate-messageom that i joined
     socket.to(roomId).broadcast.emit('user-connected', myUserId);
 
     socket.on('disconnect', () => {
       socket.to(roomId).broadcast.emit('user-disconnected', myUserId)
     })
+
+    // CHAT
+    socket.on('message', ({ text, userId }) => {
+      //send message to the same room
+      io.to(roomId).emit('createMessage', { text, userId })
+    }); 
   })
 })
 
