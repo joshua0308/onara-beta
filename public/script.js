@@ -9,6 +9,10 @@ let myVideoStream;
 const myVideoElement = document.createElement('video');
 myVideoElement.muted = true;
 
+// close socket connection when user leaves the room
+// this is needed bc there is a delay firing the disconnect event
+window.onunload = () => socket.close();
+
 navigator.mediaDevices.getUserMedia({
   video: true,
   audio: true
