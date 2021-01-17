@@ -62,12 +62,12 @@ io.on('connection', socket => {
 
 app.set('view engine', 'ejs');
 
-app.get('/status', (req, res) => {
-  res.send('hi')
+app.get('/ping', (req, res) => {
+  res.send('pong')
 })
 
 app.get('/', (req, res) => {
-  res.sendFile(__dirname + '/index.html');
+  res.render('game');
 })
 
 app.get('/room/:roomId', (req, res) => {
