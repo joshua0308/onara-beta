@@ -1,8 +1,12 @@
 const express = require('express');
 
 const app = express();
-const http = require('http').Server(app);
-const io = require('socket.io')(http);
+const server = require('http').Server(app);
+const io = require('socket.io')(server);
+const { ExpressPeerServer } = require('peer');
+const peerServer = ExpressPeerServer(server, {
+  debug: true
+});
 
 const PORT = process.env.PORT || 3000;
 
@@ -45,7 +49,7 @@ io.on('connection', socket => {
     socket.to(roomId).broadcast.emit('user-connected', myUserId);
 
     socket.on('disconnect', () => {
-      socket.to(roomId).broadcast.emit('user-disconnected', myUserId)
+      socket.to(roomId).broadcast.emit('user-disconnected', myUserId);
     })
 
     // CHAT
@@ -70,9 +74,10 @@ app.get('/room/:roomId', (req, res) => {
   res.render('room', { roomId: req.params.roomId })
 })
 
+app.use('/peerjs', peerServer);
 app.use('/src', express.static(__dirname + '/src'));
 app.use('/assets', express.static(__dirname + '/public/assets'));
 app.use('/public', express.static(__dirname + '/public'));
 
 // need to use http to listen in order for socket.io to work on the client side
-http.listen(PORT, () => console.log(`listening on port ${PORT}...`))
+server.listen(PORT, () => console.log(`listening on port ${PORT}...`))

@@ -1,9 +1,8 @@
-// eslint-disable-next-line no-console
-console.log("debug: ROOM_ID", ROOM_ID);
-
 const socket = io();
 const videoGrid = document.getElementById('video-grid');
-const peer = new Peer();
+const peer = new Peer(undefined);
+
+console.log("debug: ROOM_ID", ROOM_ID);
 
 const peers = {};
 let myVideoStream;
@@ -27,6 +26,8 @@ navigator.mediaDevices.getUserMedia({
     call.on('stream', otherUserVideoStream => {
       addVideoStream(otherUserVideoElement, otherUserVideoStream);
     })
+
+    addToPeersObj(call.peer, call, otherUserVideoElement);
   })
 
   // when I make a call to the other user 
@@ -34,14 +35,13 @@ navigator.mediaDevices.getUserMedia({
   // 2. display other user's video stream on my screen
   // ** the user already in the room will be making the call to the new user
   socket.on('user-connected', otherUserId => {
+    console.log("debug: user connected", otherUserId);
     connectToOtherUser(otherUserId, myVideoStream);
   })
 
-  // once my video is ready, jion the socket channel with room id
+  // once my video is ready, join the socket channel with room id
   let myUserId;
   peer.on('open', userId => {
-    // eslint-disable-next-line no-console
-    console.log("debug: userId", userId);
     myUserId = userId;
     socket.emit('join-room', ROOM_ID, userId);
   })
@@ -64,8 +64,12 @@ navigator.mediaDevices.getUserMedia({
 })
 
 socket.on('user-disconnected', disconnectedUserId => {
+  console.log("debug: user disconnected", disconnectedUserId);
+  console.log("debug: peers", peers);
   if (peers[disconnectedUserId]) {
-    peers[disconnectedUserId].close();
+    peers[disconnectedUserId].call.close();
+    peers[disconnectedUserId].videoElement.remove();
+    delete peers[disconnectedUserId]
   }
 })
 
@@ -81,8 +85,13 @@ function connectToOtherUser(otherUserId, myVideoStream) {
     otherUserVideoElement.remove();
   })
 
-  peers[otherUserId] = call;
-} 
+  // peers[otherUserId] = { call, videoElement: otherUserVideoElement };
+  addToPeersObj(otherUserId, call, otherUserVideoElement);
+}
+
+function addToPeersObj(id, call, videoElement) {
+  peers[id] = { call, videoElement }
+}
 
 function addVideoStream(videoElement, stream) {
   videoElement.srcObject = stream;
@@ -153,7 +162,5 @@ const setPlayVideo = () => {
 }
 
 const leaveMeeting = () => {
-  // eslint-disable-next-line no-console
-  console.log("debug: window.location", window.location);
   window.location.href = window.location.origin;
 }
