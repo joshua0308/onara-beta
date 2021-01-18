@@ -11,7 +11,9 @@ myVideoElement.muted = true;
 
 // close socket connection when user leaves the room
 // this is needed bc there is a delay firing the disconnect event
-window.onunload = () => socket.close();
+window.onbeforeunload = () => {
+  socket.close();
+}
 
 // TODO: if userMedia errors out, nothing works
 // at least chat needs to work even when userMedia is unavailable
@@ -168,5 +170,6 @@ const setPlayVideo = () => {
 }
 
 const leaveMeeting = () => {
+  socket.close();
   window.location.href = window.location.origin + '/game';
 }
