@@ -2,7 +2,8 @@
 `npm run dev` - start server with nodemon (port 3000)
 
 ## Endpoints
-- `/` - game endpoint
+- `/login` - login endpoint
+- `/game` - game endpoint
 - `/status` - status endpoint
 
 ## How to deploy

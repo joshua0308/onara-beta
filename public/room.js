@@ -13,6 +13,8 @@ myVideoElement.muted = true;
 // this is needed bc there is a delay firing the disconnect event
 window.onunload = () => socket.close();
 
+// TODO: if userMedia errors out, nothing works
+// at least chat needs to work even when userMedia is unavailable
 navigator.mediaDevices.getUserMedia({
   video: true,
   audio: true
@@ -166,5 +168,5 @@ const setPlayVideo = () => {
 }
 
 const leaveMeeting = () => {
-  window.location.href = window.location.origin;
+  window.location.href = window.location.origin + '/game';
 }

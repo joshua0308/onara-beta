@@ -67,7 +67,15 @@ app.get('/ping', (req, res) => {
 })
 
 app.get('/', (req, res) => {
+  res.redirect('/login')
+})
+
+app.get('/game', (req, res) => {
   res.render('game');
+})
+
+app.get('/login', (req, res) => {
+  res.render('login');
 })
 
 app.get('/room/:roomId', (req, res) => {
