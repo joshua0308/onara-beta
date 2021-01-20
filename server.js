@@ -19,16 +19,19 @@ io.on('connection', socket => {
     playerId: socket.id
   };
 
-  socket.emit('currentPlayers', players);
-
-  socket.broadcast.emit('newPlayer', players[socket.id]);
+  // need to wait until socket listener is set up on the client side.
+  socket.on('join-game', (playerInfo) => {
+    players[socket.id].displayName = playerInfo.displayName;
+    
+    io.emit('currentPlayers', players);
+    socket.broadcast.emit('newPlayer', players[socket.id]);
+  });
 
   socket.on('playerMovement', movementData => {
     players[socket.id].x = movementData.x;
     players[socket.id].y = movementData.y;
     players[socket.id].flipX = movementData.flipX;
     players[socket.id].motion = movementData.motion;
-    // players[socket.id].name = movementData.name;
 
     socket.broadcast.emit('playerMoved', players[socket.id]);
   })

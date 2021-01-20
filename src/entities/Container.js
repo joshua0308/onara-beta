@@ -13,15 +13,13 @@ class Container extends Phaser.GameObjects.Container {
     scene.add.existing(this);
     scene.physics.add.existing(this);
 
-    // debugger;
-
     // ADD PLAYER
     const player = scene.add.sprite(0, 0, 'player', 0);
     player.name = 'sprite';
     this.add(player);
 
     // ADD TEXT
-    const text = scene.add.text(0, 30, this.playerInfo.name);
+    const text = scene.add.text(0, 30, this.playerInfo.displayName);
     text.setOrigin(0.5, 0.5)
     this.add(text);
 
@@ -105,8 +103,7 @@ class Container extends Phaser.GameObjects.Container {
           x: this.x,
           y: this.y,
           flipX: sprite.flipX,
-          motion: this.motion,
-          // name: this.playerInfo.name
+          motion: this.motion
         })
     }
 

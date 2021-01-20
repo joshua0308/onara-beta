@@ -1,8 +1,6 @@
-// import Phaser from 'phaser';
 import PlayScene from './scenes/Play.js';
 import PreloadScene from './scenes/Preload.js';
 
-// 1600px
 const MAP_WIDTH = 1600;
 
 const WIDTH = document.body.offsetWidth;
@@ -38,10 +36,20 @@ const config = {
 firebaseClient.auth().onAuthStateChanged((player) => {
   if (player) {
     console.log("debug: logged in", player.displayName, player.email);
-    playerInfo.name = player.displayName;
-
-    new Phaser.Game(config);
+    new AronaGame(config, player);
   } else {
     window.location.replace('/login');
   }
 });
+
+class AronaGame extends Phaser.Game {
+  constructor(config, playerInfo) {
+    super(config);
+
+    this.playerInfo = playerInfo;
+    this.socket = io();
+    this.socket.on('connect', () => {
+      this.playerId = this.socket.id;
+    })
+  }
+}

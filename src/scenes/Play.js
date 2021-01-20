@@ -6,136 +6,152 @@ class Play extends Phaser.Scene {
   }
 
   create() {
+    this.socket = this.game.socket;
+    this.playerId = this.game.playerId;
+    this.playerInfo = this.game.playerInfo;
+    this.otherPlayers = this.physics.add.group();
+
     const map = this.createMap();
     const layers = this.createLayers(map);
-    const socket = this.createSocket();
     this.playerZones = this.getPlayerZones(layers.playerZones);
 
-    const container = new Container(this, this.playerZones.start.x, this.playerZones.start.y, socket, playerInfo);
+    const container = new Container(this, this.playerZones.start.x, this.playerZones.start.y, this.socket, this.playerInfo);
     container.addCollider(layers.platformsColliders)
-
     container.on('pointerover', pointer => {
       console.log("debug: me", this.playerId);
     })
 
-    this.otherPlayers = this.physics.add.group();
-
     this.createEndOfLevel(this.playerZones.end, container);
-
     this.setupFollowupCameraOn(container);
-
     this.setupSocket();
   }
 
-setupSocket() {
-  // receive live players in the room
-  this.socket.on('currentPlayers', (players) => {
-    console.log('socket: currentPlayers');
+  setupSocket() {
+    // receive live players in the room
+    this.socket.on('currentPlayers', (players) => {
+      const socketId = this.socket.id;
 
-    const socketId = this.socket.id;
-
-    Object.keys(players).forEach(id => {
-      if (id !== socketId) {
-        this.createOtherPlayer(players[id], false);
-      }
+      Object.keys(players).forEach(id => {
+        if (id !== socketId) {
+          this.createOtherPlayerContainer(players[id], false);
+        }
+      })
     })
-  })
 
-  // receive info about newly connected players
-  this.socket.on('newPlayer', (player) => {
-    this.createOtherPlayer(player, true)
-  })
-
-  // player movement
-  this.socket.on('playerMoved', otherPlayerInfo => {
-    this.otherPlayers.getChildren().forEach(otherPlayer => {
-      if (otherPlayerInfo.playerId === otherPlayer.playerId) {
-        otherPlayer.setPosition(otherPlayerInfo.x, otherPlayerInfo.y);
-        otherPlayer.flipX = otherPlayerInfo.flipX;
-        otherPlayer.play(otherPlayerInfo.motion, true);
-      }
+    // receive info about newly connected players
+    this.socket.on('newPlayer', (player) => {
+      this.createOtherPlayerContainer(player, true)
     })
-  })
 
-  this.socket.on('playerDisconnect', otherPlayerId => {
-    this.otherPlayers.getChildren().forEach(player => {
-      if (otherPlayerId === player.playerId) {
-        player.destroy();
-      }
+    // player movement
+    this.socket.on('playerMoved', otherPlayerInfo => {
+      this.otherPlayers.getChildren().forEach(otherPlayer => {
+        if (otherPlayerInfo.playerId === otherPlayer.playerId) {
+          /**
+           * CONTAINER
+           */
+          const otherPlayerSprite = otherPlayer.getByName('sprite');
+          otherPlayer.setPosition(otherPlayerInfo.x, otherPlayerInfo.y);
+          otherPlayerSprite.flipX = otherPlayerInfo.flipX;
+          otherPlayerSprite.play(otherPlayerInfo.motion, true);
+        }
+      })
     })
-  })
-}
-createSocket() {
-  // sockets
-  this.socket = io();
-  this.socket.on('connect', () => {
-    this.playerId = this.socket.id;
-  })
-  return this.socket;
-}
 
-createMap() {
-  const map = this.make.tilemap({ key: 'map' });
-  map.addTilesetImage('main_lev_build_1', 'tiles-1');
-  return map;
-}
+    this.socket.on('playerDisconnect', otherPlayerId => {
+      this.otherPlayers.getChildren().forEach(player => {
+        if (otherPlayerId === player.playerId) {
+          player.removeAll(true); // remove all children and destroy
+          player.body.destroy(); // destroy the container itself
+        }
+      })
+    })
 
-createLayers(map) {
-  const tileset = map.getTileset('main_lev_build_1');
-  const platformsColliders = map.createStaticLayer('platforms_colliders', tileset);
-  const environment = map.createStaticLayer('environment', tileset);
-  const platforms = map.createStaticLayer('platforms', tileset);
-  const playerZones = map.getObjectLayer('player_zones');
-
-  // collide player with platform
-  platformsColliders.setCollisionByProperty({ collides: true });
-
-  return { environment, platforms, platformsColliders, playerZones }
-}
-
-createOtherPlayer(player, isNew) {
-  const x = isNew ? this.playerZones.x : player.x;
-  const y = isNew ? this.playerZones.y : player.y;
-
-  const otherPlayer = this.add.sprite(x, y, 'player', 0);
-  otherPlayer.playerId = player.playerId;
-  otherPlayer.setInteractive();
-  otherPlayer.on('pointerover', pointer => {
-    // eslint-disable-next-line no-console
-    console.log("debug: other player", otherPlayer.playerId);
-  })
-
-  this.otherPlayers.add(otherPlayer);
-
-  return otherPlayer;
-}
-
-setupFollowupCameraOn(player) {
-  const { height, width, mapOffset, zoomFactor } = this.config;
-  this.physics.world.setBounds(0, 0, width + mapOffset, height + 200);
-  this.cameras.main.setBounds(0, 0, width + mapOffset, height).setZoom(zoomFactor);
-  this.cameras.main.startFollow(player);
-}
-
-getPlayerZones(playerZonesLayer) {
-  const playerZones = playerZonesLayer.objects;
-  return {
-    start: playerZones.find(zone => zone.name === 'startZone'),
-    end: playerZones.find(zone => zone.name === 'endZone')
+    // tell the server it's ready to listen
+    this.socket.emit('join-game', this.playerInfo);
   }
-}
 
-createEndOfLevel(end, player) {
-  const endOfLevel = this.physics.add.sprite(end.x, end.y, 'end')
-    .setAlpha(0)
-    .setSize(5, this.config.height)
-    .setOrigin(0.5, 1);
+  createMap() {
+    const map = this.make.tilemap({ key: 'map' });
+    map.addTilesetImage('main_lev_build_1', 'tiles-1');
+    return map;
+  }
 
-  const eolOverlap = this.physics.add.overlap(player, endOfLevel, () => {
-    eolOverlap.active = false;
-    console.log('Player has won!')
-  })
-}
+  createLayers(map) {
+    const tileset = map.getTileset('main_lev_build_1');
+    const platformsColliders = map.createStaticLayer('platforms_colliders', tileset);
+    const environment = map.createStaticLayer('environment', tileset);
+    const platforms = map.createStaticLayer('platforms', tileset);
+    const playerZones = map.getObjectLayer('player_zones');
+
+    // collide player with platform
+    platformsColliders.setCollisionByProperty({ collides: true });
+
+    return { environment, platforms, platformsColliders, playerZones }
+  }
+
+  createOtherPlayerContainer(player, isNew) {
+    const x = isNew ? this.playerZones.x : player.x;
+    const y = isNew ? this.playerZones.y : player.y;
+
+    /**
+     * CONTAINER
+     */
+    const container = this.add.container(x, y);
+    container.setSize(32, 38);
+    this.add.existing(container);
+    this.physics.add.existing(container);
+
+    container.playerId = player.playerId;
+    container.setInteractive();
+    container.on('pointerover', () => {
+      console.log('debug: other player', player.playerId);
+    })
+
+    /**
+   * TEXT
+   */
+    const text = this.add.text(0, 30, player.displayName);
+    text.setOrigin(0.5, 0.5)
+    container.add(text);
+
+    /**
+     * SPRITE
+     */
+    const otherPlayer = this.add.sprite(0, 0, 'player', 0);
+    otherPlayer.name = 'sprite';
+    container.add(otherPlayer);
+
+    this.otherPlayers.add(container);
+    return container;
+  }
+
+  setupFollowupCameraOn(player) {
+    const { height, width, mapOffset, zoomFactor } = this.config;
+    this.physics.world.setBounds(0, 0, width + mapOffset, height + 200);
+    this.cameras.main.setBounds(0, 0, width + mapOffset, height).setZoom(zoomFactor);
+    this.cameras.main.startFollow(player);
+  }
+
+  getPlayerZones(playerZonesLayer) {
+    const playerZones = playerZonesLayer.objects;
+    return {
+      start: playerZones.find(zone => zone.name === 'startZone'),
+      end: playerZones.find(zone => zone.name === 'endZone')
+    }
+  }
+
+  createEndOfLevel(end, player) {
+    const endOfLevel = this.physics.add.sprite(end.x, end.y, 'end')
+      .setAlpha(0)
+      .setSize(5, this.config.height)
+      .setOrigin(0.5, 1);
+
+    const eolOverlap = this.physics.add.overlap(player, endOfLevel, () => {
+      eolOverlap.active = false;
+      console.log('Player has won!')
+    })
+  }
 }
 
 export default Play;
