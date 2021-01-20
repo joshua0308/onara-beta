@@ -28,9 +28,11 @@
 ### Known issues
 - if you're camera/audio is disabled, you will get streams from users who were already in the room, but will not receive streams from new users
 
-### Hints
+### Links
 - [Add DOM element within Phaser](https://www.youtube.com/watch?v=y8_WqDX3MCo&ab_channel=Ourcade)
 - Use container to display player info
+  - https://phaser.io/examples/v3/view/game-objects/container/text-and-sprite-test
+  - https://phaser.io/examples/v3/view/game-objects/container/rotation
 
 ```js
 this.player = this.add.sprite(0, 0, 'player', 6);
@@ -55,3 +57,5 @@ window.location.href = "http://www.w3schools.com";
 // Simulate an HTTP redirect:
 window.location.replace("http://www.w3schools.com");
 ```
+
+https://phaser.io/phaser3/devlog/120

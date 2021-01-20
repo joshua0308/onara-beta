@@ -11,27 +11,34 @@ class Play extends Phaser.Scene {
     const layers = this.createLayers(map);
     const socket = this.createSocket();
     this.playerZones = this.getPlayerZones(layers.playerZones);
-    const player = this.createPlayer();
-    const container = new Container(this, 100, 100, socket);
-    this.physics.add.collider(container, layers.platformsColliders)
 
-    player.on('pointerover', pointer => {
-      // eslint-disable-next-line no-console
-      console.log("debug: me", this.playerId);
-    })
+    let userInfo = {
+      name: ''
+    };
 
-    this.otherPlayers = this.physics.add.group();
+    firebaseClient.auth().onAuthStateChanged((user) => {
+      if (user) {
+        console.log("debug: logged in", user.displayName, user.email);
+        userInfo.name = user.displayName;
 
-    this.createPlayerColliders(player, {
-      colliders: {
-        platformsColliders: layers.platformsColliders
+        const playerName = userInfo.name;
+        const container = new Container(this, this.playerZones.start.x, this.playerZones.start.y, socket, playerName);
+        container.addCollider(layers.platformsColliders)
+
+        container.on('pointerover', pointer => {
+          // eslint-disable-next-line no-console
+          console.log("debug: me", this.playerId);
+        })
+    
+        this.otherPlayers = this.physics.add.group();
+    
+        this.createEndOfLevel(this.playerZones.end, container);
+        this.setupSocket();
+        this.setupFollowupCameraOn(container);
+      } else {
+        window.location.replace('/login');
       }
-    })
-
-    this.createEndOfLevel(this.playerZones.end, player);
-    this.setupSocket();
-    this.setupFollowupCameraOn(player);
-
+    });
   }
 
   setupSocket() {
@@ -98,8 +105,8 @@ class Play extends Phaser.Scene {
     return { environment, platforms, platformsColliders, playerZones }
   }
 
-  createPlayer() {
-    const player = new Player(this, this.playerZones.start.x, this.playerZones.start.y, this.socket);
+  createPlayer(x, y) {
+    const player = new Player(this, x, y, this.socket);
     return player;
   }
 
@@ -107,7 +114,8 @@ class Play extends Phaser.Scene {
     const x = isNew ? this.playerZones.x : player.x;
     const y = isNew ? this.playerZones.y : player.y;
 
-    const otherPlayer = this.add.sprite(x, y, 'player', 0).setOrigin(0.5, 1);
+    const otherPlayer = this.add.sprite(x, y, 'player', 0);
+    // const otherPlayer = this.add.sprite(x, y, 'player', 0).setOrigin(0.5, 1);
     otherPlayer.playerId = player.playerId;
     otherPlayer.setInteractive();
     otherPlayer.on('pointerover', pointer => {

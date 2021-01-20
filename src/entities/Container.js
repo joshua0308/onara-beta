@@ -1,7 +1,8 @@
-import Player from './Player.js';
+import collidable from '../mixins/collidable.js';
+import initAnimations from './playerAnims.js';
 
 class Container extends Phaser.GameObjects.Container {
-  constructor(scene, x, y, socket) {
+  constructor(scene, x, y, socket, playerName) {
     super(scene, x, y);
 
     this.socket = socket;
@@ -11,34 +12,41 @@ class Container extends Phaser.GameObjects.Container {
     scene.add.existing(this);
     scene.physics.add.existing(this);
 
+    // debugger;
 
+    // ADD PLAYER
     const player = scene.add.sprite(0, 0, 'player', 0);
+    player.name = 'sprite';
     this.add(player);
 
+    // ADD TEXT
+    const text = scene.add.text(0, 30, playerName);
+    text.setOrigin(0.5, 0.5)
+    this.add(text);
+
     // Mixins
-    // Object.assign(this, collidable);
+    Object.assign(this, collidable);
 
     // // allow mouseover event listener
-    // this.setInteractive();
+    this.setInteractive();
 
     this.init();
     this.initEvents();
-    // this.motion = 'idle';
-    // this.socket.emit('playerMovement', { x, y, flipX: false, motion: this.motion })
+    this.motion = 'idle';
+    this.socket.emit('playerMovement', { x, y, flipX: false, motion: this.motion })
   }
 
   init() {
     this.gravity = 500;
-    //   this.playerSpeed = 200;
-    //   this.jumpCount = 0;
-    //   this.consecutiveJumps = 1;
-    //   this.cursors = this.scene.input.keyboard.createCursorKeys();
+    this.playerSpeed = 200;
+    this.jumpCount = 0;
+    this.consecutiveJumps = 1;
+    this.cursors = this.scene.input.keyboard.createCursorKeys();
 
     this.body.setGravityY(this.gravity);
     this.body.setCollideWorldBounds(true);
-    //   this.setOrigin(0.5, 1);
 
-    //   initAnimations(this.scene.anims);
+    initAnimations(this.scene.anims);
   }
 
   initEvents() {
@@ -46,59 +54,60 @@ class Container extends Phaser.GameObjects.Container {
   }
 
   update() {
-    //   const { left, right, up, space } = this.cursors;
-    //   const isSpaceJustDown = Phaser.Input.Keyboard.JustDown(space);
-    //   const isUpJustDown = Phaser.Input.Keyboard.JustDown(up);
-    //   const onFloor = this.body.onFloor();
+    const { left, right, up, space } = this.cursors;
+    const isSpaceJustDown = Phaser.Input.Keyboard.JustDown(space);
+    const isUpJustDown = Phaser.Input.Keyboard.JustDown(up);
+    const onFloor = this.body.onFloor();
+    const sprite = this.getByName('sprite');
 
-    //   if (left.isDown) {
-    //     this.setVelocityX(-this.playerSpeed);
-    //     this.setFlipX(true);
-    //     this.motion = 'run';
-    //   } else if (right.isDown) {
-    //     this.setVelocityX(this.playerSpeed);
-    //     this.setFlipX(false);
-    //     this.motion = 'run';
-    //   } else if (!onFloor) {
-    //     this.motion = 'jump';
-    //   } else {
-    //     this.setVelocityX(0);
-    //     this.motion = 'idle';
-    //   }
+    if (left.isDown) {
+      this.body.setVelocityX(-this.playerSpeed);
+      sprite.setFlipX(true);
+      this.motion = 'run';
+    } else if (right.isDown) {
+      this.body.setVelocityX(this.playerSpeed);
+      sprite.setFlipX(false);
+      this.motion = 'run';
+    } else if (!onFloor) {
+      this.motion = 'jump';
+    } else {
+      this.body.setVelocityX(0);
+      this.motion = 'idle';
+    }
 
-    //   if ((isSpaceJustDown || isUpJustDown) && (onFloor || this.jumpCount < this.consecutiveJumps)) {
-    //     this.setVelocityY(-this.playerSpeed * 1.5);
-    //     this.jumpCount += 1;
-    //   }
+    if ((isSpaceJustDown || isUpJustDown) && (onFloor || this.jumpCount < this.consecutiveJumps)) {
+      this.body.setVelocityY(-this.playerSpeed * 1.5);
+      this.jumpCount += 1;
+    }
 
-    //   if (onFloor) {
-    //     this.jumpCount = 0;
-    //   }
+    if (onFloor) {
+      this.jumpCount = 0;
+    }
 
-    //   // set animation based on movement
-    //   if (onFloor && this.body.velocity.x !== 0) {
-    //     this.motion = 'run';
-    //   } else if (onFloor && this.body.velocity.x === 0) {
-    //     this.motion = 'idle';
-    //   } else if (!onFloor) {
-    //     this.motion = 'jump';
-    //   }
+    // set animation based on movement
+    if (onFloor && this.body.velocity.x !== 0) {
+      this.motion = 'run';
+    } else if (onFloor && this.body.velocity.x === 0) {
+      this.motion = 'idle';
+    } else if (!onFloor) {
+      this.motion = 'jump';
+    }
 
-    //   this.play(this.motion, true);
+    sprite.play(this.motion, true);
 
-    //   // if the player is moving, emit position and motion to the server
-    //   const isMoving = this.oldPosition && (this.x !== this.oldPosition.x || this.y !== this.oldPosition.y);
+    // if the player is moving, emit position and motion to the server
+    const isMoving = this.oldPosition && (this.x !== this.oldPosition.x || this.y !== this.oldPosition.y);
 
-    //   if (isMoving) {
-    //     this.socket.emit('playerMovement',
-    //       { x: this.x, y: this.y, flipX: this.flipX, motion: this.motion })
-    //   }
+    if (isMoving) {
+      this.socket.emit('playerMovement',
+        { x: this.x, y: this.y, flipX: this.flipX, motion: this.motion })
+    }
 
-    //   this.oldPosition = {
-    //     x: this.x,
-    //     y: this.y,
-    //     flipX: this.flipX
-    //   }
+    this.oldPosition = {
+      x: this.x,
+      y: this.y,
+      flipX: this.flipX
+    }
   }
 }
 
