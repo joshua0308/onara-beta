@@ -178,8 +178,8 @@ function playStop() {
     myVideoStream.getVideoTracks()[0].enabled = false;
     setPlayVideo()
   } else {
-    setPlayVideo()
     myVideoStream.getVideoTracks()[0].enabled = true;
+    setStopVideo()
   }
 }
 
