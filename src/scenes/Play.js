@@ -1,4 +1,4 @@
-// import Phaser from 'phaser';
+import Container from "../entities/Container.js";
 import Player from '../entities/Player.js';
 class Play extends Phaser.Scene {
   constructor(config) {
@@ -12,8 +12,8 @@ class Play extends Phaser.Scene {
     const socket = this.createSocket();
     this.playerZones = this.getPlayerZones(layers.playerZones);
     const player = this.createPlayer();
-
-
+    const container = new Container(this, 100, 100, socket);
+    this.physics.add.collider(container, layers.platformsColliders)
 
     player.on('pointerover', pointer => {
       // eslint-disable-next-line no-console
