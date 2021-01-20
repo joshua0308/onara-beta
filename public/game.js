@@ -7,7 +7,7 @@ firebaseClient.auth().onAuthStateChanged((user) => {
 });
 
 function joinRoom() {
-  window.location.href = window.location.origin + "/room/example";
+  window.location.replace("/room/example");
 }
 
 function logout() {

@@ -201,5 +201,5 @@ function setPlayVideo() {
 
 function leaveMeeting() {
   socket.close();
-  window.location.href = window.location.origin + '/game';
+  window.location.replace('/game');
 }
