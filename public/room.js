@@ -2,13 +2,43 @@ const socket = io();
 const videoGrid = document.getElementById('video-grid');
 const peer = new Peer(undefined);
 
+console.log("debug: peer", peer);
 console.log("debug: ROOM_ID", ROOM_ID);
 
 const peers = {};
-let myVideoStream;
 let myUserId;
-const myVideoElement = document.createElement('video');
+let myVideoStream;
+let myVideoElement = document.createElement('video');
 myVideoElement.muted = true;
+
+init();
+
+function init() {
+  try {
+    navigator.mediaDevices.getUserMedia({
+      video: true,
+      audio: true
+    }).then(stream => {
+      myVideoStream = stream;
+      addVideoStream(myVideoElement, myVideoStream);
+      incomingCallListener(peer, myVideoStream);
+      newUserListener(peer, socket, myVideoStream);
+      joinRoom(peer, socket);
+    })
+  } catch (e) {
+    const myStream = new MediaStream();
+    incomingCallListener(peer, myStream);
+    newUserListener(peer, socket, myStream);
+    joinRoom(peer, socket);
+
+    setUnmuteButton();
+    setPlayVideo();
+  }
+
+  sendMessageListener();
+  newMessageListener(socket);
+  userDisconnectListener(socket, peers);
+}
 
 // close socket connection when user leaves the room
 // this is needed bc there is a delay firing the disconnect event
@@ -28,7 +58,7 @@ function incomingCallListener(peer, myVideoStream) {
       addVideoStream(otherUserVideoElement, otherUserVideoStream);
     })
 
-    addToPeersObj(call.peer, call, otherUserVideoElement);
+    addToPeers(call.peer, call, otherUserVideoElement);
   })
 }
 
@@ -36,11 +66,26 @@ function incomingCallListener(peer, myVideoStream) {
   // 1. call and send my video stream
   // 2. display other user's video stream on my screen
   // ** the user already in the room will be making the call to the new user
-function newUserListener(socket, myVideoStream) {
+function newUserListener(peer, socket, myVideoStream) {
   socket.on('user-connected', otherUserId => {
-    console.log("debug: user connected", otherUserId);
-    connectToNewUser(otherUserId, myVideoStream);
+    console.log("debug: user-connected", otherUserId);
+    connectToNewUser(peer, otherUserId, myVideoStream);
   })
+}
+
+function connectToNewUser(peer, otherUserId, myVideoStream) {
+  const call = peer.call(otherUserId, myVideoStream);
+  const otherUserVideoElement = document.createElement('video');
+
+  call.on('stream', otherUserVideoStream => {
+    addVideoStream(otherUserVideoElement, otherUserVideoStream);
+  })
+
+  call.on('close', () => {
+    otherUserVideoElement.remove();
+  })
+
+  addToPeers(otherUserId, call, otherUserVideoElement);
 }
 
 function joinRoom(peer, socket) {
@@ -70,53 +115,19 @@ function newMessageListener(socket) {
     scrollToBottom()
   })
 }
-// TODO: if userMedia errors out, nothing works
-// at least chat needs to work even when userMedia is unavailable
-navigator.mediaDevices.getUserMedia({
-  video: true,
-  audio: true
-}).then(stream => {
-  myVideoStream = stream;
-  addVideoStream(myVideoElement, myVideoStream);
 
-  incomingCallListener(peer, myVideoStream);
-  newUserListener(socket, myVideoStream);
-
-  // once my video is ready, join the socket channel with room id
-  joinRoom(peer, socket);
-
-  // CHAT
-  sendMessageListener();
-  newMessageListener(socket);
-})
-
-socket.on('user-disconnected', disconnectedUserId => {
-  console.log("debug: user disconnected", disconnectedUserId);
-  console.log("debug: peers", peers);
-  if (peers[disconnectedUserId]) {
-    peers[disconnectedUserId].call.close();
-    peers[disconnectedUserId].videoElement.remove();
-    delete peers[disconnectedUserId]
-  }
-})
-
-function connectToNewUser(otherUserId, myVideoStream) {
-  const call = peer.call(otherUserId, myVideoStream);
-
-  const otherUserVideoElement = document.createElement('video');
-  call.on('stream', otherUserVideoStream => {
-    addVideoStream(otherUserVideoElement, otherUserVideoStream);
+function userDisconnectListener(socket, peers) {
+  socket.on('user-disconnected', disconnectedUserId => {
+    console.log("debug: user-disconnected", disconnectedUserId);
+    if (peers[disconnectedUserId]) {
+      peers[disconnectedUserId].call.close();
+      peers[disconnectedUserId].videoElement.remove();
+      delete peers[disconnectedUserId]
+    }
   })
-
-  call.on('close', () => {
-    otherUserVideoElement.remove();
-  })
-
-  // peers[otherUserId] = { call, videoElement: otherUserVideoElement };
-  addToPeersObj(otherUserId, call, otherUserVideoElement);
 }
 
-function addToPeersObj(id, call, videoElement) {
+function addToPeers(id, call, videoElement) {
   peers[id] = { call, videoElement }
 }
 
@@ -133,7 +144,7 @@ function scrollToBottom() {
   d.scrollTop(d.prop("scrollHeight"));
 }
 
-const muteUnmute = () => {
+function muteUnmute() {
   const enabled = myVideoStream.getAudioTracks()[0].enabled;
   if (enabled) {
     myVideoStream.getAudioTracks()[0].enabled = false;
@@ -144,7 +155,7 @@ const muteUnmute = () => {
   }
 }
 
-const setMuteButton = () => {
+function setMuteButton() {
   const html = `
     <i class="fas fa-microphone"></i>
     <span>Mute</span>
@@ -152,7 +163,7 @@ const setMuteButton = () => {
   document.querySelector('.main__mute_button').innerHTML = html;
 }
 
-const setUnmuteButton = () => {
+function setUnmuteButton() {
   const html = `
     <i class="unmute fas fa-microphone-slash"></i>
     <span>Unmute</span>
@@ -160,19 +171,19 @@ const setUnmuteButton = () => {
   document.querySelector('.main__mute_button').innerHTML = html;
 }
 
-const playStop = () => {
+function playStop() {
   console.log('object')
   let enabled = myVideoStream.getVideoTracks()[0].enabled;
   if (enabled) {
     myVideoStream.getVideoTracks()[0].enabled = false;
     setPlayVideo()
   } else {
-    setStopVideo()
+    setPlayVideo()
     myVideoStream.getVideoTracks()[0].enabled = true;
   }
 }
 
-const setStopVideo = () => {
+function setStopVideo() {
   const html = `
     <i class="fas fa-video"></i>
     <span>Stop Video</span>
@@ -180,7 +191,7 @@ const setStopVideo = () => {
   document.querySelector('.main__video_button').innerHTML = html;
 }
 
-const setPlayVideo = () => {
+function setPlayVideo() {
   const html = `
   <i class="stop fas fa-video-slash"></i>
     <span>Play Video</span>
@@ -188,7 +199,7 @@ const setPlayVideo = () => {
   document.querySelector('.main__video_button').innerHTML = html;
 }
 
-const leaveMeeting = () => {
+function leaveMeeting() {
   socket.close();
   window.location.href = window.location.origin + '/game';
 }

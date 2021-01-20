@@ -25,6 +25,9 @@
   - [tween](https://www.html5gamedevs.com/topic/21644-smooth-texture-movement-from-point-to-point/?do=findComment&comment=123395)
   - [direction and velocity](https://www.html5gamedevs.com/topic/21028-smooth-movement-in-multiplayer/?do=findComment&comment=119741)
 
+### Known issues
+- if you're camera/audio is disabled, you will get streams from users who were already in the room, but will not receive streams from new users
+
 ### Hints
 - [Add DOM element within Phaser](https://www.youtube.com/watch?v=y8_WqDX3MCo&ab_channel=Ourcade)
 - Use container to display player info
