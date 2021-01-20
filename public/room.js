@@ -6,6 +6,7 @@ console.log("debug: ROOM_ID", ROOM_ID);
 
 const peers = {};
 let myVideoStream;
+let myUserId;
 const myVideoElement = document.createElement('video');
 myVideoElement.muted = true;
 
@@ -15,18 +16,10 @@ window.onbeforeunload = () => {
   socket.close();
 }
 
-// TODO: if userMedia errors out, nothing works
-// at least chat needs to work even when userMedia is unavailable
-navigator.mediaDevices.getUserMedia({
-  video: true,
-  audio: true
-}).then(stream => {
-  myVideoStream = stream;
-  addVideoStream(myVideoElement, myVideoStream);
-
-  // when I receive a call from the other user,
-  // 1. answer with my video stream
-  // 2. display other user's video stream on my screen
+// when I receive a call from the other user,
+// 1. answer with my video stream
+// 2. display other user's video stream on my screen
+function incomingCallListener(peer, myVideoStream) {
   peer.on('call', call => {
     call.answer(myVideoStream);
 
@@ -37,26 +30,32 @@ navigator.mediaDevices.getUserMedia({
 
     addToPeersObj(call.peer, call, otherUserVideoElement);
   })
+}
 
-  // when I make a call to the other user 
+  // when a new user enters, make a call to the new user
   // 1. call and send my video stream
   // 2. display other user's video stream on my screen
   // ** the user already in the room will be making the call to the new user
+function newUserListener(socket, myVideoStream) {
   socket.on('user-connected', otherUserId => {
     console.log("debug: user connected", otherUserId);
-    connectToOtherUser(otherUserId, myVideoStream);
+    connectToNewUser(otherUserId, myVideoStream);
   })
+}
 
-  // once my video is ready, join the socket channel with room id
-  let myUserId;
+function joinRoom(peer, socket) {
   peer.on('open', userId => {
-    myUserId = userId;
+    setMyUserId(userId);
     socket.emit('join-room', ROOM_ID, userId);
   })
+}
 
-  // CHAT
+function setMyUserId(userId) {
+  myUserId = userId;
+}
+
+function sendMessageListener() {
   let text = $("input");
-
   $('html').keydown(function(e) {
     // when press enter send message
     if (e.which == 13 && text.val().length !== 0) {
@@ -64,11 +63,31 @@ navigator.mediaDevices.getUserMedia({
       text.val('')
     }
   });
-
+}
+function newMessageListener(socket) {
   socket.on("createMessage", ({ text, userId }) => {
     $("ul").append(`<li class="message"><b>${userId}</b><br/>${text}</li>`);
     scrollToBottom()
   })
+}
+// TODO: if userMedia errors out, nothing works
+// at least chat needs to work even when userMedia is unavailable
+navigator.mediaDevices.getUserMedia({
+  video: true,
+  audio: true
+}).then(stream => {
+  myVideoStream = stream;
+  addVideoStream(myVideoElement, myVideoStream);
+
+  incomingCallListener(peer, myVideoStream);
+  newUserListener(socket, myVideoStream);
+
+  // once my video is ready, join the socket channel with room id
+  joinRoom(peer, socket);
+
+  // CHAT
+  sendMessageListener();
+  newMessageListener(socket);
 })
 
 socket.on('user-disconnected', disconnectedUserId => {
@@ -81,7 +100,7 @@ socket.on('user-disconnected', disconnectedUserId => {
   }
 })
 
-function connectToOtherUser(otherUserId, myVideoStream) {
+function connectToNewUser(otherUserId, myVideoStream) {
   const call = peer.call(otherUserId, myVideoStream);
 
   const otherUserVideoElement = document.createElement('video');

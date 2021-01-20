@@ -21,6 +21,7 @@ const initScenes = () => Scenes.map(createScene);
 
 const config = {
   type: Phaser.AUTO, // webGL is default
+  backgroundColor: '#000000',
   ...SHARED_CONFIG,
   parent: 'game-wrapper',
   pixelArt: true,
