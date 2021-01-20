@@ -5,3 +5,7 @@ function joinRoom() {
 function logout() {
   firebaseClient.auth().signOut();
 }
+
+let playerInfo = {
+  name: ''
+};

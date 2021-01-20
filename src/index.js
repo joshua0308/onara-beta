@@ -34,4 +34,14 @@ const config = {
   scene: initScenes()
 }
 
-new Phaser.Game(config);
+// initiate game only when user is logged in
+firebaseClient.auth().onAuthStateChanged((player) => {
+  if (player) {
+    console.log("debug: logged in", player.displayName, player.email);
+    playerInfo.name = player.displayName;
+
+    new Phaser.Game(config);
+  } else {
+    window.location.replace('/login');
+  }
+});

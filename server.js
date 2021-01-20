@@ -28,6 +28,7 @@ io.on('connection', socket => {
     players[socket.id].y = movementData.y;
     players[socket.id].flipX = movementData.flipX;
     players[socket.id].motion = movementData.motion;
+    // players[socket.id].name = movementData.name;
 
     socket.broadcast.emit('playerMoved', players[socket.id]);
   })
