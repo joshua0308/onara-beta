@@ -26,13 +26,87 @@ class Container extends Phaser.GameObjects.Container {
     // Mixins
     Object.assign(this, collidable);
 
-    // // allow mouseover event listener
-    this.setInteractive();
+    this.playerInfoText = this.createPlayerInfoText(scene, this, this.playerInfo);
+    this.buyDrinkButton = this.createBuyDrinkButton(scene, this);
+
+    this.setInteractive()
+      .on(Phaser.Input.Events.GAMEOBJECT_POINTER_DOWN, () => {
+        this.playerInfoText.setVisible(!this.playerInfoText.visible);
+        this.buyDrinkButton.buyDrinkButtonOver.setVisible(!this.buyDrinkButton.buyDrinkButtonOver.visible);
+        this.buyDrinkButton.buyDrinkText.setVisible(!this.buyDrinkButton.buyDrinkText.visible);
+      });
+
 
     this.init();
     this.initEvents();
     this.motion = 'idle';
     this.socket.emit('playerMovement', { x, y, flipX: false, motion: this.motion })
+  }
+
+  createBuyDrinkButton(scene, container) {
+    /**
+     * BUY DRINK BUTTON
+     */
+    const buyDrinkButtonOver = scene.add.image(0, 0, 'button1');
+    const buyDrinkButtonDown = scene.add.image(0, 0, 'button3');
+    const buttons = [buyDrinkButtonOver, buyDrinkButtonDown]
+    container.add(buttons);
+
+    buttons.forEach(button => {
+      button
+        .setOrigin(0.5, 2.5)
+        .setScale(1, 0.5)
+        .setVisible(false)
+    })
+
+    buyDrinkButtonOver
+      .setInteractive()
+      .on(Phaser.Input.Events.GAMEOBJECT_POINTER_DOWN, () => {
+        console.log('pointer down');
+        buyDrinkButtonDown.setVisible(true);
+      })
+      .on(Phaser.Input.Events.GAMEOBJECT_POINTER_UP, () => {
+        console.log('pointer up');
+        buyDrinkButtonDown.setVisible(false);
+      })
+      .on(Phaser.Input.Events.GAMEOBJECT_POINTER_OUT, () => {
+        console.log('pointer out');
+        buyDrinkButtonDown.setVisible(false);
+      });
+
+    /**
+     * BUY DRINK TEXT
+     */
+    const buyDrinkText = scene.add.text(0, 0, 'Buy a drink!');
+    container.add(buyDrinkText);
+
+    buyDrinkText
+      .setFill('#353d42')
+      .setPadding(10, 20)
+      .setOrigin(0.5, 1.3)
+      .setVisible(false);
+
+    return {
+      buyDrinkButtonDown,
+      buyDrinkButtonOver,
+      buyDrinkText
+    }
+  }
+
+  createPlayerInfoText(scene, container, playerInfo) {
+    const playerInfoTextContent = `name: ${playerInfo.displayName}\nemail: ${playerInfo.email}
+    `;
+    const playerInfoText = scene.add.text(0, 0, playerInfoTextContent);
+    container.add(playerInfoText);
+
+    playerInfoText
+      .setFill('black')
+      .setBackgroundColor('#8cd1ff')
+      .setPadding(10, 20)
+      .setOrigin(0.5, 1.3)
+      .setVisible(false);
+
+    return playerInfoText;
   }
 
   init() {
@@ -116,3 +190,10 @@ class Container extends Phaser.GameObjects.Container {
 }
 
 export default Container;
+
+// class PlayerInfoDisplayContainer extends Phaser.GameObjects.Container {
+//   constructor(scene, x, y) {
+//     super(scene, x, y);
+
+//   }
+// }

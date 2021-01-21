@@ -1,4 +1,4 @@
-import Container from "../entities/Container.js";
+import PlayerContainer from "../entities/Container.js";
 class Play extends Phaser.Scene {
   constructor(config) {
     super('PlayScene');
@@ -15,11 +15,11 @@ class Play extends Phaser.Scene {
     const layers = this.createLayers(map);
     this.playerZones = this.getPlayerZones(layers.playerZones);
 
-    const container = new Container(this, this.playerZones.start.x, this.playerZones.start.y, this.socket, this.playerInfo);
+    const container = new PlayerContainer(this, this.playerZones.start.x, this.playerZones.start.y, this.socket, this.playerInfo);
     container.addCollider(layers.platformsColliders)
-    container.on('pointerover', pointer => {
-      console.log("debug: me", this.playerId);
-    })
+    // container.on('pointerover', pointer => {
+    //   console.log("debug: me", this.playerId);
+    // })
 
     this.createEndOfLevel(this.playerZones.end, container);
     this.setupFollowupCameraOn(container);

@@ -10,6 +10,13 @@ class Preload extends Phaser.Scene {
     this.load.image('tiles-1', 'assets/main_lev_build_1.png');
     this.load.image('tiles-2', 'assets/main_lev_build_2.png');
     this.load.spritesheet('player', 'assets/player/move_sprite_1.png', { frameWidth: 32, frameHeight: 38, spacing: 32 })
+
+    /**
+     * BUTTONS
+     */
+    this.load.image('button1', 'assets/buttons/blue_button01.png')
+    this.load.image('button2', 'assets/buttons/blue_button02.png')
+    this.load.image('button3', 'assets/buttons/blue_button03.png')
   }
 
   create() {
