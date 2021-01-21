@@ -22,6 +22,7 @@ io.on('connection', socket => {
   // need to wait until socket listener is set up on the client side.
   socket.on('join-game', (playerInfo) => {
     players[socket.id].displayName = playerInfo.displayName;
+    players[socket.id].email = playerInfo.email;
     
     io.emit('currentPlayers', players);
     socket.broadcast.emit('newPlayer', players[socket.id]);

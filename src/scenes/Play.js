@@ -88,6 +88,8 @@ class Play extends Phaser.Scene {
   }
 
   createOtherPlayerContainer(player, isNew) {
+    // eslint-disable-next-line no-console
+    console.log("debug: player", player);
     const x = isNew ? this.playerZones.x : player.x;
     const y = isNew ? this.playerZones.y : player.y;
 
@@ -119,8 +121,91 @@ class Play extends Phaser.Scene {
     otherPlayer.name = 'sprite';
     container.add(otherPlayer);
 
+    /**
+     * PLAYER INFO
+     */
+    const playerInfoText = this.createPlayerInfoText(this, container, player);
+    const buyDrinkButtonGroup = this.createBuyDrinkButton(this, container);
+    this.setPlayerInfoInteraction(container, playerInfoText, buyDrinkButtonGroup);
+
     this.otherPlayers.add(container);
     return container;
+  }
+
+
+  setPlayerInfoInteraction(container, playerInfoText, buyDrinkButtonGroup) {
+    container.setInteractive()
+      .on(Phaser.Input.Events.GAMEOBJECT_POINTER_DOWN, () => {
+        playerInfoText.setVisible(!playerInfoText.visible);
+        buyDrinkButtonGroup.buyDrinkButtonOver.setVisible(!buyDrinkButtonGroup.buyDrinkButtonOver.visible);
+        buyDrinkButtonGroup.buyDrinkText.setVisible(!buyDrinkButtonGroup.buyDrinkText.visible);
+      });
+  }
+
+  createBuyDrinkButton(scene, container) {
+    /**
+     * BUY DRINK BUTTON
+     */
+    const buyDrinkButtonOver = scene.add.image(0, 0, 'button1');
+    const buyDrinkButtonDown = scene.add.image(0, 0, 'button3');
+    const buttons = [buyDrinkButtonOver, buyDrinkButtonDown]
+    container.add(buttons);
+
+    buttons.forEach(button => {
+      button
+        .setOrigin(0.5, 2.5)
+        .setScale(1, 0.5)
+        .setVisible(false)
+    })
+
+    buyDrinkButtonOver
+      .setInteractive()
+      .on(Phaser.Input.Events.GAMEOBJECT_POINTER_DOWN, () => {
+        console.log('pointer down');
+        buyDrinkButtonDown.setVisible(true);
+      })
+      .on(Phaser.Input.Events.GAMEOBJECT_POINTER_UP, () => {
+        console.log('pointer up');
+        buyDrinkButtonDown.setVisible(false);
+      })
+      .on(Phaser.Input.Events.GAMEOBJECT_POINTER_OUT, () => {
+        console.log('pointer out');
+        buyDrinkButtonDown.setVisible(false);
+      });
+
+    /**
+     * BUY DRINK TEXT
+     */
+    const buyDrinkText = scene.add.text(0, 0, 'Buy a drink!');
+    container.add(buyDrinkText);
+
+    buyDrinkText
+      .setFill('#353d42')
+      .setPadding(10, 20)
+      .setOrigin(0.5, 1.3)
+      .setVisible(false);
+
+    return {
+      buyDrinkButtonDown,
+      buyDrinkButtonOver,
+      buyDrinkText
+    }
+  }
+
+  createPlayerInfoText(scene, container, playerInfo) {
+    const playerInfoTextContent = `name: ${playerInfo.displayName}\nemail: ${playerInfo.email}
+    `;
+    const playerInfoText = scene.add.text(0, 0, playerInfoTextContent);
+    container.add(playerInfoText);
+
+    playerInfoText
+      .setFill('black')
+      .setBackgroundColor('#8cd1ff')
+      .setPadding(30, 20)
+      .setOrigin(0.5, 1.3)
+      .setVisible(false);
+
+    return playerInfoText;
   }
 
   setupFollowupCameraOn(player) {
