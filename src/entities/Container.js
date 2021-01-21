@@ -27,20 +27,22 @@ class Container extends Phaser.GameObjects.Container {
     Object.assign(this, collidable);
 
     this.playerInfoText = this.createPlayerInfoText(scene, this, this.playerInfo);
-    this.buyDrinkButton = this.createBuyDrinkButton(scene, this);
-
-    this.setInteractive()
-      .on(Phaser.Input.Events.GAMEOBJECT_POINTER_DOWN, () => {
-        this.playerInfoText.setVisible(!this.playerInfoText.visible);
-        this.buyDrinkButton.buyDrinkButtonOver.setVisible(!this.buyDrinkButton.buyDrinkButtonOver.visible);
-        this.buyDrinkButton.buyDrinkText.setVisible(!this.buyDrinkButton.buyDrinkText.visible);
-      });
-
+    this.buyDrinkButtonGroup = this.createBuyDrinkButton(scene, this);
+    this.setPlayerInfoInteraction(this, this.playerInfoText, this.buyDrinkButtonGroup);
 
     this.init();
     this.initEvents();
     this.motion = 'idle';
     this.socket.emit('playerMovement', { x, y, flipX: false, motion: this.motion })
+  }
+
+  setPlayerInfoInteraction(container, playerInfoText, buyDrinkButtonGroup) {
+    container.setInteractive()
+      .on(Phaser.Input.Events.GAMEOBJECT_POINTER_DOWN, () => {
+        playerInfoText.setVisible(!playerInfoText.visible);
+        buyDrinkButtonGroup.buyDrinkButtonOver.setVisible(!buyDrinkButtonGroup.buyDrinkButtonOver.visible);
+        buyDrinkButtonGroup.buyDrinkText.setVisible(!buyDrinkButtonGroup.buyDrinkText.visible);
+      });
   }
 
   createBuyDrinkButton(scene, container) {

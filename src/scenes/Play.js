@@ -16,10 +16,7 @@ class Play extends Phaser.Scene {
     this.playerZones = this.getPlayerZones(layers.playerZones);
 
     const container = new PlayerContainer(this, this.playerZones.start.x, this.playerZones.start.y, this.socket, this.playerInfo);
-    container.addCollider(layers.platformsColliders)
-    // container.on('pointerover', pointer => {
-    //   console.log("debug: me", this.playerId);
-    // })
+    container.addCollider(layers.platformsColliders);
 
     this.createEndOfLevel(this.playerZones.end, container);
     this.setupFollowupCameraOn(container);
