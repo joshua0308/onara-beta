@@ -115,10 +115,3 @@ class Container extends Phaser.GameObjects.Container {
 }
 
 export default Container;
-
-// class PlayerInfoDisplayContainer extends Phaser.GameObjects.Container {
-//   constructor(scene, x, y) {
-//     super(scene, x, y);
-
-//   }
-// }

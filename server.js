@@ -16,7 +16,7 @@ io.on('connection', socket => {
   // GAME SOCKETS
   // add player to the object keyed by socket.id
   players[socket.id] = {
-    playerId: socket.id
+    socketId: socket.id
   };
 
   // need to wait until socket listener is set up on the client side.

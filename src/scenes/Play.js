@@ -7,9 +7,10 @@ class Play extends Phaser.Scene {
 
   create() {
     this.socket = this.game.socket;
-    this.playerId = this.game.playerId;
+    this.socketId = this.game.socketId;
     this.playerInfo = this.game.playerInfo;
     this.otherPlayers = this.physics.add.group();
+    this.callButtonPressedDown = false;
 
     const map = this.createMap();
     const layers = this.createLayers(map);
@@ -43,7 +44,7 @@ class Play extends Phaser.Scene {
     // player movement
     this.socket.on('playerMoved', otherPlayerInfo => {
       this.otherPlayers.getChildren().forEach(otherPlayer => {
-        if (otherPlayerInfo.playerId === otherPlayer.playerId) {
+        if (otherPlayerInfo.socketId === otherPlayer.socketId) {
           /**
            * CONTAINER
            */
@@ -55,9 +56,9 @@ class Play extends Phaser.Scene {
       })
     })
 
-    this.socket.on('playerDisconnect', otherPlayerId => {
+    this.socket.on('playerDisconnect', otherPlayerSocketId => {
       this.otherPlayers.getChildren().forEach(player => {
-        if (otherPlayerId === player.playerId) {
+        if (otherPlayerSocketId === player.socketId) {
           player.removeAll(true); // remove all children and destroy
           player.body.destroy(); // destroy the container itself
         }
@@ -101,10 +102,10 @@ class Play extends Phaser.Scene {
     this.add.existing(container);
     this.physics.add.existing(container);
 
-    container.playerId = player.playerId;
+    container.socketId = player.socketId;
     container.setInteractive();
     container.on('pointerover', () => {
-      console.log('debug: other player', player.playerId);
+      console.log('debug: other player', player.socketId);
     })
 
     /**
@@ -125,7 +126,7 @@ class Play extends Phaser.Scene {
      * PLAYER INFO
      */
     const playerInfoText = this.createPlayerInfoText(this, container, player);
-    const buyDrinkButtonGroup = this.createBuyDrinkButton(this, container);
+    const buyDrinkButtonGroup = this.createBuyDrinkButton(this, container, player);
     this.setPlayerInfoInteraction(container, playerInfoText, buyDrinkButtonGroup);
 
     this.otherPlayers.add(container);
@@ -142,7 +143,7 @@ class Play extends Phaser.Scene {
       });
   }
 
-  createBuyDrinkButton(scene, container) {
+  createBuyDrinkButton(scene, container, player) {
     /**
      * BUY DRINK BUTTON
      */
@@ -161,15 +162,16 @@ class Play extends Phaser.Scene {
     buyDrinkButtonOver
       .setInteractive()
       .on(Phaser.Input.Events.GAMEOBJECT_POINTER_DOWN, () => {
-        console.log('pointer down');
         buyDrinkButtonDown.setVisible(true);
+        this.callButtonPressedDown = true;
       })
       .on(Phaser.Input.Events.GAMEOBJECT_POINTER_UP, () => {
-        console.log('pointer up');
         buyDrinkButtonDown.setVisible(false);
+        if (this.callButtonPressedDown) {
+          console.log('call ' + player.displayName);
+        }
       })
       .on(Phaser.Input.Events.GAMEOBJECT_POINTER_OUT, () => {
-        console.log('pointer out');
         buyDrinkButtonDown.setVisible(false);
       });
 
