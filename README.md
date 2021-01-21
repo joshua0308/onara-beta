@@ -33,6 +33,8 @@
 - Use container to display player info
   - https://phaser.io/examples/v3/view/game-objects/container/text-and-sprite-test
   - https://phaser.io/examples/v3/view/game-objects/container/rotation
+- [Add Buttons to Your Phaser 3 Game with RexUI Plugins](https://youtu.be/SU2H903RJcE)
+- [How to Make a Custom Phaser 3 Button](https://youtu.be/yWlILdKrbqQ)
 
 ```js
 this.player = this.add.sprite(0, 0, 'player', 6);
@@ -59,3 +61,7 @@ window.location.replace("http://www.w3schools.com");
 ```
 
 https://phaser.io/phaser3/devlog/120
+
+## Game Assets
+- https://www.kenney.nl/assets
+- 
