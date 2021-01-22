@@ -35,7 +35,6 @@ const config = {
 // initiate game only when user is logged in
 firebaseClient.auth().onAuthStateChanged((player) => {
   if (player) {
-    console.log("debug: logged in", player.displayName, player.email);
     new AronaGame(config, player);
   } else {
     window.location.replace('/login');

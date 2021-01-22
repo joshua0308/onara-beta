@@ -6,9 +6,12 @@ class Play extends Phaser.Scene {
   }
 
   create() {
+    this.myPlayer = {
+      socketId: this.game.socketId,
+      displayName: this.game.playerInfo.displayName,
+      email: this.game.playerInfo.email
+    };
     this.socket = this.game.socket;
-    this.socketId = this.game.socketId;
-    this.playerInfo = this.game.playerInfo;
     this.otherPlayers = this.physics.add.group();
     this.callButtonPressedDown = false;
 
@@ -16,18 +19,18 @@ class Play extends Phaser.Scene {
     const layers = this.createLayers(map);
     this.playerZones = this.getPlayerZones(layers.playerZones);
 
-    const container = new PlayerContainer(this, this.playerZones.start.x, this.playerZones.start.y, this.socket, this.playerInfo);
+    const container = new PlayerContainer(this, this.playerZones.start.x, this.playerZones.start.y, this.socket, this.myPlayer);
     container.addCollider(layers.platformsColliders);
 
     this.createEndOfLevel(this.playerZones.end, container);
     this.setupFollowupCameraOn(container);
-    this.setupSocket();
+    this.setupSocket(this.socket);
   }
 
-  setupSocket() {
+  setupSocket(socket) {
     // receive live players in the room
-    this.socket.on('currentPlayers', (players) => {
-      const socketId = this.socket.id;
+    socket.on('currentPlayers', (players) => {
+      const socketId = socket.id;
 
       Object.keys(players).forEach(id => {
         if (id !== socketId) {
@@ -36,13 +39,42 @@ class Play extends Phaser.Scene {
       })
     })
 
+    socket.on('join-chat-room', roomId => {
+      window.location.replace(`/room/${roomId}`);
+    })
+
+    socket.on('incoming-call', caller => {
+      const acceptButton = document.createElement('button');
+      acceptButton.innerText = 'Accept call';
+      document.body.append(acceptButton);
+      acceptButton.addEventListener('click', () => {
+        console.log('debug: call accepted');
+        socket.emit('accept-call', { caller })
+      })
+
+      const declineButton = document.createElement('button');
+      declineButton.innerText = 'Decline call';
+      document.body.append(declineButton);
+      declineButton.addEventListener('click', () => {
+        console.log('debug: call declined');
+        socket.emit('decline-call', { caller, receiver: this.myPlayer })
+        acceptButton.remove();
+        declineButton.remove();
+      })
+    })
+
+    socket.on('call-declined', receiver => {
+      console.log('debug: declined')
+      alert(`${receiver.displayName} has declined your call`)
+    })
+
     // receive info about newly connected players
-    this.socket.on('newPlayer', (player) => {
+    socket.on('newPlayer', (player) => {
       this.createOtherPlayerContainer(player, true)
     })
 
     // player movement
-    this.socket.on('playerMoved', otherPlayerInfo => {
+    socket.on('playerMoved', otherPlayerInfo => {
       this.otherPlayers.getChildren().forEach(otherPlayer => {
         if (otherPlayerInfo.socketId === otherPlayer.socketId) {
           /**
@@ -56,7 +88,7 @@ class Play extends Phaser.Scene {
       })
     })
 
-    this.socket.on('playerDisconnect', otherPlayerSocketId => {
+    socket.on('playerDisconnect', otherPlayerSocketId => {
       this.otherPlayers.getChildren().forEach(player => {
         if (otherPlayerSocketId === player.socketId) {
           player.removeAll(true); // remove all children and destroy
@@ -66,7 +98,7 @@ class Play extends Phaser.Scene {
     })
 
     // tell the server it's ready to listen
-    this.socket.emit('join-game', this.playerInfo);
+    socket.emit('join-game', this.myPlayer);
   }
 
   createMap() {
@@ -167,6 +199,7 @@ class Play extends Phaser.Scene {
         buyDrinkButtonDown.setVisible(false);
         if (this.callButtonPressedDown) {
           console.log('call ' + player.displayName);
+          this.socket.emit('outgoing-call', { caller: this.myPlayer, receiver: player })
         }
       })
       .on(Phaser.Input.Events.GAMEOBJECT_POINTER_OUT, () => {

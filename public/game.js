@@ -1,11 +1,9 @@
-function joinRoom() {
-  window.location.replace("/room/example");
-}
+// function joinRoom() {
+//   window.location.replace("/room/example");
+// }
 
 function logout() {
   firebaseClient.auth().signOut();
 }
 
-let playerInfo = {
-  name: ''
-};
+let playerInfo;

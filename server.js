@@ -1,4 +1,5 @@
 const express = require('express');
+const { v4: uuidv4 } = require('uuid');
 
 const app = express();
 const server = require('http').Server(app);
@@ -56,6 +57,21 @@ gameIO.on('connection', socket => {
     players[socket.id].motion = movementData.motion;
 
     socket.broadcast.emit('playerMoved', players[socket.id]);
+  })
+
+  socket.on('outgoing-call', ({ caller, receiver }) => {
+    socket.to(receiver.socketId).emit('incoming-call', caller)
+  })
+
+  socket.on('accept-call', ({ caller }) => {
+    const roomId = uuidv4();
+    socket.to(caller.socketId).emit('join-chat-room', roomId);
+    socket.emit('join-chat-room', roomId);
+  })
+
+  socket.on('decline-call', ({ caller, receiver }) => {
+    console.log('debug: call declined');
+    socket.to(caller.socketId).emit('call-declined', receiver);
   })
 
   socket.on('disconnect', () => {

@@ -2,9 +2,6 @@ const socket = io('/room');
 const videoGrid = document.getElementById('video-grid');
 const peer = new Peer(undefined);
 
-console.log("debug: peer", peer);
-console.log("debug: ROOM_ID", ROOM_ID);
-
 const peers = {};
 let myUserId;
 let myVideoStream;
