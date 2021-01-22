@@ -89,8 +89,6 @@ class Play extends Phaser.Scene {
   }
 
   createOtherPlayerContainer(player, isNew) {
-    // eslint-disable-next-line no-console
-    console.log("debug: player", player);
     const x = isNew ? this.playerZones.x : player.x;
     const y = isNew ? this.playerZones.y : player.y;
 

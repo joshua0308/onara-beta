@@ -47,7 +47,7 @@ class AronaGame extends Phaser.Game {
     super(config);
 
     this.playerInfo = playerInfo;
-    this.socket = io();
+    this.socket = io('/game');
     this.socket.on('connect', () => {
       this.socketId = this.socket.id;
     })

@@ -1,4 +1,4 @@
-const socket = io();
+const socket = io('/room');
 const videoGrid = document.getElementById('video-grid');
 const peer = new Peer(undefined);
 

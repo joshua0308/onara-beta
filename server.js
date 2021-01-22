@@ -10,7 +10,28 @@ const PORT = process.env.PORT || 3000;
 
 const players = {};
 
-io.on('connection', socket => {
+const gameIO = io.of('/game');
+const roomIO = io.of('/room');
+
+roomIO.on('connection', socket => {
+  // ROOM SOCKETS (VIDEO)
+  socket.on('join-room', (roomId, myUserId) => {
+    socket.join(roomId);
+    socket.to(roomId).broadcast.emit('user-connected', myUserId);
+
+    socket.on('disconnect', () => {
+      socket.to(roomId).broadcast.emit('user-disconnected', myUserId);
+    })
+
+    // CHAT
+    socket.on('message', ({ text, userId }) => {
+      //send message to the same room
+      roomIO.to(roomId).emit('createMessage', { text, userId })
+    });
+  })
+})
+
+gameIO.on('connection', socket => {
   console.log('a user connected: ', socket.id);
 
   // GAME SOCKETS
@@ -24,7 +45,7 @@ io.on('connection', socket => {
     players[socket.id].displayName = playerInfo.displayName;
     players[socket.id].email = playerInfo.email;
     
-    io.emit('currentPlayers', players);
+    gameIO.emit('currentPlayers', players);
     socket.broadcast.emit('newPlayer', players[socket.id]);
   });
 
@@ -41,26 +62,10 @@ io.on('connection', socket => {
     console.log('user disconnected: ', socket.id)
     delete players[socket.id];
 
-    io.emit('playerDisconnect', socket.id)
+    gameIO.emit('playerDisconnect', socket.id)
   });
 
-  // ROOM SOCKETS (VIDEO)
-  socket.on('join-room', (roomId, myUserId) => {
-    socket.join(roomId);
 
-    // broadcast to the rocreate-messageom that i joined
-    socket.to(roomId).broadcast.emit('user-connected', myUserId);
-
-    socket.on('disconnect', () => {
-      socket.to(roomId).broadcast.emit('user-disconnected', myUserId);
-    })
-
-    // CHAT
-    socket.on('message', ({ text, userId }) => {
-      //send message to the same room
-      io.to(roomId).emit('createMessage', { text, userId })
-    }); 
-  })
 })
 
 app.set('view engine', 'ejs');
