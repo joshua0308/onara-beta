@@ -17,11 +17,19 @@ const uiConfig = {
   signInFlow: 'popup',
   signInSuccessUrl: '/game',
   signInOptions: [
-    // firebase.auth.GoogleAuthProvider.PROVIDER_ID,
     {
       provider: firebase.auth.GoogleAuthProvider.PROVIDER_ID,
       scopes: [
         'https://www.googleapis.com/auth/userinfo.profile'
+      ]
+    },
+    {
+      provider: firebase.auth.FacebookAuthProvider.PROVIDER_ID,
+      scopes: [
+        'public_profile',
+        'email',
+        'user_likes',
+        'user_friends'
       ]
     },
     firebase.auth.EmailAuthProvider.PROVIDER_ID,
