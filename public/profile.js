@@ -14,7 +14,7 @@ profileEditForm.addEventListener('input', () => {
 firebase.auth().onAuthStateChanged((user) => {
   if (user) {
     currentUser = user;
-
+    
     if (currentUser.photoURL) {
       profileImage.src = user.photoURL;
     }
@@ -36,13 +36,13 @@ firebase.auth().onAuthStateChanged((user) => {
 profileEditForm.addEventListener("submit", updateProfile);
 
 function updateProfile(e) {
-  e.preventDefault();
-  const data = new FormData(profileEditForm);
+  e.preventDefault(); // prevent from refreshing
+  const data = new FormData(profileEditForm); // get all values from form element
   const updated_doc = {};
   const updated_user = {};
 
-  const auth_properties = ['name'];
-  const doc_properties = ['education', 'bio'];
+  const auth_properties = ['name']; // update displayName through firebase.auth
+  const doc_properties = ['education', 'bio']; // update others through firebase.firestore
 
   for (const [key, value] of data) {
     if (auth_properties.includes(key)) {
