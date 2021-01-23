@@ -78,10 +78,8 @@ gameIO.on('connection', socket => {
     console.log('user disconnected: ', socket.id)
     delete players[socket.id];
 
-    gameIO.emit('playerDisconnect', socket.id)
+    gameIO.emit('removePlayer', socket.id)
   });
-
-
 })
 
 app.set('view engine', 'ejs');

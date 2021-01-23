@@ -88,7 +88,7 @@ class Play extends Phaser.Scene {
       })
     })
 
-    socket.on('playerDisconnect', otherPlayerSocketId => {
+    socket.on('removePlayer', otherPlayerSocketId => {
       this.otherPlayers.getChildren().forEach(player => {
         if (otherPlayerSocketId === player.socketId) {
           player.removeAll(true); // remove all children and destroy
