@@ -8,12 +8,23 @@
   <script src="/socket.io/socket.io.js"></script>
 
   <style>
-    body {
-      margin: 100px;
+    body, html {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      background-color: black;
     }
 
+    canvas {
+      margin: 0;
+    }
+
+    #game-wrapper {
+      height: 100%;
+    }
     .button-wrapper {
-      margin: 30px;
+      /* margin: 0; */
+      /* height: 100%; */
       display: flex;
       justify-content: center;
     }
@@ -31,7 +42,7 @@
   <div id='game-wrapper'></div>
   <div class='button-wrapper'>
     <!-- <button id="join-button" class="button" type="button" onclick="joinRoom()">Join video chat!</button> -->
-    <button id="logout-button" class="button" type="button" onclick="logout()">Logout</button>
+    <!-- <button id="logout-button" class="button" type="button" onclick="logout()">Logout</button> -->
   </div>
   <!-- firebase -->
   <script src="https://www.gstatic.com/firebasejs/8.2.3/firebase-app.js"></script>

@@ -2,15 +2,17 @@ import PlayScene from './scenes/Play.js';
 import PreloadScene from './scenes/Preload.js';
 
 const MAP_WIDTH = 1600;
+const MAP_HEIGHT = 640;
 
 const WIDTH = document.body.offsetWidth;
-const HEIGHT = 600;
+const HEIGHT = document.body.offsetHeight;
 
 const SHARED_CONFIG = {
-  mapOffset: MAP_WIDTH > WIDTH ? MAP_WIDTH - WIDTH : 0,
+  mapOffsetWidth: MAP_WIDTH > WIDTH ? MAP_WIDTH - WIDTH : 0,
+  mapOffsetHeight: MAP_HEIGHT > HEIGHT ? MAP_HEIGHT - HEIGHT : 0,
   width: WIDTH,
   height: HEIGHT,
-  zoomFactor: 1.3
+  zoomFactor: 1.5
 }
 
 const Scenes = [PreloadScene, PlayScene];
@@ -19,9 +21,17 @@ const initScenes = () => Scenes.map(createScene);
 
 const config = {
   type: Phaser.AUTO, // webGL is default
+  parent: 'game-wrapper',
+  scale: {
+    // mode: Phaser.Scale.FIT,
+    // mode: Phaser.Scale.RESIZE,
+    // mode: Phaser.Scale.ENVELOP,
+    // mode: Phaser.Scale.HEIGHT_CONTROLS_WIDTH,
+    mode: Phaser.Scale.WIDTH_CONTROLS_HEIGHT,
+    autoCenter: Phaser.Scale.CENTER_BOTH,
+  },
   backgroundColor: '#000000',
   ...SHARED_CONFIG,
-  parent: 'game-wrapper',
   pixelArt: true,
   physics: { // interaction of your objects
     default: 'arcade', // arcade phsyics plugin manages physics simulation like gravity, velocity, etc
