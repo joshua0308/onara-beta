@@ -44,7 +44,7 @@ const uiConfig = {
 ui.start('#firebaseui-auth-container', uiConfig);
 
 // if the user is already logged in, move to the game page
-firebaseClient.auth().onAuthStateChanged((user) => {
+firebase.auth().onAuthStateChanged((user) => {
   if (user) {
     console.log("debug: logged in", user.displayName, user.email);
     window.location.replace('/game');

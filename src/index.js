@@ -43,7 +43,7 @@ const config = {
 }
 
 // initiate game only when user is logged in
-firebaseClient.auth().onAuthStateChanged((player) => {
+firebase.auth().onAuthStateChanged((player) => {
   if (player) {
     new AronaGame(config, player);
   } else {
