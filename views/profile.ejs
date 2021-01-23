@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://www.gstatic.com/firebasejs/ui/4.6.1/firebase-ui-auth.js"></script>
+  <link type="text/css" rel="stylesheet" href="https://www.gstatic.com/firebasejs/ui/4.6.1/firebase-ui-auth.css" />
+  <title>Profile</title>
+  <style>
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+    }
+
+    .wrapper {
+      display: flex;
+      justify-content: center;
+    }
+
+    h1,
+    form {
+      margin: 100px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wrapper">
+    <h1>Profile</h1>
+    <form id='profile-edit-form'>
+      <label>Name</label><br>
+      <input type="text" name="name" value="Josh Kim"><br><br>
+      <label>Education</label><br>
+      <input type="text" name="education" value="University of Michigan"><br><br>
+      <label>Bio</label><br>
+      <textarea name="bio" form="profile-edit-form" rows=5>Working on a stealth startup</textarea><br><br>
+      <input type="submit" value="Submit">
+    </form>
+  </div>
+
+  <script>
+    const profileEditForm = document.getElementById("profile-edit-form");
+
+    profileEditForm.addEventListener("submit", myFunction);
+
+    function myFunction(e) {
+      e.preventDefault();
+      const data = new FormData(profileEditForm)
+      for (const [name, value] of data) {
+        console.log(name, value)
+        // update DB for each value
+      };
+    }
+  </script>
+  <script src="https://www.gstatic.com/firebasejs/8.2.3/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.2.3/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.2.3/firebase-firestore.js"></script>
+
+  <script src="public/firebase.js"></script>
+  <script src="public/profile.js"></script>
+</body>
+
+</html>

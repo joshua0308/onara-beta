@@ -91,10 +91,6 @@ app.get('/ping', (req, res) => {
   res.send('pong')
 })
 
-app.get('/', (req, res) => {
-  res.redirect('/login')
-})
-
 app.get('/game', (req, res) => {
   res.render('game');
 })
@@ -103,8 +99,16 @@ app.get('/login', (req, res) => {
   res.render('login');
 })
 
+app.get('/profile', (req, res) => {
+  res.render('profile');
+})
+
 app.get('/room/:roomId', (req, res) => {
   res.render('room', { roomId: req.params.roomId })
+})
+
+app.get('/', (req, res) => {
+  res.redirect('/login')
 })
 
 app.use('/peerjs', peerServer);
