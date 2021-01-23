@@ -40,26 +40,28 @@ class Play extends Phaser.Scene {
     })
 
     socket.on('join-chat-room', roomId => {
+      console.log('debug: join-chat-room', roomId)
       window.location.replace(`/room/${roomId}`);
     })
 
     socket.on('incoming-call', caller => {
-      const acceptButton = document.createElement('button');
-      acceptButton.innerText = 'Accept call';
-      document.body.append(acceptButton);
+      console.log('debug: incoming-call', caller.socketId)
+      const buttonWrapper = document.getElementById('call-button-wrapper');
+      buttonWrapper.style.display = 'flex';
+
+      const acceptButton = document.getElementById('accept-button');
+      const declineButton = document.getElementById('decline-button');
       acceptButton.addEventListener('click', () => {
         console.log('debug: call accepted');
         socket.emit('accept-call', { caller })
+        buttonWrapper.style.display = 'none';
       })
 
-      const declineButton = document.createElement('button');
-      declineButton.innerText = 'Decline call';
-      document.body.append(declineButton);
       declineButton.addEventListener('click', () => {
         console.log('debug: call declined');
         socket.emit('decline-call', { caller, receiver: this.myPlayer })
-        acceptButton.remove();
-        declineButton.remove();
+
+        buttonWrapper.style.display = 'none';
       })
     })
 
@@ -142,7 +144,8 @@ class Play extends Phaser.Scene {
     /**
    * TEXT
    */
-    const text = this.add.text(0, 30, player.displayName);
+    // const text = this.add.text(0, 30, player.displayName);
+    const text = this.add.text(0, 30, player.socketId);
     text.setOrigin(0.5, 0.5)
     container.add(text);
 
@@ -199,7 +202,7 @@ class Play extends Phaser.Scene {
       .on(Phaser.Input.Events.GAMEOBJECT_POINTER_UP, () => {
         buyDrinkButtonDown.setVisible(false);
         if (this.callButtonPressedDown) {
-          console.log('call ' + player.displayName);
+          console.log('debug: call ' + player.socketId);
           this.socket.emit('outgoing-call', { caller: this.myPlayer, receiver: player })
         }
       })
@@ -244,7 +247,6 @@ class Play extends Phaser.Scene {
 
   setupFollowupCameraOn(player) {
     const { height, width, mapOffset, zoomFactor } = this.config;
-    console.log(this.config.height, this.sys.scale.height)
     this.physics.world.setBounds(0, 0, this.sys.scale.width + mapOffset, this.sys.scale.height);
 
     // TODO: need to adjust camera when window is resized

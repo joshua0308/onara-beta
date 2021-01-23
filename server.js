@@ -51,7 +51,6 @@ gameIO.on('connection', socket => {
   });
 
   socket.on('playerMovement', movementData => {
-    console.log('debug: playerMovement', socket.id)
     if (players[socket.id]) {
       players[socket.id].x = movementData.x;
       players[socket.id].y = movementData.y;
@@ -63,10 +62,16 @@ gameIO.on('connection', socket => {
   })
 
   socket.on('outgoing-call', ({ caller, receiver }) => {
+    console.log('debug: call outgoing')
+    console.log('caller -', caller.socketId)
+    console.log('receiver -', receiver.socketId)
     socket.to(receiver.socketId).emit('incoming-call', caller)
   })
 
   socket.on('accept-call', ({ caller }) => {
+    console.log('debug: call accepted');
+    console.log('caller -', caller.socketId)
+    console.log('receiver -', socket.id)
     const roomId = uuidv4();
     socket.to(caller.socketId).emit('join-chat-room', roomId);
     socket.emit('join-chat-room', roomId);
@@ -74,6 +79,8 @@ gameIO.on('connection', socket => {
 
   socket.on('decline-call', ({ caller, receiver }) => {
     console.log('debug: call declined');
+    console.log('caller -', caller.socketId)
+    console.log('receiver -', socket.id)
     socket.to(caller.socketId).emit('call-declined', receiver);
   })
 
@@ -86,6 +93,10 @@ gameIO.on('connection', socket => {
 })
 
 app.set('view engine', 'ejs');
+
+app.get('/users', (req, res) => {
+  res.json(players);
+})
 
 app.get('/ping', (req, res) => {
   res.send('pong')

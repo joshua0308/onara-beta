@@ -22,7 +22,8 @@
     #game-wrapper {
       height: 100%;
     }
-    .button-wrapper {
+
+    #menu-button-wrapper {
       display: flex;
       flex-direction: column;
       justify-content: center;
@@ -39,6 +40,15 @@
       margin: 5px;
       height: 30px;
     }
+
+    #call-button-wrapper {
+      position: fixed;
+      width: 100%;
+      bottom: 50px;
+      display: flex;
+      justify-content: center;
+      display: none;
+    }
   </style>
 </head>
 
@@ -46,9 +56,13 @@
   <!-- entrypoint to the game files -->
   <script type="module" src="src/index.js"></script>
   <div id='game-wrapper'></div>
-  <div class='button-wrapper'>
+  <div id='menu-button-wrapper'>
     <button id="profile-button" class="button" type="button" onclick="profile()">Profile</button>
     <button id="logout-button" class="button" type="button" onclick="logout()">Logout</button>
+  </div>
+  <div id='call-button-wrapper'>
+    <button class="button" id="accept-button">Accept</button>
+    <button class="button" id="decline-button">Decline</button>
   </div>
   <!-- firebase -->
   <script src="https://www.gstatic.com/firebasejs/8.2.3/firebase-app.js"></script>
