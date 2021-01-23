@@ -28,6 +28,10 @@
 ### Known issues
 - if you're camera/audio is disabled, you will get streams from users who were already in the room, but will not receive streams from new users
 
+### Resize phaser when window size is **changed******
+- https://labs.phaser.io/edit.html?src=src/scalemanager/manually%20resize.js
+
+
 ### Links
 - [Add DOM element within Phaser](https://www.youtube.com/watch?v=y8_WqDX3MCo&ab_channel=Ourcade)
 - Use container to display player info

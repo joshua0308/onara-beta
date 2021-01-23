@@ -51,12 +51,15 @@ gameIO.on('connection', socket => {
   });
 
   socket.on('playerMovement', movementData => {
-    players[socket.id].x = movementData.x;
-    players[socket.id].y = movementData.y;
-    players[socket.id].flipX = movementData.flipX;
-    players[socket.id].motion = movementData.motion;
+    console.log('debug: playerMovement', socket.id)
+    if (players[socket.id]) {
+      players[socket.id].x = movementData.x;
+      players[socket.id].y = movementData.y;
+      players[socket.id].flipX = movementData.flipX;
+      players[socket.id].motion = movementData.motion;
 
-    socket.broadcast.emit('playerMoved', players[socket.id]);
+      socket.broadcast.emit('playerMoved', players[socket.id]);
+    }
   })
 
   socket.on('outgoing-call', ({ caller, receiver }) => {
