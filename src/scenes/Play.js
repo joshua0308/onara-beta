@@ -43,6 +43,12 @@ class Play extends Phaser.Scene {
     navigator.mediaDevices.getUserMedia({ video: true, audio: true }).then(stream => {
       this.stream = stream;
       console.log('debug: stream init', stream)
+      const myVideoElement = document.getElementById('my-video');
+      myVideoElement.srcObject = stream;
+      myVideoElement.muted = 'true';
+      myVideoElement.addEventListener('loadedmetadata', () => {
+        myVideoElement.play();
+      });
     })
 
     socket.on('incoming-call', ({ callerId, callerSignal }) => {
@@ -64,6 +70,14 @@ class Play extends Phaser.Scene {
 
         receiverPeer.on('stream', callerStream => {
           console.log('receiver peer on stream', callerStream);
+          const modalWrapper = document.getElementById('modal-wrapper');
+          modalWrapper.style.display = 'inline';
+
+          const otherVideoElement = document.getElementById('other-video');
+          otherVideoElement.srcObject = callerStream;
+          otherVideoElement.addEventListener('loadedmetadata', () => {
+            otherVideoElement.play();
+          });
         })
 
         console.log('receiver peer.signal(callerSignal)')
@@ -231,10 +245,10 @@ class Play extends Phaser.Scene {
           //   audio: true
           // }).then(gotMedia.bind(this)).catch((e) => console.log(e))
 
-          const bindedGotMedia = gotMedia.bind(this);
-          bindedGotMedia(this.stream);
+          const bindedInitHandshake = initHandshake.bind(this);
+          bindedInitHandshake(this.stream);
 
-          function gotMedia(stream) {
+          function initHandshake(stream) {
             console.log('caller peer init')
             const callerPeer = new SimplePeer({
               initiator: true,
@@ -249,6 +263,14 @@ class Play extends Phaser.Scene {
 
             callerPeer.on('stream', stream => {
               console.log('caller peer on stream', stream)
+              const modalWrapper = document.getElementById('modal-wrapper');
+              modalWrapper.style.display = 'inline';
+
+              const otherVideoElement = document.getElementById('other-video');
+              otherVideoElement.srcObject = stream;
+              otherVideoElement.addEventListener('loadedmetadata', () => {
+                otherVideoElement.play();
+              });
             })
 
             this.socket.on('call-accepted', ({ receiverSignal }) => {
