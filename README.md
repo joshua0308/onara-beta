@@ -9,6 +9,9 @@
 ## How to deploy
 `git push heroku HEAD:master` - push your HEAD to master in heroku's remote 
 
+## Troubleshoot
+`heroku logs -a onara-beta -d web -t` - watch heroku logs
+
 ## Stack
 ### Authentication
 - [FirebaseUI](https://firebase.google.com/docs/auth/web/firebaseui?authuser=0)

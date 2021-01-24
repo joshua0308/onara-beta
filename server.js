@@ -17,15 +17,20 @@ const roomIO = io.of('/room');
 roomIO.on('connection', socket => {
   // ROOM SOCKETS (VIDEO)
   socket.on('join-room', (roomId, myUserId) => {
+    console.log('debug: user connected (room)', socket.id);
     socket.join(roomId);
     socket.to(roomId).broadcast.emit('user-connected', myUserId);
+    socket.to(roomId).broadcast.emit('createMessage', { userId: socket.id, text: 'joined the chat' })
 
     socket.on('disconnect', () => {
+      console.log('debug: user disconnected (room)', socket.id);
       socket.to(roomId).broadcast.emit('user-disconnected', myUserId);
+      socket.to(roomId).broadcast.emit('createMessage', { userId: socket.id, text: 'left the chat' })
     })
 
     // CHAT
     socket.on('message', ({ text, userId }) => {
+      console.log("debug: message -", text);
       //send message to the same room
       roomIO.to(roomId).emit('createMessage', { text, userId })
     });
@@ -33,8 +38,6 @@ roomIO.on('connection', socket => {
 })
 
 gameIO.on('connection', socket => {
-  console.log('a user connected: ', socket.id);
-
   // GAME SOCKETS
   // add player to the object keyed by socket.id
   players[socket.id] = {
@@ -43,6 +46,7 @@ gameIO.on('connection', socket => {
 
   // need to wait until socket listener is set up on the client side.
   socket.on('join-game', (playerInfo) => {
+    console.log('debug: user connected (game)', socket.id);
     players[socket.id].displayName = playerInfo.displayName;
     players[socket.id].email = playerInfo.email;
     
@@ -85,7 +89,7 @@ gameIO.on('connection', socket => {
   })
 
   socket.on('disconnect', () => {
-    console.log('user disconnected: ', socket.id)
+    console.log('debug: user disconnected (game)', socket.id)
     delete players[socket.id];
 
     gameIO.emit('removePlayer', socket.id)
