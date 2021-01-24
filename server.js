@@ -12,30 +12,6 @@ const PORT = process.env.PORT || 3000;
 const players = {};
 
 const gameIO = io.of('/game');
-const roomIO = io.of('/room');
-
-roomIO.on('connection', socket => {
-  // ROOM SOCKETS (VIDEO)
-  socket.on('join-room', (roomId, myUserId) => {
-    console.log('debug: user connected (room)', socket.id);
-    socket.join(roomId);
-    socket.to(roomId).broadcast.emit('user-connected', myUserId);
-    socket.to(roomId).broadcast.emit('createMessage', { userId: socket.id, text: 'joined the chat' })
-
-    socket.on('disconnect', () => {
-      console.log('debug: user disconnected (room)', socket.id);
-      socket.to(roomId).broadcast.emit('user-disconnected', myUserId);
-      socket.to(roomId).broadcast.emit('createMessage', { userId: socket.id, text: 'left the chat' })
-    })
-
-    // CHAT
-    socket.on('message', ({ text, userId }) => {
-      console.log("debug: message -", text);
-      //send message to the same room
-      roomIO.to(roomId).emit('createMessage', { text, userId })
-    });
-  })
-})
 
 gameIO.on('connection', socket => {
   // GAME SOCKETS
@@ -65,27 +41,26 @@ gameIO.on('connection', socket => {
     }
   })
 
-  socket.on('outgoing-call', ({ caller, receiver }) => {
+  socket.on('outgoing-call', ({ callerId, receiverId, callerSignal }) => {
     console.log('debug: call outgoing')
-    console.log('caller -', caller.socketId)
-    console.log('receiver -', receiver.socketId)
-    socket.to(receiver.socketId).emit('incoming-call', caller)
+    console.log('caller -', callerId)
+    console.log('receiver -', receiverId)
+    socket.to(receiverId).emit('incoming-call', { callerId, callerSignal })
   })
 
-  socket.on('accept-call', ({ caller }) => {
+  socket.on('accept-call', ({ callerId, receiverSignal }) => {
     console.log('debug: call accepted');
-    console.log('caller -', caller.socketId)
+    console.log('caller -', callerId)
     console.log('receiver -', socket.id)
-    const roomId = uuidv4();
-    socket.to(caller.socketId).emit('join-chat-room', roomId);
-    socket.emit('join-chat-room', roomId);
+
+    socket.to(callerId).emit('call-accepted', { receiverSignal });
   })
 
-  socket.on('decline-call', ({ caller, receiver }) => {
+  socket.on('decline-call', ({ callerId }) => {
     console.log('debug: call declined');
-    console.log('caller -', caller.socketId)
+    console.log('caller -', callerId)
     console.log('receiver -', socket.id)
-    socket.to(caller.socketId).emit('call-declined', receiver);
+    socket.to(callerId).emit('call-declined', { callerId });
   })
 
   socket.on('disconnect', () => {

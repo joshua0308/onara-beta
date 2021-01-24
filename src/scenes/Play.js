@@ -40,35 +40,49 @@ class Play extends Phaser.Scene {
       })
     })
 
-    socket.on('join-chat-room', roomId => {
-      console.log('debug: join-chat-room', roomId)
-      window.location.replace(`/room/${roomId}`);
+    navigator.mediaDevices.getUserMedia({ video: true, audio: true }).then(stream => {
+      this.stream = stream;
+      console.log('debug: stream init', stream)
     })
 
-    socket.on('incoming-call', caller => {
-      console.log('debug: incoming-call', caller.socketId)
+    socket.on('incoming-call', ({ callerId, callerSignal }) => {
+      console.log('debug: incoming-call', callerId)
       const buttonWrapper = document.getElementById('call-button-wrapper');
       buttonWrapper.style.display = 'flex';
 
       const acceptButton = document.getElementById('accept-button');
       const declineButton = document.getElementById('decline-button');
+
       acceptButton.addEventListener('click', () => {
-        console.log('debug: call accepted');
-        socket.emit('accept-call', { caller })
+        console.log('debug: receiver peer init');
+        const receiverPeer = new SimplePeer({ initiator: false, trickle: false, stream: this.stream });
+
+        receiverPeer.on('signal', receiverSignal => {
+          console.log('debug: receiver peer on signal')
+          socket.emit('accept-call', { callerId, receiverSignal })
+        })
+
+        receiverPeer.on('stream', callerStream => {
+          console.log('receiver peer on stream', callerStream);
+        })
+
+        console.log('receiver peer.signal(callerSignal)')
+        receiverPeer.signal(callerSignal);
+
         buttonWrapper.style.display = 'none';
       })
 
       declineButton.addEventListener('click', () => {
         console.log('debug: call declined');
-        socket.emit('decline-call', { caller, receiver: this.myPlayer })
+        socket.emit('decline-call', { callerId })
 
         buttonWrapper.style.display = 'none';
       })
     })
 
-    socket.on('call-declined', receiver => {
+    socket.on('call-declined', ({ callerId }) => {
       console.log('debug: declined')
-      alert(`${receiver.displayName} has declined your call`)
+      alert(`${callerId} has declined your call`)
     })
 
     // receive info about newly connected players
@@ -211,8 +225,39 @@ class Play extends Phaser.Scene {
       .on(Phaser.Input.Events.GAMEOBJECT_POINTER_UP, () => {
         buyDrinkButtonDown.setVisible(false);
         if (this.callButtonPressedDown) {
-          console.log('debug: call ' + player.socketId);
-          this.socket.emit('outgoing-call', { caller: this.myPlayer, receiver: player })
+          // console.log('debug: call ' + player.socketId);
+          // navigator.mediaDevices.getUserMedia({
+          //   video: true,
+          //   audio: true
+          // }).then(gotMedia.bind(this)).catch((e) => console.log(e))
+
+          const bindedGotMedia = gotMedia.bind(this);
+          bindedGotMedia(this.stream);
+
+          function gotMedia(stream) {
+            console.log('caller peer init')
+            const callerPeer = new SimplePeer({
+              initiator: true,
+              trickle: false,
+              stream: stream
+            })
+
+            callerPeer.on('signal', (callerSignal) => {
+              console.log('caller peer on signal', callerSignal)
+              this.socket.emit('outgoing-call', { callerId: this.myPlayer.socketId, callerSignal, receiverId: player.socketId })
+            })
+
+            callerPeer.on('stream', stream => {
+              console.log('caller peer on stream', stream)
+            })
+
+            this.socket.on('call-accepted', ({ receiverSignal }) => {
+              console.log('caller socket on call accepted', receiverSignal)
+              console.log('caller peer.signal(receiverSignal)')
+              callerPeer.signal(receiverSignal)
+            })
+          }
+          // this.socket.emit('outgoing-call', { caller: this.myPlayer, receiver: player })
         }
       })
       .on(Phaser.Input.Events.GAMEOBJECT_POINTER_OUT, () => {
