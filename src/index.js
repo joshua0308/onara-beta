@@ -56,15 +56,15 @@ class AronaGame extends Phaser.Game {
     super(config);
 
     this.playerInfo = playerInfo;
-    this.socket = io('/game');
-    this.socket.on('connect', () => {
-      this.socketId = this.socket.id;
-    })
+    // this.socket = io('/game');
+    // this.socket.on('connect', () => {
+    //   this.socketId = this.socket.id;
+    // })
 
-    // close socket connection when user leaves the room
-    // this is needed bc there is a delay firing the disconnect event
-    window.onbeforeunload = () => {
-      this.socket.close();
-    }
+    // // close socket connection when user leaves the room
+    // // this is needed bc there is a delay firing the disconnect event
+    // window.onbeforeunload = () => {
+    //   this.socket.close();
+    // }
   }
 }

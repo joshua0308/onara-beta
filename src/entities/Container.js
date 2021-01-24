@@ -19,8 +19,7 @@ class Container extends Phaser.GameObjects.Container {
     this.add(player);
 
     // ADD TEXT
-    const text = scene.add.text(0, 30, this.playerInfo.socketId);
-    // const text = scene.add.text(0, 30, this.playerInfo.displayName);
+    const text = scene.add.text(0, 30, this.playerInfo.displayName);
     text.setOrigin(0.5, 0.5)
     this.add(text);
 

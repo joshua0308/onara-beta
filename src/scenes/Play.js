@@ -7,11 +7,11 @@ class Play extends Phaser.Scene {
 
   create() {
     this.myPlayer = {
-      socketId: this.game.socketId,
+      socketId: undefined,
       displayName: this.game.playerInfo.displayName,
       email: this.game.playerInfo.email
     };
-    this.socket = this.game.socket;
+    this.socket = io('/game');
     this.otherPlayers = this.physics.add.group();
     this.callButtonPressedDown = false;
 
@@ -34,6 +34,7 @@ class Play extends Phaser.Scene {
 
       Object.keys(players).forEach(id => {
         if (id !== socketId) {
+          console.log('debug: other socket ids', id)
           this.createOtherPlayerContainer(players[id], false);
         }
       })
@@ -100,8 +101,17 @@ class Play extends Phaser.Scene {
       })
     })
 
-    // tell the server it's ready to listen
-    socket.emit('join-game', this.myPlayer);
+    socket.on('connect', () => {
+      this.myPlayer.socketId = socket.id;
+
+      // tell the server it's ready to listen
+      console.log("debug: my socket id", this.myPlayer.socketId);
+      socket.emit('join-game', this.myPlayer);
+    })
+
+    window.onbeforeunload = () => {
+      socket.close();
+    }
   }
 
   createMap() {
@@ -144,9 +154,8 @@ class Play extends Phaser.Scene {
     /**
    * TEXT
    */
-    // const text = this.add.text(0, 30, player.displayName);
-    const text = this.add.text(0, 30, player.socketId);
-    text.setOrigin(0.5, 0.5)
+    const text = this.add.text(0, 30, player.displayName);
+    text.setOrigin(0.5, 0.5);
     container.add(text);
 
     /**
