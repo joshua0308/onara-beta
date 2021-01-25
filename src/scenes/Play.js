@@ -78,10 +78,12 @@ class Play extends Phaser.Scene {
     inCallButtonWrapper.appendChild(this.endCallButton);
   }
 
-  addStreamToVideoElement(elementId, stream) {
+  addStreamToVideoElement(elementId, stream, setMute = false) {
     const myVideoElement = document.getElementById(elementId);
     myVideoElement.srcObject = stream;
-    myVideoElement.muted = 'true';
+    if (setMute) {
+      myVideoElement.muted = 'true';
+    }
     myVideoElement.addEventListener('loadedmetadata', () => {
       myVideoElement.play();
     });
@@ -96,6 +98,9 @@ class Play extends Phaser.Scene {
         mediaConstraints.video = true;
       }
     })
+
+    // eslint-disable-next-line no-console
+    console.log("debug: mediaConstraints", mediaConstraints);
 
     return navigator.mediaDevices.getUserMedia(mediaConstraints);
   }
@@ -126,7 +131,7 @@ class Play extends Phaser.Scene {
         })
 
         this.myPeer.on('stream', callerStream => {
-          this.addStreamToVideoElement('other-video', callerStream);
+          this.addStreamToVideoElement('other-video', callerStream, false);
         })
       })
   }
@@ -170,7 +175,7 @@ class Play extends Phaser.Scene {
   initChatElements() {
     const modalWrapper = document.getElementById('modal-wrapper');
     modalWrapper.style.display = 'inline';
-    this.addStreamToVideoElement('my-video', this.myStream);
+    this.addStreamToVideoElement('my-video', this.myStream, true);
     this.createInCallButtons(modalWrapper);
   }
 
@@ -257,7 +262,7 @@ class Play extends Phaser.Scene {
           })
 
           this.myPeer.on('stream', receiverStream => {
-            this.addStreamToVideoElement('other-video', receiverStream);
+            this.addStreamToVideoElement('other-video', receiverStream, false);
           })
 
           this.myPeer.signal(receiverSignalData);
