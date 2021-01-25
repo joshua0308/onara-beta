@@ -79,13 +79,13 @@ class Play extends Phaser.Scene {
   }
 
   addStreamToVideoElement(elementId, stream, setMute = false) {
-    const myVideoElement = document.getElementById(elementId);
-    myVideoElement.srcObject = stream;
+    const videoElement = document.getElementById(elementId);
+    videoElement.srcObject = stream;
     if (setMute) {
-      myVideoElement.muted = 'true';
+      videoElement.muted = 'true';
     }
-    myVideoElement.addEventListener('loadedmetadata', () => {
-      myVideoElement.play();
+    videoElement.addEventListener('loadedmetadata', () => {
+      videoElement.play();
     });
   }
 
