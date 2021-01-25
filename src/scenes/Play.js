@@ -54,6 +54,51 @@ class Play extends Phaser.Scene {
     console.log('debug: toggle audio button - enabled', this.myStream.getAudioTracks()[0].enabled)
   }
 
+  createInCallButtons(modalWrapper) {
+    const inCallButtonWrapper = document.getElementById('in-call-button-wrapper');
+
+    this.toggleVideoButton = document.createElement('button');
+    this.toggleVideoButton.setAttribute('id', 'toggle-video');
+    this.toggleVideoButton.innerText = 'Hide video';
+    this.toggleVideoButton.addEventListener('click', () => this.toggleVideoButtonCallback());
+    inCallButtonWrapper.appendChild(this.toggleVideoButton);
+
+    this.toggleAudioButton = document.createElement('button');
+    this.toggleAudioButton.setAttribute('id', 'toggle-audio');
+    this.toggleAudioButton.innerText = 'Mute';
+    this.toggleAudioButton.addEventListener('click', () => this.toggleAudioButtonCallback());
+    inCallButtonWrapper.appendChild(this.toggleAudioButton);
+
+    // end call button is added to 'this' because it needs to be removed inside 'call-ended' socket event listener
+    this.endCallButton = document.createElement('button');
+    this.endCallButton.classList.add('button');
+    this.endCallButton.setAttribute('id', 'end-call-button');
+    this.endCallButton.innerText = 'Leave chat';
+    this.endCallButton.addEventListener('click', () => this.endCallButtonCallback(modalWrapper, this.endCallButton))
+    inCallButtonWrapper.appendChild(this.endCallButton);
+  }
+
+  addStreamToVideoElement(elementId, stream) {
+    const myVideoElement = document.getElementById(elementId);
+    myVideoElement.srcObject = stream;
+    myVideoElement.muted = 'true';
+    myVideoElement.addEventListener('loadedmetadata', () => {
+      myVideoElement.play();
+    });
+  }
+
+  setMediaConstraints(devices) {
+    const mediaConstraints = { video: false, audio: false }
+    devices.forEach(device => {
+      if (device.kind === 'audioinput') {
+        mediaConstraints.audio = true;
+      } else if (device.kind === 'videoinput') {
+        mediaConstraints.video = true;
+      }
+    })
+
+    return navigator.mediaDevices.getUserMedia(mediaConstraints);
+  }
   // receiver - accept call
   acceptButtonCallback(acceptButton, declienButton, buttonWrapper, callerId) {
     console.log('debug: call accepted');
@@ -62,52 +107,10 @@ class Play extends Phaser.Scene {
     declienButton.remove();
 
     navigator.mediaDevices.enumerateDevices()
-      .then(devices => {
-        const mediaConstraints = { video: false, audio: false }
-        devices.forEach(device => {
-          if (device.kind === 'audioinput') {
-            mediaConstraints.audio = true;
-          } else if (device.kind === 'videoinput') {
-            mediaConstraints.video = true;
-          }
-        })
-
-        return navigator.mediaDevices.getUserMedia(mediaConstraints);
-      })
+      .then(this.setMediaConstraints)
       .then(stream => {
         this.myStream = stream;
-
-        const modalWrapper = document.getElementById('modal-wrapper');
-        modalWrapper.style.display = 'inline';
-
-        const myVideoElement = document.getElementById('my-video');
-        myVideoElement.srcObject = this.myStream;
-        myVideoElement.muted = 'true';
-        myVideoElement.addEventListener('loadedmetadata', () => {
-          myVideoElement.play();
-        });
-
-        const inCallButtonWrapper = document.getElementById('in-call-button-wrapper');
-
-        this.toggleVideoButton = document.createElement('button');
-        this.toggleVideoButton.setAttribute('id', 'toggle-video');
-        this.toggleVideoButton.innerText = 'Hide video';
-        this.toggleVideoButton.addEventListener('click', () => this.toggleVideoButtonCallback());
-        inCallButtonWrapper.appendChild(this.toggleVideoButton);
-
-        this.toggleAudioButton = document.createElement('button');
-        this.toggleAudioButton.setAttribute('id', 'toggle-audio');
-        this.toggleAudioButton.innerText = 'Mute';
-        this.toggleAudioButton.addEventListener('click', () => this.toggleAudioButtonCallback());
-        inCallButtonWrapper.appendChild(this.toggleAudioButton);
-
-        // end call button is added to 'this' because it needs to be removed inside 'call-ended' socket event listener
-        this.endCallButton = document.createElement('button');
-        this.endCallButton.classList.add('button');
-        this.endCallButton.setAttribute('id', 'end-call-button');
-        this.endCallButton.innerText = 'Leave chat';
-        this.endCallButton.addEventListener('click', () => this.endCallButtonCallback(modalWrapper, this.endCallButton))
-        inCallButtonWrapper.appendChild(this.endCallButton);
+        this.initiateChatElements();
 
         const receiverPeer = new SimplePeer({
           initiator: true,
@@ -122,13 +125,16 @@ class Play extends Phaser.Scene {
         })
 
         this.myPeer.on('stream', callerStream => {
-          const otherVideoElement = document.getElementById('other-video');
-          otherVideoElement.srcObject = callerStream;
-          otherVideoElement.addEventListener('loadedmetadata', () => {
-            otherVideoElement.play();
-          });
+          this.addStreamToVideoElement('other-video', callerStream);
         })
       })
+  }
+
+  initiateChatElements() {
+    const modalWrapper = document.getElementById('modal-wrapper');
+    modalWrapper.style.display = 'inline';
+    this.addStreamToVideoElement('my-video', this.myStream);
+    this.createInCallButtons(modalWrapper);
   }
 
   declineButtonCallback(declineButton, acceptButton, buttonWrapper, callerId) {
@@ -180,7 +186,6 @@ class Play extends Phaser.Scene {
       acceptButton.setAttribute('id', 'accept-button');
       acceptButton.innerText = 'Accept';
 
-      // const declineButton = document.getElementById('decline-button');
       const declineButton = document.createElement('button');
       declineButton.classList.add("button");
       declineButton.setAttribute('id', 'accept-button');
@@ -192,8 +197,6 @@ class Play extends Phaser.Scene {
       buttonWrapper.appendChild(declineButton);
 
       callerName.innerText = `${this.players[callerId].displayName} is calling...`
-
-      // declineButton.addEventListener('click', () => this.declineButtonCallback(declineButton, buttonWrapper, callerId))
     })
 
     // caller - when receiver accepts the call and initiates peer connection
@@ -202,52 +205,10 @@ class Play extends Phaser.Scene {
 
       console.log('debug: peer-connection-initiated', receiverSignalData)
       navigator.mediaDevices.enumerateDevices()
-        .then(devices => {
-          const mediaConstraints = { video: false, audio: false };
-
-          devices.forEach(device => {
-            if (device.kind === 'audioinput') {
-              mediaConstraints.audio = true;
-            } else if (device.kind === 'videoinput') {
-              mediaConstraints.video = true;
-            }
-          })
-
-          return navigator.mediaDevices.getUserMedia(mediaConstraints)
-        })
+        .then(this.setMediaConstraints)
         .then(stream => {
           this.myStream = stream;
-
-          const modalWrapper = document.getElementById('modal-wrapper');
-          modalWrapper.style.display = 'inline';
-
-          const myVideoElement = document.getElementById('my-video');
-          myVideoElement.srcObject = this.myStream;
-          myVideoElement.muted = 'true';
-          myVideoElement.addEventListener('loadedmetadata', () => {
-            myVideoElement.play();
-          });
-
-          const inCallButtonWrapper = document.getElementById('in-call-button-wrapper');
-
-          this.toggleVideoButton = document.createElement('button');
-          this.toggleVideoButton.setAttribute('id', 'toggle-video');
-          this.toggleVideoButton.innerText = 'Hide video';
-          this.toggleVideoButton.addEventListener('click', () => this.toggleVideoButtonCallback());
-          inCallButtonWrapper.appendChild(this.toggleVideoButton);
-
-          this.toggleAudioButton = document.createElement('button');
-          this.toggleAudioButton.setAttribute('id', 'toggle-audio');
-          this.toggleAudioButton.innerText = 'Mute';
-          this.toggleAudioButton.addEventListener('click', () => this.toggleAudioButtonCallback());
-          inCallButtonWrapper.appendChild(this.toggleAudioButton);
-
-          this.endCallButton = document.createElement('button');
-          this.endCallButton.classList.add('button');
-          this.endCallButton.setAttribute('id', 'end-call-button');
-          this.endCallButton.innerText = 'Leave chat';
-          this.endCallButton.addEventListener('click', () => this.endCallButtonCallback(modalWrapper, this.endCallButton))
-          inCallButtonWrapper.appendChild(this.endCallButton);
+          this.initiateChatElements();
 
           const callerPeer = new SimplePeer({
             initiator: false,
@@ -264,11 +225,7 @@ class Play extends Phaser.Scene {
           })
 
           this.myPeer.on('stream', receiverStream => {
-            const otherVideoElement = document.getElementById('other-video');
-            otherVideoElement.srcObject = receiverStream;
-            otherVideoElement.addEventListener('loadedmetadata', () => {
-              otherVideoElement.play();
-            });
+            this.addStreamToVideoElement('other-video', receiverStream);
           })
 
           this.myPeer.signal(receiverSignalData);
