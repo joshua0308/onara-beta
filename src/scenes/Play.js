@@ -32,7 +32,7 @@ class Play extends Phaser.Scene {
   acceptButtonCallback(acceptButton, buttonWrapper, callerId) {
     console.log('debug: call accepted');
     buttonWrapper.style.display = 'none';
-    acceptButton.removeEventListener('click', this.acceptButtonCallback);
+    // acceptButton.removeEventListener('click', returnFunction);
 
     navigator.mediaDevices.enumerateDevices()
       .then(devices => {
@@ -61,6 +61,9 @@ class Play extends Phaser.Scene {
           myVideoElement.play();
         });
 
+        const endCallButton = document.getElementById('end-call-button');
+        endCallButton.addEventListener('click', () => this.endCallButtonCallback(modalWrapper, endCallButton))
+
         const receiverPeer = new SimplePeer({
           initiator: true,
           trickle: false,
@@ -81,16 +84,24 @@ class Play extends Phaser.Scene {
           });
         })
       })
-    // this.socket.emit('call-accepted', { callerId })
-    //
   }
 
   declineButtonCallback(declineButton, buttonWrapper, callerId) {
     console.log('debug: call declined');
-    socket.emit('call-declined', { callerId })
+    this.socket.emit('call-declined', { callerId })
 
     buttonWrapper.style.display = 'none';
-    declineButton.removeEventListener('click', this.declineButtonCallback)
+    // declineButton.removeEventListener('click', returnFunction)
+  }
+
+  endCallButtonCallback(modalWrapper, endCallButton) {
+    modalWrapper.style.display = 'none';
+
+    this.socket.emit('end-call', { peerSocketId: this.peerSocketId });
+    this.myPeer.destroy();
+    console.log('debug: peer is destroyed');
+    this.peerSocketId = undefined;
+    endCallButton.removeEventListener('click', this.endCallButtonCallback)
   }
 
   setupSocket() {
@@ -109,6 +120,8 @@ class Play extends Phaser.Scene {
 
     // receiver - when caller requests a call
     this.socket.on('call-requested', ({ callerId }) => {
+      this.peerSocketId = callerId;
+
       console.log('debug: call-requested', callerId, this.players[callerId].displayName)
       const buttonWrapper = document.getElementById('call-button-wrapper');
       buttonWrapper.style.display = 'flex';
@@ -125,6 +138,8 @@ class Play extends Phaser.Scene {
 
     // caller - when receiver accepts the call and initiates peer connection
     this.socket.on('peer-connection-initiated', ({ receiverSignalData, receiverSocketId }) => {
+      this.peerSocketId = receiverSocketId;
+
       console.log('debug: peer-connection-initiated', receiverSignalData)
       navigator.mediaDevices.enumerateDevices()
         .then(devices => {
@@ -152,6 +167,9 @@ class Play extends Phaser.Scene {
           myVideoElement.addEventListener('loadedmetadata', () => {
             myVideoElement.play();
           });
+
+          const endCallButton = document.getElementById('end-call-button');
+          endCallButton.addEventListener('click', () => this.endCallButtonCallback(modalWrapper, endCallButton))
 
           const callerPeer = new SimplePeer({
             initiator: false,
@@ -185,136 +203,6 @@ class Play extends Phaser.Scene {
       this.myPeer.signal(callerSignalData)
     })
 
-    // socket.on('init-call', ({ receiverId }) => {
-    //   console.log('debug: init-call')
-
-    //   navigator.mediaDevices.getUserMedia({ video: true, audio: true }).then(stream => {
-    //     this.stream = stream;
-    //     console.log('debug: stream init', stream)
-
-    //     console.log('caller peer init')
-    //     const callerPeer = new SimplePeer({
-    //       initiator: true,
-    //       trickle: false,
-    //       stream: stream
-    //     })
-
-    //     this.peer = callerPeer; // save a reference to peer obj
-    //     this.peerSocketId = receiverId;
-    //     console.log("debug: this.peerSocketId", this.peerSocketId);
-
-    //     callerPeer.on('signal', (callerSignal) => {
-    //       console.log('caller peer on signal', callerSignal)
-    //       this.socket.emit('outgoing-call', { callerId: this.myPlayer.socketId, callerSignal, receiverId })
-    //     })
-
-    //     callerPeer.on('stream', stream => {
-    //       console.log('caller peer on stream', stream)
-    //       const modalWrapper = document.getElementById('modal-wrapper');
-    //       modalWrapper.style.display = 'inline';
-
-    //       const endCallButton = document.getElementById('end-call-button');
-
-    //       const endCallButtonCallback = () => {
-    //         modalWrapper.style.display = 'none';
-
-    //         this.socket.emit('end-call', { peerSocketId: this.peerSocketId });
-    //         this.peer.destroy();
-    //         console.log('debug: peer is destroyed');
-    //         this.peerSocketId = undefined;
-    //         endCallButton.removeEventListener('click', endCallButtonCallback)
-    //       }
-
-    //       endCallButton.addEventListener('click', endCallButtonCallback)
-
-    //   /**
-    //    * CALLER VIDEO
-    //    */
-    //       const myVideoElement = document.getElementById('my-video');
-    //       myVideoElement.srcObject = stream;
-    //       myVideoElement.muted = 'true';
-    //       myVideoElement.addEventListener('loadedmetadata', () => {
-    //         myVideoElement.play();
-    //       });
-
-    //       /**
-    //        * RECEIVER VIDEO
-    //        */
-    //       const otherVideoElement = document.getElementById('other-video');
-    //       otherVideoElement.srcObject = stream;
-    //       otherVideoElement.addEventListener('loadedmetadata', () => {
-    //         otherVideoElement.play();
-    //       });
-    //     })
-
-    //     this.socket.on('call-accepted', ({ receiverSignal }) => {
-    //       console.log('caller socket on call accepted', receiverSignal)
-    //       console.log('caller peer.signal(receiverSignal)')
-    //       callerPeer.signal(receiverSignal)
-    //     })
-    //   })
-    // })
-
-    // this.socket.on('incoming-call', ({ callerId, callerSignal }) => {
-    //   console.log('receiver accept call')
-    //   navigator.mediaDevices.getUserMedia({ video: true, audio: true }).then(stream => {
-    //     this.stream = stream;
-    //     console.log('debug: receiver peer init');
-    //     const receiverPeer = new SimplePeer({ initiator: false, trickle: false, stream });
-
-    //     this.peer = receiverPeer; // save reference to peer obj
-    //     this.peerSocketId = callerId;
-    //     console.log("debug: this.peerSocketId", this.peerSocketId);
-
-    //     receiverPeer.on('signal', receiverSignal => {
-    //       console.log('debug: receiver peer on signal')
-    //       this.socket.emit('accept-call', { callerId, receiverSignal })
-    //     })
-
-    //     receiverPeer.on('stream', callerStream => {
-    //       console.log('receiver peer on stream', callerStream);
-    //       const modalWrapper = document.getElementById('modal-wrapper');
-    //       modalWrapper.style.display = 'inline';
-
-    //       const endCallButton = document.getElementById('end-call-button');
-
-    //       const endCallButtonCallback = () => {
-    //         modalWrapper.style.display = 'none';
-
-    //         this.socket.emit('end-call', { peerSocketId: this.peerSocketId });
-    //         this.peer.destroy();
-    //         console.log('debug: peer is destroyed');
-    //         this.peerSocketId = undefined;
-    //         endCallButton.removeEventListener('click', endCallButtonCallback)
-    //       }
-
-    //       endCallButton.addEventListener('click', endCallButtonCallback)
-
-    //       /**
-    //        * RECEIVER VIDEO
-    //        */
-    //       const myVideoElement = document.getElementById('my-video');
-    //       myVideoElement.srcObject = stream;
-    //       myVideoElement.muted = 'true';
-    //       myVideoElement.addEventListener('loadedmetadata', () => {
-    //         myVideoElement.play();
-    //       });
-
-    //     /**
-    //      * CALLER VIDEO
-    //      */
-    //       const otherVideoElement = document.getElementById('other-video');
-    //       otherVideoElement.srcObject = callerStream;
-    //       otherVideoElement.addEventListener('loadedmetadata', () => {
-    //         otherVideoElement.play();
-    //       });
-    //     })
-
-    //     console.log('receiver peer.signal(callerSignal)')
-    //     receiverPeer.signal(callerSignal);
-    //   })
-    // })
-
     this.socket.on('call-request-declined', ({ callerId }) => {
       console.log('debug: declined')
       alert(`${callerId} has declined your call`)
@@ -322,7 +210,7 @@ class Play extends Phaser.Scene {
 
     this.socket.on('call-ended', ({ peerSocketId }) => {
       console.log('debug: call ended');
-      this.peer.destroy();
+      this.myPeer.destroy();
       console.log('debug: peer is destroyed');
       this.peerSocketId = undefined;
 
@@ -354,15 +242,14 @@ class Play extends Phaser.Scene {
       })
     })
 
-    this.socket.on('removePlayer', otherPlayerSocketId => {
-      console.log('debug: removePlayer', otherPlayerSocketId)
+    this.socket.on('player-disconnected', otherPlayerSocketId => {
+      console.log('debug: player-disconnected', otherPlayerSocketId)
       delete this.players[otherPlayerSocketId];
 
-      console.log("debug: this.peerSocketId, otherPlayerSocketId", this.peerSocketId, otherPlayerSocketId);
       if (this.peerSocketId === otherPlayerSocketId) {
-        this.peer.destroy();
+        console.log('debug: chat peer disconnected')
+        this.myPeer.destroy();
         this.peerSocketId = undefined;
-        console.log("debug: this.peer", this.peer);
 
         const modalWrapper = document.getElementById('modal-wrapper');
         modalWrapper.style.display = 'none';

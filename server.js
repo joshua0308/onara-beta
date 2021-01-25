@@ -72,21 +72,6 @@ gameIO.on('connection', socket => {
     socket.to(callerId).emit('call-request-declined', { callerId });
   })
 
-  socket.on('outgoing-call', ({ callerId, receiverId, callerSignal }) => {
-    console.log('debug: call outgoing')
-    console.log('caller -', callerId)
-    console.log('receiver -', receiverId)
-    socket.to(receiverId).emit('incoming-call', { callerId, callerSignal })
-  })
-
-  socket.on('accept-call', ({ callerId, receiverSignal }) => {
-    console.log('debug: call accepted');
-    console.log('caller -', callerId)
-    console.log('receiver -', socket.id)
-
-    socket.to(callerId).emit('call-accepted', { receiverSignal });
-  })
-
   socket.on('end-call', ({ peerSocketId }) => {
     console.log("debug: end-call")
     socket.to(peerSocketId).emit('call-ended', { peerSocketId })
@@ -96,7 +81,7 @@ gameIO.on('connection', socket => {
     console.log('debug: user disconnected (game)', socket.id)
     delete players[socket.id];
 
-    gameIO.emit('removePlayer', socket.id)
+    gameIO.emit('player-disconnected', socket.id)
   });
 })
 
