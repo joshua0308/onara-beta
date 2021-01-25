@@ -42,12 +42,15 @@
       height: 30px;
     }
 
-    #call-button-wrapper {
+    .bottom-button-wrapper {
       position: fixed;
       width: 100%;
       bottom: 50px;
       display: flex;
       justify-content: center;
+    }
+
+    #call-button-wrapper {
       display: none;
     }
 
@@ -88,6 +91,10 @@
       padding: 8px;
       border-radius: 200px;
     }
+
+    #caller-name {
+      color: white;
+    }
   </style>
 </head>
 
@@ -99,16 +106,21 @@
       <video id="my-video"></video>
       <video id="other-video"></video>
     </div>
+    <div id='in-call-button-wrapper' class='bottom-button-wrapper'>
+      <button class="button" id="end-call-button">Leave chat</button>
+    </div>
   </div>
   <div id='game-wrapper'></div>
   <div id='menu-button-wrapper'>
     <button id="profile-button" class="button" type="button" onclick="profile()">Profile</button>
     <button id="logout-button" class="button" type="button" onclick="logout()">Logout</button>
   </div>
-  <div id='call-button-wrapper'>
+  <div id='call-button-wrapper' class='bottom-button-wrapper'>
+    <div id='caller-name'></div>
     <button class="button" id="accept-button">Accept</button>
     <button class="button" id="decline-button">Decline</button>
   </div>
+
   <!-- firebase -->
   <script src="https://www.gstatic.com/firebasejs/8.2.3/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.2.3/firebase-auth.js"></script>

@@ -41,6 +41,28 @@ gameIO.on('connection', socket => {
     }
   })
 
+  socket.on('request-call', ({ callerId, receiverId }) => {
+    console.log('debug: request call')
+    console.log('caller -', callerId)
+    console.log('receiver -', receiverId)
+    socket.to(receiverId).emit('call-requested', { callerId })
+  })
+
+  socket.on('request-accepted', ({ callerId }) => {
+    console.log('debug: request accepted')
+    console.log('debug: init call')
+    console.log('caller -', callerId)
+    console.log('receiver -', socket.id)
+    socket.to(callerId).emit('init-call', { receiverId: socket.id })
+  })
+
+  socket.on('request-declined', ({ callerId }) => {
+    console.log('debug: call declined');
+    console.log('caller -', callerId)
+    console.log('receiver -', socket.id)
+    socket.to(callerId).emit('call-request-declined', { callerId });
+  })
+
   socket.on('outgoing-call', ({ callerId, receiverId, callerSignal }) => {
     console.log('debug: call outgoing')
     console.log('caller -', callerId)
@@ -56,11 +78,9 @@ gameIO.on('connection', socket => {
     socket.to(callerId).emit('call-accepted', { receiverSignal });
   })
 
-  socket.on('decline-call', ({ callerId }) => {
-    console.log('debug: call declined');
-    console.log('caller -', callerId)
-    console.log('receiver -', socket.id)
-    socket.to(callerId).emit('call-declined', { callerId });
+  socket.on('end-call', ({ peerSocketId }) => {
+    console.log("debug: end-call")
+    socket.to(peerSocketId).emit('call-ended', { peerSocketId })
   })
 
   socket.on('disconnect', () => {
