@@ -2,17 +2,16 @@ import PlayScene from './scenes/Play.js';
 import PreloadScene from './scenes/Preload.js';
 
 const MAP_WIDTH = 1600;
-const MAP_HEIGHT = 640;
 
 const WIDTH = document.body.offsetWidth;
 const HEIGHT = document.body.offsetHeight;
+// const HEIGHT = document.body.offsetHeight;
 
 const SHARED_CONFIG = {
-  mapOffsetWidth: MAP_WIDTH > WIDTH ? MAP_WIDTH - WIDTH : 0,
-  mapOffsetHeight: MAP_HEIGHT > HEIGHT ? MAP_HEIGHT - HEIGHT : 0,
-  width: WIDTH,
-  height: HEIGHT,
-  zoomFactor: 1.5
+  mapOffset: MAP_WIDTH > WIDTH ? MAP_WIDTH - WIDTH : 0,
+  width: WIDTH, // width of the canvas
+  height: HEIGHT, // height of the canvas
+  zoomFactor: 1
 }
 
 const Scenes = [PreloadScene, PlayScene];
@@ -25,9 +24,9 @@ const config = {
   scale: {
     // mode: Phaser.Scale.FIT,
     // mode: Phaser.Scale.RESIZE,
-    // mode: Phaser.Scale.ENVELOP,
+    mode: Phaser.Scale.ENVELOP,
     // mode: Phaser.Scale.HEIGHT_CONTROLS_WIDTH,
-    mode: Phaser.Scale.WIDTH_CONTROLS_HEIGHT,
+    // mode: Phaser.Scale.WIDTH_CONTROLS_HEIGHT,
     autoCenter: Phaser.Scale.CENTER_BOTH,
   },
   backgroundColor: '#000000',

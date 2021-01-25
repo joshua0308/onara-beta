@@ -7,7 +7,7 @@ class Container extends Phaser.GameObjects.Container {
 
     this.playerInfo = playerInfo;
     this.socket = socket;
-    this.setSize(32, 38)
+    this.setSize(32, 38);
 
     // add existing context - this will add image and set gravity
     scene.add.existing(this);

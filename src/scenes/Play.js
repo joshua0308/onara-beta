@@ -24,8 +24,9 @@ class Play extends Phaser.Scene {
     const container = new PlayerContainer(this, this.playerZones.start.x, this.playerZones.start.y, this.socket, this.myPlayer);
     container.addCollider(layers.platformsColliders);
 
-    this.createEndOfLevel(this.playerZones.end, container);
     this.setupFollowupCameraOn(container);
+    this.createHouses(map);
+    this.createBG(map);
     this.setupSocket();
   }
 
@@ -341,14 +342,16 @@ class Play extends Phaser.Scene {
   createMap() {
     const map = this.make.tilemap({ key: 'map' });
     map.addTilesetImage('main_lev_build_1', 'tiles-1');
+    map.addTilesetImage('tilemap_packed', 'tiles-2');
     return map;
   }
 
   createLayers(map) {
     const tileset = map.getTileset('main_lev_build_1');
+    const tileset2 = map.getTileset('tilemap_packed');
     const platformsColliders = map.createStaticLayer('platforms_colliders', tileset);
     const environment = map.createStaticLayer('environment', tileset);
-    const platforms = map.createStaticLayer('platforms', tileset);
+    const platforms = map.createStaticLayer('platforms', tileset2);
     const playerZones = map.getObjectLayer('player_zones');
 
     // collide player with platform
@@ -480,30 +483,33 @@ class Play extends Phaser.Scene {
 
   setupFollowupCameraOn(player) {
     const { height, width, mapOffset, zoomFactor } = this.config;
-    this.physics.world.setBounds(0, 0, this.sys.scale.width + mapOffset, this.sys.scale.height);
+    this.physics.world.setBounds(0, 0, 1600, 600);
 
     // TODO: need to adjust camera when window is resized
-    this.cameras.main.setBounds(0, 0, this.sys.scale.width + mapOffset, this.sys.scale.height).setZoom(zoomFactor);
+    this.cameras.main.setBounds(0, 0, 1600, 600).setZoom(3);
     this.cameras.main.startFollow(player);
   }
 
   getPlayerZones(playerZonesLayer) {
     const playerZones = playerZonesLayer.objects;
     return {
-      start: playerZones.find(zone => zone.name === 'startZone'),
-      end: playerZones.find(zone => zone.name === 'endZone')
+      start: playerZones.find(zone => zone.name === 'startZone')
     }
   }
 
-  createEndOfLevel(end, player) {
-    const endOfLevel = this.physics.add.sprite(end.x, end.y, 'end')
-      .setAlpha(0)
-      .setSize(5, this.config.height)
-      .setOrigin(0.5, 1);
+  createBG(map) {
+    const bgObject = map.getObjectLayer('distance_bg').objects[0];
+    this.add.tileSprite(bgObject.x, bgObject.y, 1600, bgObject.height, 'sky')
+      .setOrigin(0, 1)
+      .setDepth(-10);
+  }
 
-    const eolOverlap = this.physics.add.overlap(player, endOfLevel, () => {
-      eolOverlap.active = false;
-      console.log('Player has won!')
+  createHouses(map) {
+    const houseObjects = map.getObjectLayer('houses').objects;
+    houseObjects.forEach(houseObject => {
+      this.add.tileSprite(houseObject.x, houseObject.y, houseObject.width, houseObject.height, houseObject.name)
+        .setOrigin(0, 1)
+        .setDepth(-5);
     })
   }
 }
