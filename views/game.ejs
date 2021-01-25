@@ -35,7 +35,7 @@
       box-sizing: border-box;
     }
 
-    .button {
+    button {
       box-sizing: border-box;
       width: 100px;
       margin: 5px;
@@ -107,18 +107,20 @@
       <video id="other-video"></video>
     </div>
     <div id='in-call-button-wrapper' class='bottom-button-wrapper'>
-      <button class="button" id="end-call-button">Leave chat</button>
+      <!-- <button id='toggle-video'>Turn video off</button>
+                  <button id='toggle-video'>Mute</button> -->
+      <!-- <button class="button" id="end-call-button">Leave chat</button> -->
     </div>
   </div>
   <div id='game-wrapper'></div>
   <div id='menu-button-wrapper'>
-    <button id="profile-button" class="button" type="button" onclick="profile()">Profile</button>
-    <button id="logout-button" class="button" type="button" onclick="logout()">Logout</button>
+    <button id="profile-button" type="button" onclick="profile()">Profile</button>
+    <button id="logout-button" type="button" onclick="logout()">Logout</button>
   </div>
   <div id='call-button-wrapper' class='bottom-button-wrapper'>
     <div id='caller-name'></div>
-    <button class="button" id="accept-button">Accept</button>
-    <button class="button" id="decline-button">Decline</button>
+    <!-- <button class="button" id="accept-button">Accept</button> -->
+    <!-- <button class="button" id="decline-button">Decline</button> -->
   </div>
 
   <!-- firebase -->

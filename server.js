@@ -69,7 +69,7 @@ gameIO.on('connection', socket => {
     console.log('debug: call declined');
     console.log('caller -', callerId)
     console.log('receiver -', socket.id)
-    socket.to(callerId).emit('call-request-declined', { callerId });
+    socket.to(callerId).emit('call-request-declined', { receiverId: socket.id });
   })
 
   socket.on('end-call', ({ peerSocketId }) => {
