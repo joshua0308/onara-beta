@@ -42,21 +42,30 @@ gameIO.on('connection', socket => {
   })
 
   socket.on('request-call', ({ callerId, receiverId }) => {
-    console.log('debug: request call')
+    console.log('debug: request-call')
     console.log('caller -', callerId)
     console.log('receiver -', receiverId)
     socket.to(receiverId).emit('call-requested', { callerId })
   })
 
-  socket.on('request-accepted', ({ callerId }) => {
-    console.log('debug: request accepted')
-    console.log('debug: init call')
-    console.log('caller -', callerId)
-    console.log('receiver -', socket.id)
-    socket.to(callerId).emit('init-call', { receiverId: socket.id })
+  // socket.on('call-accepted', ({ callerId }) => {
+  //   console.log('debug: request accepted')
+  //   console.log('debug: init call')
+  //   console.log('caller -', callerId)
+  //   console.log('receiver -', socket.id)
+  //   socket.to(callerId).emit('init-call', { receiverId: socket.id })
+  // })
+  socket.on('init-peer-connection', ({ receiverSignalData, callerSocketId }) => {
+    console.log('debug: init-peer-connection')
+    socket.to(callerSocketId).emit('peer-connection-initiated', { receiverSignalData, receiverSocketId: socket.id })
   })
 
-  socket.on('request-declined', ({ callerId }) => {
+  socket.on('answer-peer-connection', ({ callerSignalData, receiverSocketId }) => {
+    console.log('debug: answer-peer-connection')
+    socket.to(receiverSocketId).emit('peer-connection-answered', { callerSignalData })
+  })
+
+  socket.on('call-declined', ({ callerId }) => {
     console.log('debug: call declined');
     console.log('caller -', callerId)
     console.log('receiver -', socket.id)
