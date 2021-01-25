@@ -1,5 +1,4 @@
 const express = require('express');
-const { v4: uuidv4 } = require('uuid');
 
 const app = express();
 const server = require('http').Server(app);
@@ -48,13 +47,6 @@ gameIO.on('connection', socket => {
     socket.to(receiverId).emit('call-requested', { callerId })
   })
 
-  // socket.on('call-accepted', ({ callerId }) => {
-  //   console.log('debug: request accepted')
-  //   console.log('debug: init call')
-  //   console.log('caller -', callerId)
-  //   console.log('receiver -', socket.id)
-  //   socket.to(callerId).emit('init-call', { receiverId: socket.id })
-  // })
   socket.on('init-peer-connection', ({ receiverSignalData, callerSocketId }) => {
     console.log('debug: init-peer-connection')
     socket.to(callerSocketId).emit('peer-connection-initiated', { receiverSignalData, receiverSocketId: socket.id })
@@ -105,10 +97,6 @@ app.get('/login', (req, res) => {
 
 app.get('/profile', (req, res) => {
   res.render('profile');
-})
-
-app.get('/room/:roomId', (req, res) => {
-  res.render('room', { roomId: req.params.roomId })
 })
 
 app.get('/', (req, res) => {

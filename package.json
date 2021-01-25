@@ -21,7 +21,6 @@
     "phaser": "^3.24.1",
     "socket.io": "^3.0.5",
     "socket.io-client": "^3.0.5",
-    "uuid": "^8.3.2",
     "webpack-merge": "^5.1.4"
   },
   "devDependencies": {
