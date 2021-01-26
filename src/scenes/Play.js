@@ -1,18 +1,28 @@
 import PlayerContainer from "../entities/Container.js";
+import userInterfaceManager from '../UserInterfaceManager.js';
+
 class Play extends Phaser.Scene {
+  peer = null;
+  players = {};
+
   constructor(config) {
     super('PlayScene');
     this.config = config;
+
+    this.acceptButtonCallback = this.acceptButtonCallback.bind(this);
+    this.declineButtonCallback = this.declineButtonCallback.bind(this);
+    this.endCallButtonCallback = this.endCallButtonCallback.bind(this);
   }
 
   create() {
-    this.peer;
+    this.userInterfaceManager = userInterfaceManager;
+
     this.myPlayer = {
       socketId: undefined,
       displayName: this.game.playerInfo.displayName,
       email: this.game.playerInfo.email
     };
-    this.players = {};
+
     this.socket = io('/game');
     this.otherPlayers = this.physics.add.group();
     this.callButtonPressedDown = false;
@@ -28,176 +38,6 @@ class Play extends Phaser.Scene {
     this.createHouses(map);
     this.createBG(map);
     this.setupSocket();
-  }
-
-  toggleVideoButtonCallback() {
-    let enabled = this.myStream.getVideoTracks()[0].enabled;
-    if (enabled) {
-      this.myStream.getVideoTracks()[0].enabled = false;
-      this.toggleVideoButton.innerText = 'Show video';
-    } else {
-      this.myStream.getVideoTracks()[0].enabled = true;
-      this.toggleVideoButton.innerText = 'Hide video';
-    }
-    console.log('debug: toggle video button - enabled', this.myStream.getVideoTracks()[0].enabled)
-  }
-
-  toggleAudioButtonCallback() {
-    console.log('debug: toggle audio button')
-    let enabled = this.myStream.getAudioTracks()[0].enabled;
-    if (enabled) {
-      this.myStream.getAudioTracks()[0].enabled = false;
-      this.toggleAudioButton.innerText = 'Unmute';
-    } else {
-      this.myStream.getAudioTracks()[0].enabled = true;
-      this.toggleAudioButton.innerText = 'Mute';
-    }
-    console.log('debug: toggle audio button - enabled', this.myStream.getAudioTracks()[0].enabled)
-  }
-
-  createInCallButtons(modalWrapper) {
-    const inCallButtonWrapper = document.getElementById('in-call-button-wrapper');
-
-    this.toggleVideoButton = document.createElement('button');
-    this.toggleVideoButton.setAttribute('id', 'toggle-video');
-    this.toggleVideoButton.innerText = 'Hide video';
-    this.toggleVideoButton.addEventListener('click', () => this.toggleVideoButtonCallback());
-    inCallButtonWrapper.appendChild(this.toggleVideoButton);
-
-    this.toggleAudioButton = document.createElement('button');
-    this.toggleAudioButton.setAttribute('id', 'toggle-audio');
-    this.toggleAudioButton.innerText = 'Mute';
-    this.toggleAudioButton.addEventListener('click', () => this.toggleAudioButtonCallback());
-    inCallButtonWrapper.appendChild(this.toggleAudioButton);
-
-    // end call button is added to 'this' because it needs to be removed inside 'call-ended' socket event listener
-    this.endCallButton = document.createElement('button');
-    this.endCallButton.classList.add('button');
-    this.endCallButton.setAttribute('id', 'end-call-button');
-    this.endCallButton.innerText = 'Leave chat';
-    this.endCallButton.addEventListener('click', () => this.endCallButtonCallback(modalWrapper, this.endCallButton))
-    inCallButtonWrapper.appendChild(this.endCallButton);
-  }
-
-  addStreamToVideoElement(elementId, stream, setMute = false) {
-    const videoElement = document.getElementById(elementId);
-    videoElement.srcObject = stream;
-    if (setMute) {
-      videoElement.muted = 'true';
-    }
-    videoElement.addEventListener('loadedmetadata', () => {
-      videoElement.play();
-    });
-  }
-
-  setMediaConstraints(devices) {
-    const mediaConstraints = { video: false, audio: false }
-    devices.forEach(device => {
-      if (device.kind === 'audioinput') {
-        mediaConstraints.audio = true;
-      } else if (device.kind === 'videoinput') {
-        mediaConstraints.video = true;
-      }
-    })
-
-    // eslint-disable-next-line no-console
-    console.log("debug: mediaConstraints", mediaConstraints);
-
-    return navigator.mediaDevices.getUserMedia(mediaConstraints);
-  }
-
-  // receiver - accept call
-  acceptButtonCallback(acceptButton, declienButton, buttonWrapper, callerId) {
-    console.log('debug: call accepted');
-    buttonWrapper.style.display = 'none';
-    acceptButton.remove();
-    declienButton.remove();
-
-    navigator.mediaDevices.enumerateDevices()
-      .then(this.setMediaConstraints)
-      .then(stream => {
-        this.myStream = stream;
-        this.initChatElements();
-
-        const receiverPeer = new SimplePeer({
-          initiator: true,
-          trickle: false,
-          stream: this.myStream
-        })
-
-        this.myPeer = receiverPeer;
-
-        this.myPeer.on('signal', receiverSignalData => {
-          this.socket.emit('init-peer-connection', { receiverSignalData, receiverSocketId: this.socket.id, callerSocketId: callerId })
-        })
-
-        this.myPeer.on('stream', callerStream => {
-          this.addStreamToVideoElement('other-video', callerStream, false);
-        })
-      })
-  }
-
-  stopStream() {
-    const tracks = this.myStream.getTracks()
-    tracks.forEach(track => track.stop())
-  }
-
-  cleanupChatElements() {
-    const modalWrapper = document.getElementById('modal-wrapper');
-    modalWrapper.style.display = 'none';
-    if (this.endCallButton) { this.endCallButton.remove(); }
-    if (this.toggleVideoButton) { this.toggleVideoButton.remove(); }
-    if (this.toggleAudioButton) { this.toggleAudioButton.remove(); }
-  }
-
-  initIncomingCallElements(callerId) {
-    const buttonWrapper = document.getElementById('call-button-wrapper');
-    buttonWrapper.style.display = 'flex';
-
-    const callerName = document.getElementById('caller-name');
-    const acceptButton = document.createElement('button');
-    acceptButton.classList.add("button");
-    acceptButton.setAttribute('id', 'accept-button');
-    acceptButton.innerText = 'Accept';
-
-    const declineButton = document.createElement('button');
-    declineButton.classList.add("button");
-    declineButton.setAttribute('id', 'accept-button');
-    declineButton.innerText = 'Decline';
-
-    acceptButton.addEventListener('click', () => this.acceptButtonCallback(acceptButton, declineButton, buttonWrapper, callerId));
-    declineButton.addEventListener('click', () => this.declineButtonCallback(declineButton, acceptButton, buttonWrapper, callerId));
-    buttonWrapper.appendChild(acceptButton);
-    buttonWrapper.appendChild(declineButton);
-
-    callerName.innerText = `${this.players[callerId].displayName} is calling...`
-  }
-
-  initChatElements() {
-    const modalWrapper = document.getElementById('modal-wrapper');
-    modalWrapper.style.display = 'inline';
-    this.addStreamToVideoElement('my-video', this.myStream, true);
-    this.createInCallButtons(modalWrapper);
-  }
-
-  declineButtonCallback(declineButton, acceptButton, buttonWrapper, callerId) {
-    console.log('debug: call declined');
-    this.socket.emit('call-declined', { callerId })
-
-    buttonWrapper.style.display = 'none';
-    declineButton.remove();
-    acceptButton.remove();
-  }
-
-  endCallButtonCallback(modalWrapper, endCallButton) {
-    console.log('debug: end call')
-    this.cleanupChatElements();
-    this.stopStream();
-    endCallButton.remove();
-
-    this.socket.emit('end-call', { peerSocketId: this.peerSocketId });
-    this.myPeer.destroy();
-    this.peerSocketId = undefined;
   }
 
   setupSocket() {
@@ -234,7 +74,8 @@ class Play extends Phaser.Scene {
     this.socket.on('call-requested', ({ callerId }) => {
       console.log('debug: call-requested', callerId, this.players[callerId].displayName)
       this.peerSocketId = callerId;
-      this.initIncomingCallElements(callerId);
+
+      this.userInterfaceManager.createIncomingCallInterface(this.players, callerId, this.acceptButtonCallback, this.declineButtonCallback);
     })
 
     // caller - when receiver accepts the call and initiates peer connection
@@ -246,7 +87,8 @@ class Play extends Phaser.Scene {
         .then(this.setMediaConstraints)
         .then(stream => {
           this.myStream = stream;
-          this.initChatElements();
+          this.userInterfaceManager.createChatInterface(this.myStream, this.toggleVideoButtonCallback, this.toggleAudioButtonCallback, this.endCallButtonCallback);
+          this.userInterfaceManager.addStreamToVideoElement('my-video', this.myStream, true);
 
           const callerPeer = new SimplePeer({
             initiator: false,
@@ -263,7 +105,7 @@ class Play extends Phaser.Scene {
           })
 
           this.myPeer.on('stream', receiverStream => {
-            this.addStreamToVideoElement('other-video', receiverStream, false);
+            this.userInterfaceManager.addStreamToVideoElement('other-video', receiverStream, false);
           })
 
           this.myPeer.signal(receiverSignalData);
@@ -285,7 +127,7 @@ class Play extends Phaser.Scene {
 
     this.socket.on('call-ended', ({ peerSocketId }) => {
       console.log('debug: call ended');
-      this.cleanupChatElements();
+      this.userInterfaceManager.removeChatInterface();
       this.stopStream();
 
       this.myPeer.destroy();
@@ -323,7 +165,7 @@ class Play extends Phaser.Scene {
 
       if (this.peerSocketId === otherPlayerSocketId) {
         console.log('debug: chat peer disconnected')
-        this.cleanupChatElements();
+        this.userInterfaceManager.removeChatInterface();
         this.stopStream();
 
         this.myPeer.destroy();
@@ -358,6 +200,22 @@ class Play extends Phaser.Scene {
     platformsColliders.setCollisionByProperty({ collides: true });
 
     return { environment, platforms, platformsColliders, playerZones }
+  }
+
+  createBG(map) {
+    const bgObject = map.getObjectLayer('distance_bg').objects[0];
+    this.add.tileSprite(bgObject.x, bgObject.y, 1600, bgObject.height, 'sky')
+      .setOrigin(0, 1)
+      .setDepth(-10);
+  }
+
+  createHouses(map) {
+    const houseObjects = map.getObjectLayer('houses').objects;
+    houseObjects.forEach(houseObject => {
+      this.add.tileSprite(houseObject.x, houseObject.y, houseObject.width, houseObject.height, houseObject.name)
+        .setOrigin(0, 1)
+        .setDepth(-5);
+    })
   }
 
   createOtherPlayerContainer(player, isNew) {
@@ -401,16 +259,6 @@ class Play extends Phaser.Scene {
 
     this.otherPlayers.add(container);
     return container;
-  }
-
-
-  setPlayerInfoInteraction(container, playerInfoText, buyDrinkButtonGroup) {
-    container.setInteractive()
-      .on(Phaser.Input.Events.GAMEOBJECT_POINTER_DOWN, () => {
-        playerInfoText.setVisible(!playerInfoText.visible);
-        buyDrinkButtonGroup.buyDrinkButtonOver.setVisible(!buyDrinkButtonGroup.buyDrinkButtonOver.visible);
-        buyDrinkButtonGroup.buyDrinkText.setVisible(!buyDrinkButtonGroup.buyDrinkText.visible);
-      });
   }
 
   createBuyDrinkButton(scene, container, player) {
@@ -481,15 +329,6 @@ class Play extends Phaser.Scene {
     return playerInfoText;
   }
 
-  setupFollowupCameraOn(player) {
-    // const { height, width, mapOffset, zoomFactor } = this.config;
-    this.physics.world.setBounds(0, 0, 1600, 640);
-
-    // TODO: need to adjust camera when window is resized
-    this.cameras.main.setBounds(0, 0, 1600, 640).setZoom(3);
-    this.cameras.main.startFollow(player);
-  }
-
   getPlayerZones(playerZonesLayer) {
     const playerZones = playerZonesLayer.objects;
     return {
@@ -497,21 +336,124 @@ class Play extends Phaser.Scene {
     }
   }
 
-  createBG(map) {
-    const bgObject = map.getObjectLayer('distance_bg').objects[0];
-    this.add.tileSprite(bgObject.x, bgObject.y, 1600, bgObject.height, 'sky')
-      .setOrigin(0, 1)
-      .setDepth(-10);
+  setupFollowupCameraOn(player) {
+    this.physics.world.setBounds(0, 0, 1600, 640);
+
+    // TODO: need to adjust camera when window is resized
+    this.cameras.main.setBounds(0, 0, 1600, 640).setZoom(3);
+    this.cameras.main.startFollow(player);
   }
 
-  createHouses(map) {
-    const houseObjects = map.getObjectLayer('houses').objects;
-    houseObjects.forEach(houseObject => {
-      this.add.tileSprite(houseObject.x, houseObject.y, houseObject.width, houseObject.height, houseObject.name)
-        .setOrigin(0, 1)
-        .setDepth(-5);
-    })
+  setPlayerInfoInteraction(container, playerInfoText, buyDrinkButtonGroup) {
+    container.setInteractive()
+      .on(Phaser.Input.Events.GAMEOBJECT_POINTER_DOWN, () => {
+        playerInfoText.setVisible(!playerInfoText.visible);
+        buyDrinkButtonGroup.buyDrinkButtonOver.setVisible(!buyDrinkButtonGroup.buyDrinkButtonOver.visible);
+        buyDrinkButtonGroup.buyDrinkText.setVisible(!buyDrinkButtonGroup.buyDrinkText.visible);
+      });
   }
+
+  /**
+   * CALLBACK FUNCTIONS
+   */
+  toggleVideoButtonCallback(stream) {
+    let enabled = stream.getVideoTracks()[0].enabled;
+    if (enabled) {
+      stream.getVideoTracks()[0].enabled = false;
+      this.toggleVideoButton.innerText = 'Show video';
+    } else {
+      stream.getVideoTracks()[0].enabled = true;
+      this.toggleVideoButton.innerText = 'Hide video';
+    }
+    console.log('debug: toggle video button - enabled', stream.getVideoTracks()[0].enabled)
+  }
+
+  toggleAudioButtonCallback(stream) {
+    console.log('debug: toggle audio button', this.toggleAudioButton)
+    let enabled = stream.getAudioTracks()[0].enabled;
+    if (enabled) {
+      stream.getAudioTracks()[0].enabled = false;
+      this.toggleAudioButton.innerText = 'Unmute';
+    } else {
+      stream.getAudioTracks()[0].enabled = true;
+      this.toggleAudioButton.innerText = 'Mute';
+    }
+    console.log('debug: toggle audio button - enabled', stream.getAudioTracks()[0].enabled)
+  }
+
+  setMediaConstraints(devices) {
+    const mediaConstraints = { video: false, audio: false }
+    devices.forEach(device => {
+      if (device.kind === 'audioinput') {
+        mediaConstraints.audio = true;
+      } else if (device.kind === 'videoinput') {
+        mediaConstraints.video = true;
+      }
+    })
+
+    console.log("debug: mediaConstraints", mediaConstraints);
+
+    return navigator.mediaDevices.getUserMedia(mediaConstraints);
+  }
+
+  // receiver - accept call
+  acceptButtonCallback(acceptButton, declienButton, buttonWrapper, callerId) {
+    console.log('debug: call accepted');
+    buttonWrapper.style.display = 'none';
+    acceptButton.remove();
+    declienButton.remove();
+
+    navigator.mediaDevices.enumerateDevices()
+      .then(this.setMediaConstraints)
+      .then(stream => {
+        this.myStream = stream;
+
+        this.userInterfaceManager.createChatInterface(this.myStream, this.toggleVideoButtonCallback, this.toggleAudioButtonCallback, this.endCallButtonCallback);
+        this.userInterfaceManager.addStreamToVideoElement('my-video', this.myStream, true);
+
+        const receiverPeer = new SimplePeer({
+          initiator: true,
+          trickle: false,
+          stream: this.myStream
+        })
+
+        this.myPeer = receiverPeer;
+
+        this.myPeer.on('signal', receiverSignalData => {
+          this.socket.emit('init-peer-connection', { receiverSignalData, receiverSocketId: this.socket.id, callerSocketId: callerId })
+        })
+
+        this.myPeer.on('stream', callerStream => {
+          this.userInterfaceManager.addStreamToVideoElement('other-video', callerStream, false);
+        })
+      })
+  }
+
+  stopStream() {
+    const tracks = this.myStream.getTracks()
+    tracks.forEach(track => track.stop())
+  }
+
+  declineButtonCallback(declineButton, acceptButton, buttonWrapper, callerId) {
+    console.log('debug: call declined');
+    this.socket.emit('call-declined', { callerId })
+
+    buttonWrapper.style.display = 'none';
+    declineButton.remove();
+    acceptButton.remove();
+  }
+
+  endCallButtonCallback(modalWrapper, endCallButton) {
+    console.log('debug: end call')
+    this.userInterfaceManager.removeChatInterface();
+    this.stopStream();
+    endCallButton.remove();
+
+    this.socket.emit('end-call', { peerSocketId: this.peerSocketId });
+    this.myPeer.destroy();
+    this.peerSocketId = undefined;
+  }
+
 }
 
 export default Play;
