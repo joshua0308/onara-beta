@@ -49,6 +49,14 @@ https://github.com/samme/phaser3-faq/wiki#how-do-i-scaleresize-the-game-canvas
 - [Add Buttons to Your Phaser 3 Game with RexUI Plugins](https://youtu.be/SU2H903RJcE)
 - [How to Make a Custom Phaser 3 Button](https://youtu.be/yWlILdKrbqQ)
 
+## React + Phaser
+https://phaser.discourse.group/t/phaser-3-interaction-with-react/308/7
+```
+Just adding my 2 cents since I’m also working on a project using both React and Phaser 3.
+The way we linked both is quite simple, we simply used EventEmitters.
+When something interesting happens in Phaser, we emit an event and our React components are listening to them. We can then use setState since we’re back inside React.
+It also perfectly work the other way around when we need to update Phaser based on React events.
+```
 
 
 https://phaser.io/phaser3/devlog/120

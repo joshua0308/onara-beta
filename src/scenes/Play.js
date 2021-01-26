@@ -482,11 +482,11 @@ class Play extends Phaser.Scene {
   }
 
   setupFollowupCameraOn(player) {
-    const { height, width, mapOffset, zoomFactor } = this.config;
-    this.physics.world.setBounds(0, 0, 1600, 600);
+    // const { height, width, mapOffset, zoomFactor } = this.config;
+    this.physics.world.setBounds(0, 0, 1600, 640);
 
     // TODO: need to adjust camera when window is resized
-    this.cameras.main.setBounds(0, 0, 1600, 600).setZoom(3);
+    this.cameras.main.setBounds(0, 0, 1600, 640).setZoom(3);
     this.cameras.main.startFollow(player);
   }
 
