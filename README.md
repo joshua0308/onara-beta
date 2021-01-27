@@ -16,6 +16,9 @@
 ### Authentication
 - [FirebaseUI](https://firebase.google.com/docs/auth/web/firebaseui?authuser=0)
 
+## Bugs
+1. when a player disconnects while moving, `socket.close()` is not fired. therefore, other players see the disconnected player for a while after the player has left.
+2. 
 ## Resources
 ### Video Chat
 - [Build a Zoom Clone with Node JS for Beginners](https://youtu.be/ZVznzY7EjuY)

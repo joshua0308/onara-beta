@@ -13,22 +13,29 @@ class UserInterfaceManager {
   createOutgoingCallInterface() { }
 
   createIncomingCallInterface(players, callerId, acceptButtonCallback, declineButtonCallback) {
-    const buttonWrapper = document.getElementById('call-button-wrapper');
-    buttonWrapper.style.display = 'flex';
+    const callerWrapper = document.getElementById('caller-wrapper');
+    callerWrapper.style.display = 'flex';
 
-    const callerName = document.getElementById('caller-name');
-    callerName.innerText = `${players[callerId].displayName} is calling...`
+    const buttonWrapper = document.getElementById('caller-buttons-wrapper');
+
+    const callerName = document.getElementById('caller-display-name');
+    callerName.innerText = `${players[callerId].displayName}`
+
+    // const callerImg = document.getElementById('caller-image');
+    // callerImg.src = players[callerId].photoURL;
+
+    console.log(players[callerId])
 
     const acceptButton = document.createElement('button');
-    acceptButton.setAttribute('id', 'accept-button');
+    acceptButton.setAttribute('id', 'accept');
     acceptButton.innerText = 'Accept';
 
     const declineButton = document.createElement('button');
-    declineButton.setAttribute('id', 'accept-button');
+    declineButton.setAttribute('id', 'decline');
     declineButton.innerText = 'Decline';
 
-    acceptButton.addEventListener('click', () => acceptButtonCallback(acceptButton, declineButton, buttonWrapper, callerId));
-    declineButton.addEventListener('click', () => declineButtonCallback(declineButton, acceptButton, buttonWrapper, callerId));
+    acceptButton.addEventListener('click', () => acceptButtonCallback(acceptButton, declineButton, callerWrapper, callerId));
+    declineButton.addEventListener('click', () => declineButtonCallback(declineButton, acceptButton, callerWrapper, callerId));
     buttonWrapper.appendChild(acceptButton);
     buttonWrapper.appendChild(declineButton);
   }

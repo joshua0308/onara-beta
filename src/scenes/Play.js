@@ -16,7 +16,7 @@ class Play extends Phaser.Scene {
 
   create() {
     this.userInterfaceManager = userInterfaceManager;
-    
+
     this.myPlayer = {
       socketId: undefined,
       displayName: this.game.playerInfo.displayName,
@@ -52,8 +52,9 @@ class Play extends Phaser.Scene {
     // I can't tell if this event handler is working properly
     window.onbeforeunload = () => {
       if (this.peer) {
-        this.socket.emit('end-call', { peerSocketId: this.peerSocketId })
+        this.socket.emit('end-call', { peerSocketId: this.peerSocketId });
       }
+
       this.socket.close();
     }
 
