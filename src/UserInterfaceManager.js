@@ -79,6 +79,30 @@ class UserInterfaceManager {
       videoElement.play();
     });
   }
+
+  addPlayerToOnlineList(playerName, playerSocketId, isCurrentPlayer = false) {
+    if (document.getElementById(playerSocketId)) return;
+
+    const onlineList = document.getElementById('online-list');
+
+    const playerListItem = document.createElement('li');
+    playerListItem.innerText = playerName;
+    playerListItem.setAttribute('id', playerSocketId);
+
+
+    if (isCurrentPlayer) {
+      playerListItem.style.fontWeight = '600';
+      onlineList.insertBefore(playerListItem, onlineList.firstChild)
+    } else {
+      onlineList.appendChild(playerListItem);
+    }
+  }
+
+  removePlayerFromOnlineList(playerSocketId) {
+    if (document.getElementById(playerSocketId)) {
+      document.getElementById(playerSocketId).remove();
+    }
+  }
 }
 
 export default new UserInterfaceManager();

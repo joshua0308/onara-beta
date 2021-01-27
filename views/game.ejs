@@ -96,27 +96,31 @@
       color: white;
     }
 
-    #players-list {
+    #online-list-wrapper {
       width: 10vw;
       min-width: 150px;
       position: fixed;
       top: 0;
       right: 0;
       height: 100vh;
-      background-color: black;
+      background-color: rgba(45, 45, 53, 0.8);
+      backdrop-filter: blur(6px);
       color: white;
       font-size: 20px;
     }
 
     ul {
       list-style-type: none;
+      padding: 0;
     }
 
     li {
-      margin-top: 5px;
+      margin-top: 8px;
+      text-align: center;
+      font-weight: 200;
     }
 
-    #players-list div {
+    #online-list-wrapper div {
       margin-top: 20px;
       font-weight: 600;
       text-align: center;
@@ -139,13 +143,11 @@
     </div>
   </div>
   <div id='game-wrapper'></div>
-  <div id='players-list'>
+  <div id='online-list-wrapper'>
     <div>
       Players online
     </div>
-    <ul>
-      <li>Joshua</li>
-      <li>Won</li>
+    <ul id='online-list'>
     </ul>
   </div>
   <div id='menu-button-wrapper'>

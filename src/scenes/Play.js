@@ -16,7 +16,7 @@ class Play extends Phaser.Scene {
 
   create() {
     this.userInterfaceManager = userInterfaceManager;
-
+    
     this.myPlayer = {
       socketId: undefined,
       displayName: this.game.playerInfo.displayName,
@@ -63,10 +63,14 @@ class Play extends Phaser.Scene {
       const socketId = this.socket.id;
 
       Object.keys(players).forEach(id => {
-        if (id !== socketId) {
+        const isCurrentPlayer = id === socketId;
+
+        if (!isCurrentPlayer) {
           console.log('debug: other socket ids', id)
           this.createOtherPlayerContainer(players[id], false);
         }
+
+        this.userInterfaceManager.addPlayerToOnlineList(players[id].displayName, id, isCurrentPlayer);
       })
     })
 
@@ -160,6 +164,8 @@ class Play extends Phaser.Scene {
     })
 
     this.socket.on('player-disconnected', otherPlayerSocketId => {
+      this.userInterfaceManager.removePlayerFromOnlineList(otherPlayerSocketId);
+
       console.log('debug: player-disconnected', otherPlayerSocketId)
       delete this.players[otherPlayerSocketId];
 
