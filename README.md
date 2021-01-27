@@ -35,9 +35,16 @@ https://github.com/samme/phaser3-faq/wiki#how-do-i-scaleresize-the-game-canvas
 - if you're camera/audio is disabled, you will get streams from users who were already in the room, but will not receive streams from new users
 
 ### Resize phaser when window size is changed
-- https://labs.phaser.io/edit.html?src=src/scalemanager/manually%20resize.js
-- https://labs.phaser.io/index.html?dir=scalemanager/&q=
+- scale manager
+  - https://labs.phaser.io/index.html?dir=scalemanager/&q=
+  - https://labs.phaser.io/edit.html?src=src/scalemanager/manually%20resize.js
+- window resize event
+  - https://phaser.discourse.group/t/how-to-change-the-game-size/1145/4
+- phaser resize example (this works well)
+  - https://phaser.io/examples/v3/view/scalemanager/resize
 
+### Flex basis
+- https://mastery.games/post/the-difference-between-width-and-flex-basis/
 
 ### Add dom elements in phaser
 - [Add DOM element within Phaser](https://www.youtube.com/watch?v=y8_WqDX3MCo&ab_channel=Ourcade)

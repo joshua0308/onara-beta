@@ -7,6 +7,8 @@ import PreloadScene from './scenes/Preload.js';
 const WIDTH = document.body.offsetWidth;
 const HEIGHT = document.body.offsetHeight;
 
+// const phaserCanvas = document.getElementById('phaser-canvas');
+
 // shared config will be available to all scenes
 const SHARED_CONFIG = {
   width: WIDTH, // width of the canvas
@@ -35,7 +37,7 @@ const config = {
   physics: { // interaction of your objects
     default: 'arcade', // arcade phsyics plugin manages physics simulation like gravity, velocity, etc
     arcade: {
-      debug: true
+      // debug: true
     }
   },
   scene: initScenes()
