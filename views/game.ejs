@@ -24,7 +24,7 @@
       /* height: 100%; */
     }
 
-    #menu-button-wrapper {
+    #menu-buttons-wrapper {
       display: flex;
       flex-direction: column;
       justify-content: center;
@@ -42,7 +42,7 @@
       height: 30px;
     }
 
-    .bottom-button-wrapper {
+    #in-call-buttons-wrapper {
       position: fixed;
       width: 100%;
       bottom: 50px;
@@ -54,28 +54,21 @@
       display: none;
     }
 
-    .modal {
+    #in-call-modal-wrapper {
       display: none;
-      /* Hidden by default */
       position: fixed;
-      /* Stay in place */
       z-index: 1;
-      /* Sit on top */
       left: 0;
       top: 0;
       width: 100%;
-      /* Full width */
       height: 100%;
-      /* Full height */
-      overflow: auto;
+      /* overflow: auto; */
       /* Enable scroll if needed */
       background-color: rgb(0, 0, 0);
-      /* Fallback color */
       background-color: rgba(74, 67, 67, 0.4);
-      /* Black w/ opacity */
     }
 
-    .modal-content {
+    #videos-wrapper {
       margin: auto;
       width: 80%;
       height: 100%;
@@ -126,7 +119,7 @@
       text-align: center;
     }
 
-    #caller-card-placeholder {
+    #caller-card-wrapper {
       position: fixed;
       bottom: 20%;
       left: 0;
@@ -182,14 +175,8 @@
 <body>
   <!-- entrypoint to the game files -->
   <script type="module" src="src/index.js"></script>
-  <div id='caller-card-placeholder'></div>
-  <div class="modal" id="modal-wrapper">
-    <div class="modal-content">
-      <video id="my-video"></video>
-      <video id="other-video"></video>
-    </div>
-    <div id='in-call-button-wrapper' class='bottom-button-wrapper'></div>
-  </div>
+  <div id='caller-card-wrapper'></div>
+  <div id="in-call-modal-wrapper"></div>
   <div id='game-wrapper'></div>
   <div id='online-list-wrapper'>
     <div>
@@ -198,7 +185,7 @@
     <ul id='online-list'>
     </ul>
   </div>
-  <div id='menu-button-wrapper'>
+  <div id='menu-buttons-wrapper'>
     <button id="profile-button" type="button" onclick="profile()">Profile</button>
     <button id="logout-button" type="button" onclick="logout()">Logout</button>
   </div>

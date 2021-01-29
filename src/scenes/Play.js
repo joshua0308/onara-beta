@@ -96,8 +96,8 @@ class Play extends Phaser.Scene {
         .then(this.setMediaConstraints)
         .then(stream => {
           this.myStream = stream;
-          this.userInterfaceManager.createChatInterface(this.myStream, this.toggleVideoButtonCallback, this.toggleAudioButtonCallback, this.endCallButtonCallback);
-          this.userInterfaceManager.addStreamToVideoElement('my-video', this.myStream, true);
+          this.userInterfaceManager.createInCallInterface(this.myStream, this.toggleVideoButtonCallback, this.toggleAudioButtonCallback, this.endCallButtonCallback);
+          this.userInterfaceManager.addStreamToVideoElement(this.myStream, true);
 
           const callerPeer = new SimplePeer({
             initiator: false,
@@ -114,7 +114,7 @@ class Play extends Phaser.Scene {
           })
 
           this.myPeer.on('stream', receiverStream => {
-            this.userInterfaceManager.addStreamToVideoElement('other-video', receiverStream, false);
+            this.userInterfaceManager.addStreamToVideoElement(receiverStream, false);
           })
 
           this.myPeer.signal(receiverSignalData);
@@ -136,7 +136,7 @@ class Play extends Phaser.Scene {
 
     this.socket.on('call-ended', ({ peerSocketId }) => {
       console.log('debug: call ended');
-      this.userInterfaceManager.removeChatInterface();
+      this.userInterfaceManager.removeInCallInterface();
       this.stopStream();
 
       this.myPeer.destroy();
@@ -176,7 +176,7 @@ class Play extends Phaser.Scene {
 
       if (this.peerSocketId === otherPlayerSocketId) {
         console.log('debug: chat peer disconnected')
-        this.userInterfaceManager.removeChatInterface();
+        this.userInterfaceManager.removeInCallInterface();
         this.stopStream();
 
         this.myPeer.destroy();
@@ -421,8 +421,8 @@ class Play extends Phaser.Scene {
       .then(stream => {
         this.myStream = stream;
 
-        this.userInterfaceManager.createChatInterface(this.myStream, this.toggleVideoButtonCallback, this.toggleAudioButtonCallback, this.endCallButtonCallback);
-        this.userInterfaceManager.addStreamToVideoElement('my-video', this.myStream, true);
+        this.userInterfaceManager.createInCallInterface(this.myStream, this.toggleVideoButtonCallback, this.toggleAudioButtonCallback, this.endCallButtonCallback);
+        this.userInterfaceManager.addStreamToVideoElement(this.myStream, true);
 
         const receiverPeer = new SimplePeer({
           initiator: true,
@@ -437,7 +437,7 @@ class Play extends Phaser.Scene {
         })
 
         this.myPeer.on('stream', callerStream => {
-          this.userInterfaceManager.addStreamToVideoElement('other-video', callerStream, false);
+          this.userInterfaceManager.addStreamToVideoElement(callerStream, false);
         })
       })
   }
@@ -456,7 +456,7 @@ class Play extends Phaser.Scene {
 
   endCallButtonCallback(modalWrapper, endCallButton) {
     console.log('debug: end call')
-    this.userInterfaceManager.removeChatInterface();
+    this.userInterfaceManager.removeInCallInterface();
     this.stopStream();
     endCallButton.remove();
 

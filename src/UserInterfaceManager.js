@@ -4,10 +4,17 @@ class UserInterfaceManager {
   toggleAudioButton = null;
   endCallButton = null;
 
-  createChatInterface(stream, toggleVideoButtonCallback, toggleAudioButtonCallback, endCallButtonCallback) {
-    const modalWrapper = document.getElementById('modal-wrapper');
-    modalWrapper.style.display = 'inline';
-    this.createChatButtons(stream, modalWrapper, toggleVideoButtonCallback, toggleAudioButtonCallback, endCallButtonCallback);
+  createInCallInterface(stream, toggleVideoButtonCallback, toggleAudioButtonCallback, endCallButtonCallback) {
+    const inCallModalWrapper = document.getElementById('in-call-modal-wrapper');
+    inCallModalWrapper.style.display = 'inline';
+
+    const videosWrapper = document.createElement('div');
+    videosWrapper.setAttribute('id', 'videos-wrapper');
+
+    const inCallButtonsWrapper = this.createInCallButtons(stream, inCallModalWrapper, toggleVideoButtonCallback, toggleAudioButtonCallback, endCallButtonCallback);
+
+    inCallModalWrapper.appendChild(videosWrapper);
+    inCallModalWrapper.appendChild(inCallButtonsWrapper);
   }
 
   createOutgoingCallInterface() { }
@@ -23,7 +30,7 @@ class UserInterfaceManager {
     callerImage.src = "https://media-exp1.licdn.com/dms/image/C4D03AQEvRvRJmKWoDg/profile-displayphoto-shrink_200_200/0/1589619361084?e=1617235200&v=beta&t=3-uo_2qiaKJTSj3k0e5XcL2a3kAZZEM3Yd37i82tZqQ";
 
     const callerInfo = document.createElement('div');
-    callerInfo.setAttribute('id', 'caller-info')
+    callerInfo.setAttribute('id', 'caller-info');
     callerInfo.innerText = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.";
 
   /**
@@ -45,8 +52,8 @@ class UserInterfaceManager {
     buttonWrapper.appendChild(acceptButton);
     buttonWrapper.appendChild(declineButton);
 
-    const callerPlaceholder = document.getElementById('caller-card-placeholder');
-    callerPlaceholder.style.display = 'flex';
+    const callerCardWrapper = document.getElementById('caller-card-wrapper');
+    callerCardWrapper.style.display = 'flex';
 
     const callerCard = document.createElement('div');
     callerCard.setAttribute('id', 'caller-card');
@@ -55,60 +62,61 @@ class UserInterfaceManager {
     callerCard.appendChild(callerName);
     callerCard.appendChild(callerInfo);
     callerCard.appendChild(buttonWrapper);
-    callerPlaceholder.appendChild(callerCard);
+    callerCardWrapper.appendChild(callerCard);
   }
 
-  removeIncomingCallInterface() {
-    const callerPlaceholder = document.getElementById('caller-card-placeholder');
-    if (callerPlaceholder) {
-      callerPlaceholder.style.display = 'none';
-    }
-
-    // iterate through the placeholder to remove all child nodes
-    while (callerPlaceholder.firstChild) {
-      callerPlaceholder.removeChild(callerPlaceholder.lastChild);
-    }
-  }
-
-
-  createChatButtons(stream, modalWrapper, toggleVideoButtonCallback, toggleAudioButtonCallback, endCallButtonCallback) {
-    const inCallButtonWrapper = document.getElementById('in-call-button-wrapper');
-
+  createInCallButtons(stream, modalWrapper, toggleVideoButtonCallback, toggleAudioButtonCallback, endCallButtonCallback) {
     this.toggleVideoButton = document.createElement('button');
     this.toggleVideoButton.setAttribute('id', 'toggle-video');
     this.toggleVideoButton.innerText = 'Hide video';
     this.toggleVideoButton.addEventListener('click', () => toggleVideoButtonCallback.bind(this)(stream))
-    inCallButtonWrapper.appendChild(this.toggleVideoButton);
-
+    
     this.toggleAudioButton = document.createElement('button');
     this.toggleAudioButton.setAttribute('id', 'toggle-audio');
     this.toggleAudioButton.innerText = 'Mute';
     this.toggleAudioButton.addEventListener('click', () => toggleAudioButtonCallback.bind(this)(stream))
-    inCallButtonWrapper.appendChild(this.toggleAudioButton);
-
+    
     // end call button is added to 'this' because it needs to be removed inside 'call-ended' socket event listener
     this.endCallButton = document.createElement('button');
     this.endCallButton.classList.add('button');
     this.endCallButton.setAttribute('id', 'end-call-button');
     this.endCallButton.innerText = 'Leave chat';
     this.endCallButton.addEventListener('click', () => endCallButtonCallback(modalWrapper, this.endCallButton))
-    inCallButtonWrapper.appendChild(this.endCallButton);
+
+    const inCallButtonsWrapper = document.createElement('in-call-buttons-wrapper');
+    inCallButtonsWrapper.setAttribute('id', 'in-call-buttons-wrapper');
+
+    inCallButtonsWrapper.appendChild(this.toggleVideoButton);
+    inCallButtonsWrapper.appendChild(this.toggleAudioButton);
+    inCallButtonsWrapper.appendChild(this.endCallButton);
+
+    return inCallButtonsWrapper;
   }
 
-  createActiveUserListInterface() { }
+  removeIncomingCallInterface() {
+    const callerCardWrapper = document.getElementById('caller-card-wrapper');
+    if (callerCardWrapper) {
+      callerCardWrapper.style.display = 'none';
+    }
 
-  removeChatInterface() {
-    const modalWrapper = document.getElementById('modal-wrapper');
-    modalWrapper.style.display = 'none';
-    if (this.endCallButton) { this.endCallButton.remove(); }
-    if (this.toggleVideoButton) { this.toggleVideoButton.remove(); }
-    if (this.toggleAudioButton) { this.toggleAudioButton.remove(); }
+    while (callerCardWrapper.firstChild) {
+      callerCardWrapper.removeChild(callerCardWrapper.lastChild);
+    }
   }
 
+  removeInCallInterface() {
+    const modalWrapper = document.getElementById('in-call-modal-wrapper');
+    if (modalWrapper) {
+      modalWrapper.style.display = 'none';
+    }
 
+    while (modalWrapper.firstChild) {
+      modalWrapper.removeChild(modalWrapper.lastChild);
+    }
+  }
 
-  addStreamToVideoElement(elementId, stream, setMute = false) {
-    const videoElement = document.getElementById(elementId);
+  addStreamToVideoElement(stream, setMute = false) {
+    const videoElement = document.createElement('video');
     videoElement.srcObject = stream;
     if (setMute) {
       videoElement.muted = 'true';
@@ -116,6 +124,9 @@ class UserInterfaceManager {
     videoElement.addEventListener('loadedmetadata', () => {
       videoElement.play();
     });
+
+    const videosWrapper = document.getElementById('videos-wrapper');
+    videosWrapper.appendChild(videoElement);
   }
 
   addPlayerToOnlineList(playerName, playerSocketId, isCurrentPlayer = false) {
