@@ -11,7 +11,7 @@ class UserInterfaceManager {
     const videosWrapper = document.createElement('div');
     videosWrapper.setAttribute('id', 'videos-wrapper');
 
-    const inCallButtonsWrapper = this.createInCallButtons(stream, inCallModalWrapper, toggleVideoButtonCallback, toggleAudioButtonCallback, endCallButtonCallback);
+    const inCallButtonsWrapper = this.createInCallButtons(stream, toggleVideoButtonCallback, toggleAudioButtonCallback, endCallButtonCallback);
 
     inCallModalWrapper.appendChild(videosWrapper);
     inCallModalWrapper.appendChild(inCallButtonsWrapper);
@@ -65,30 +65,29 @@ class UserInterfaceManager {
     callerCardWrapper.appendChild(callerCard);
   }
 
-  createInCallButtons(stream, modalWrapper, toggleVideoButtonCallback, toggleAudioButtonCallback, endCallButtonCallback) {
-    this.toggleVideoButton = document.createElement('button');
-    this.toggleVideoButton.setAttribute('id', 'toggle-video');
-    this.toggleVideoButton.innerText = 'Hide video';
-    this.toggleVideoButton.addEventListener('click', () => toggleVideoButtonCallback.bind(this)(stream))
+  createInCallButtons(stream, toggleVideoButtonCallback, toggleAudioButtonCallback, endCallButtonCallback) {
+    const toggleVideoButton = document.createElement('button');
+    toggleVideoButton.setAttribute('id', 'toggle-video');
+    toggleVideoButton.innerText = 'Hide video';
+    toggleVideoButton.addEventListener('click', () => toggleVideoButtonCallback(toggleVideoButton, stream))
     
-    this.toggleAudioButton = document.createElement('button');
-    this.toggleAudioButton.setAttribute('id', 'toggle-audio');
-    this.toggleAudioButton.innerText = 'Mute';
-    this.toggleAudioButton.addEventListener('click', () => toggleAudioButtonCallback.bind(this)(stream))
+    const toggleAudioButton = document.createElement('button');
+    toggleAudioButton.setAttribute('id', 'toggle-audio');
+    toggleAudioButton.innerText = 'Mute';
+    toggleAudioButton.addEventListener('click', () => toggleAudioButtonCallback(toggleAudioButton, stream))
     
-    // end call button is added to 'this' because it needs to be removed inside 'call-ended' socket event listener
-    this.endCallButton = document.createElement('button');
-    this.endCallButton.classList.add('button');
-    this.endCallButton.setAttribute('id', 'end-call-button');
-    this.endCallButton.innerText = 'Leave chat';
-    this.endCallButton.addEventListener('click', () => endCallButtonCallback(modalWrapper, this.endCallButton))
+    const endCallButton = document.createElement('button');
+    endCallButton.classList.add('button');
+    endCallButton.setAttribute('id', 'end-call-button');
+    endCallButton.innerText = 'Leave chat';
+    endCallButton.addEventListener('click', () => endCallButtonCallback(endCallButton))
 
     const inCallButtonsWrapper = document.createElement('in-call-buttons-wrapper');
     inCallButtonsWrapper.setAttribute('id', 'in-call-buttons-wrapper');
 
-    inCallButtonsWrapper.appendChild(this.toggleVideoButton);
-    inCallButtonsWrapper.appendChild(this.toggleAudioButton);
-    inCallButtonsWrapper.appendChild(this.endCallButton);
+    inCallButtonsWrapper.appendChild(toggleVideoButton);
+    inCallButtonsWrapper.appendChild(toggleAudioButton);
+    inCallButtonsWrapper.appendChild(endCallButton);
 
     return inCallButtonsWrapper;
   }

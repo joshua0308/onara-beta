@@ -367,27 +367,30 @@ class Play extends Phaser.Scene {
   /**
    * CALLBACK FUNCTIONS
    */
-  toggleVideoButtonCallback(stream) {
+  toggleVideoButtonCallback(toggleVideoButton, stream) {
+    console.log('debug: toggle video button')
+
     let enabled = stream.getVideoTracks()[0].enabled;
     if (enabled) {
       stream.getVideoTracks()[0].enabled = false;
-      this.toggleVideoButton.innerText = 'Show video';
+      toggleVideoButton.innerText = 'Show video';
     } else {
       stream.getVideoTracks()[0].enabled = true;
-      this.toggleVideoButton.innerText = 'Hide video';
+      toggleVideoButton.innerText = 'Hide video';
     }
     console.log('debug: toggle video button - enabled', stream.getVideoTracks()[0].enabled)
   }
 
-  toggleAudioButtonCallback(stream) {
-    console.log('debug: toggle audio button', this.toggleAudioButton)
+  toggleAudioButtonCallback(toggleAudioButton, stream) {
+    console.log('debug: toggle audio button')
+
     let enabled = stream.getAudioTracks()[0].enabled;
     if (enabled) {
       stream.getAudioTracks()[0].enabled = false;
-      this.toggleAudioButton.innerText = 'Unmute';
+      toggleAudioButton.innerText = 'Unmute';
     } else {
       stream.getAudioTracks()[0].enabled = true;
-      this.toggleAudioButton.innerText = 'Mute';
+      toggleAudioButton.innerText = 'Mute';
     }
     console.log('debug: toggle audio button - enabled', stream.getAudioTracks()[0].enabled)
   }
@@ -454,7 +457,7 @@ class Play extends Phaser.Scene {
     this.userInterfaceManager.removeIncomingCallInterface();
   }
 
-  endCallButtonCallback(modalWrapper, endCallButton) {
+  endCallButtonCallback(endCallButton) {
     console.log('debug: end call')
     this.userInterfaceManager.removeInCallInterface();
     this.stopStream();
