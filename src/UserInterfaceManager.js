@@ -1,8 +1,5 @@
 
 class UserInterfaceManager {
-  toggleVideoButton = null;
-  toggleAudioButton = null;
-  endCallButton = null;
 
   createInCallInterface(stream, toggleVideoButtonCallback, toggleAudioButtonCallback, endCallButtonCallback) {
     const inCallModalWrapper = document.getElementById('in-call-modal-wrapper');
@@ -20,7 +17,7 @@ class UserInterfaceManager {
   createOutgoingCallInterface() { }
 
   createIncomingCallInterface(players, callerId, acceptButtonCallback, declineButtonCallback) {
-    console.log('incoming call from - ', players[callerId]);
+    console.log('debug: incoming call from', players[callerId]);
 
     const callerName = document.createElement('div');
     callerName.innerText = `${players[callerId].displayName}`;
@@ -33,27 +30,21 @@ class UserInterfaceManager {
     callerInfo.setAttribute('id', 'caller-info');
     callerInfo.innerText = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.";
 
-  /**
-   * Buttons
-   */
     const acceptButton = document.createElement('button');
     acceptButton.setAttribute('id', 'accept-button');
     acceptButton.innerText = 'Accept';
+    acceptButton.addEventListener('click', () => acceptButtonCallback(callerId));
     
     const declineButton = document.createElement('button');
     declineButton.setAttribute('id', 'decline-button');
     declineButton.innerText = 'Decline';
-    
-    acceptButton.addEventListener('click', () => acceptButtonCallback(callerId));
     declineButton.addEventListener('click', () => declineButtonCallback(callerId));
 
     const buttonWrapper = document.createElement('div');
     buttonWrapper.setAttribute('id', 'caller-buttons-wrapper');
+
     buttonWrapper.appendChild(acceptButton);
     buttonWrapper.appendChild(declineButton);
-
-    const callerCardWrapper = document.getElementById('caller-card-wrapper');
-    callerCardWrapper.style.display = 'flex';
 
     const callerCard = document.createElement('div');
     callerCard.setAttribute('id', 'caller-card');
@@ -62,6 +53,10 @@ class UserInterfaceManager {
     callerCard.appendChild(callerName);
     callerCard.appendChild(callerInfo);
     callerCard.appendChild(buttonWrapper);
+
+    const callerCardWrapper = document.getElementById('caller-card-wrapper');
+    callerCardWrapper.style.display = 'flex';
+
     callerCardWrapper.appendChild(callerCard);
   }
 

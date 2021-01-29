@@ -1,4 +1,4 @@
-import PlayerContainer from "../entities/Container.js";
+import PlayerContainer from "../entities/PlayerContainer.js";
 import userInterfaceManager from '../UserInterfaceManager.js';
 
 class Play extends Phaser.Scene {
@@ -14,8 +14,6 @@ class Play extends Phaser.Scene {
   }
 
   create() {
-
-
     this.myPlayer = {
       socketId: undefined,
       displayName: this.game.playerInfo.displayName,
@@ -63,7 +61,8 @@ class Play extends Phaser.Scene {
     }
 
     // receive live players in the room
-    this.socket.on('currentPlayers', (players) => {
+    this.socket.on('current-players', (players) => {
+      console.log('debug: current players', players);
       this.players = players;
       const socketId = this.socket.id;
 
@@ -71,7 +70,6 @@ class Play extends Phaser.Scene {
         const isCurrentPlayer = id === socketId;
 
         if (!isCurrentPlayer) {
-          console.log('debug: other socket ids', id)
           this.createOtherPlayerContainer(players[id], false);
         }
 
@@ -80,8 +78,8 @@ class Play extends Phaser.Scene {
     })
 
     // receiver - when caller requests a call
-    this.socket.on('call-requested', ({ callerId }) => {
-      console.log('debug: call-requested', callerId, this.players[callerId].displayName)
+    this.socket.on('call-received', ({ callerId }) => {
+      console.log('debug: call received', callerId, this.players[callerId].displayName)
       this.peerSocketId = callerId;
 
       this.userInterfaceManager.createIncomingCallInterface(this.players, callerId, this.acceptButtonCallback, this.declineButtonCallback);
@@ -89,9 +87,9 @@ class Play extends Phaser.Scene {
 
     // caller - when receiver accepts the call and initiates peer connection
     this.socket.on('peer-connection-initiated', ({ receiverSignalData, receiverSocketId }) => {
+      console.log('debug: call accepted by receiver', receiverSignalData)
       this.peerSocketId = receiverSocketId;
 
-      console.log('debug: peer-connection-initiated', receiverSignalData)
       navigator.mediaDevices.enumerateDevices()
         .then(this.setMediaConstraints)
         .then(stream => {
@@ -109,7 +107,7 @@ class Play extends Phaser.Scene {
           console.log('debug: callerPeer', this.myPeer)
 
           this.myPeer.on('signal', callerSignalData => {
-            console.log('debug: callerPeer on signal', callerSignalData)
+            console.log('debug: send caller signal to receiver', callerSignalData)
             this.socket.emit('answer-peer-connection', { callerSignalData, receiverSocketId })
           })
 
@@ -123,14 +121,12 @@ class Play extends Phaser.Scene {
 
     // receiver - receiver initiated the peer connection. caller is now answering with its signal data.
     this.socket.on('peer-connection-answered', ({ callerSignalData }) => {
-      console.log('debug: peer-connection-answered')
+      console.log('debug: received caller signal data', callerSignalData)
       this.myPeer.signal(callerSignalData)
     })
 
     this.socket.on('call-request-declined', ({ receiverId }) => {
       console.log('debug: declined', receiverId)
-      // eslint-disable-next-line no-console
-      console.log("debug: this.players", this.players, receiverId);
       alert(`${this.players[receiverId].displayName} has declined your call`)
     })
 
@@ -145,7 +141,7 @@ class Play extends Phaser.Scene {
     })
 
     // receive info about newly connected players
-    this.socket.on('newPlayer', (player) => {
+    this.socket.on('new-player', (player) => {
       if (!this.players[player.socketId]) {
         players[player.socketId] = player;
       }
@@ -154,7 +150,7 @@ class Play extends Phaser.Scene {
     })
 
     // player movement
-    this.socket.on('playerMoved', otherPlayerInfo => {
+    this.socket.on('player-moved', otherPlayerInfo => {
       this.otherPlayers.getChildren().forEach(otherPlayer => {
         if (otherPlayerInfo.socketId === otherPlayer.socketId) {
           /**
@@ -412,7 +408,7 @@ class Play extends Phaser.Scene {
 
   // receiver - accept call
   acceptButtonCallback(callerId) {
-    console.log('debug: call accepted');
+    console.log('debug: accepted call');
     // Arrow functions establish "this" when it is defined
     // Traditional functions establish "this" at runtime
     // That is why in some cases functions do things like myFcn.call(obj)
@@ -436,6 +432,7 @@ class Play extends Phaser.Scene {
         this.myPeer = receiverPeer;
 
         this.myPeer.on('signal', receiverSignalData => {
+          console.log('debug: sending receiver signal data to caller', receiverSignalData)
           this.socket.emit('init-peer-connection', { receiverSignalData, receiverSocketId: this.socket.id, callerSocketId: callerId })
         })
 

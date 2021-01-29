@@ -1,7 +1,7 @@
 import collidable from '../mixins/collidable.js';
 import initAnimations from './playerAnims.js';
 
-class Container extends Phaser.GameObjects.Container {
+class PlayerContainer extends Phaser.GameObjects.Container {
   constructor(scene, x, y, socket, playerInfo) {
     super(scene, x, y);
 
@@ -30,7 +30,7 @@ class Container extends Phaser.GameObjects.Container {
     this.init();
     this.initEvents();
     this.motion = 'idle';
-    this.socket.emit('playerMovement', { x, y, flipX: false, motion: this.motion })
+    this.socket.emit('player-movement', { x, y, flipX: false, motion: this.motion })
   }
 
 
@@ -97,7 +97,7 @@ class Container extends Phaser.GameObjects.Container {
     const isMoving = this.oldPosition && (this.x !== this.oldPosition.x || this.y !== this.oldPosition.y);
 
     if (isMoving) {
-      this.socket.emit('playerMovement',
+      this.socket.emit('player-movement',
         {
           x: this.x,
           y: this.y,
@@ -114,4 +114,4 @@ class Container extends Phaser.GameObjects.Container {
   }
 }
 
-export default Container;
+export default PlayerContainer;

@@ -25,18 +25,18 @@ gameIO.on('connection', socket => {
     players[socket.id].displayName = playerInfo.displayName;
     players[socket.id].email = playerInfo.email;
     
-    gameIO.emit('currentPlayers', players);
-    socket.broadcast.emit('newPlayer', players[socket.id]);
+    gameIO.emit('current-players', players);
+    socket.broadcast.emit('new-player', players[socket.id]);
   });
 
-  socket.on('playerMovement', movementData => {
+  socket.on('player-movement', movementData => {
     if (players[socket.id]) {
       players[socket.id].x = movementData.x;
       players[socket.id].y = movementData.y;
       players[socket.id].flipX = movementData.flipX;
       players[socket.id].motion = movementData.motion;
 
-      socket.broadcast.emit('playerMoved', players[socket.id]);
+      socket.broadcast.emit('player-moved', players[socket.id]);
     }
   })
 
@@ -44,7 +44,7 @@ gameIO.on('connection', socket => {
     console.log('debug: request-call')
     console.log('caller -', callerId)
     console.log('receiver -', receiverId)
-    socket.to(receiverId).emit('call-requested', { callerId })
+    socket.to(receiverId).emit('call-received', { callerId })
   })
 
   socket.on('init-peer-connection', ({ receiverSignalData, callerSocketId }) => {
