@@ -18,7 +18,8 @@
 
 ## Bugs
 1. when a player disconnects while moving, `socket.close()` is not fired. therefore, other players see the disconnected player for a while after the player has left.
-2. 
+2. Call doesn't work when I call Won. Only works when Won calls me. Look into turn and stun server.
+
 ## Resources
 ### Video Chat
 - [Build a Zoom Clone with Node JS for Beginners](https://youtu.be/ZVznzY7EjuY)

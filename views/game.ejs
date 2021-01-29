@@ -126,7 +126,7 @@
       text-align: center;
     }
 
-    #caller-wrapper {
+    #caller-card-placeholder {
       position: fixed;
       bottom: 20%;
       left: 0;
@@ -153,22 +153,22 @@
       display: flex;
     }
 
-    #accept {
+    #accept-button {
       border-radius: 10px;
       border-style: none;
       background-color: rgb(69, 176, 69);
       color: white;
     }
-    #accept:hover {
+    #accept-button:hover {
       background-color: rgb(55, 159, 50);
     }
-    #decline {
+    #decline-button {
       border-radius: 10px;
       border-style: none;
       background-color: rgb(218, 74, 74);
       color: white;
     }
-    #decline:hover {
+    #decline-button:hover {
       background-color: rgb(199, 59, 59);
     }
 
@@ -180,32 +180,15 @@
 </head>
 
 <body>
-  <div id='caller-wrapper'>
-    <div id='caller-card'>
-      <img id="caller-image"
-        src="https://media-exp1.licdn.com/dms/image/C4D03AQEvRvRJmKWoDg/profile-displayphoto-shrink_200_200/0/1589619361084?e=1617235200&v=beta&t=3-uo_2qiaKJTSj3k0e5XcL2a3kAZZEM3Yd37i82tZqQ">
-      <div id='caller-display-name'></div>
-      <div id='caller-info'>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut
-        labore et dolore magna aliqua.</div>
-      <div id='caller-buttons-wrapper'>
-        <!-- <button id='accept'>accept</button>
-              <button id='decline'>decline</button> -->
-      </div>
-    </div>
-  
-  </div>
   <!-- entrypoint to the game files -->
   <script type="module" src="src/index.js"></script>
+  <div id='caller-card-placeholder'></div>
   <div class="modal" id="modal-wrapper">
     <div class="modal-content">
       <video id="my-video"></video>
       <video id="other-video"></video>
     </div>
-    <div id='in-call-button-wrapper' class='bottom-button-wrapper'>
-      <!-- <button id='toggle-video'>Turn video off</button>
-                  <button id='toggle-video'>Mute</button> -->
-      <!-- <button class="button" id="end-call-button">Leave chat</button> -->
-    </div>
+    <div id='in-call-button-wrapper' class='bottom-button-wrapper'></div>
   </div>
   <div id='game-wrapper'></div>
   <div id='online-list-wrapper'>
@@ -218,13 +201,6 @@
   <div id='menu-button-wrapper'>
     <button id="profile-button" type="button" onclick="profile()">Profile</button>
     <button id="logout-button" type="button" onclick="logout()">Logout</button>
-  </div>
-
-
-  <div id='call-button-wrapper' class='bottom-button-wrapper'>
-    <div id='caller-name'></div>
-    <!-- <button class="button" id="accept-button">Accept</button> -->
-    <!-- <button class="button" id="decline-button">Decline</button> -->
   </div>
 
   <!-- firebase -->

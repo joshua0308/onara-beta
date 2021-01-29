@@ -13,32 +13,63 @@ class UserInterfaceManager {
   createOutgoingCallInterface() { }
 
   createIncomingCallInterface(players, callerId, acceptButtonCallback, declineButtonCallback) {
-    const callerWrapper = document.getElementById('caller-wrapper');
-    callerWrapper.style.display = 'flex';
+    console.log('incoming call from - ', players[callerId]);
 
-    const buttonWrapper = document.getElementById('caller-buttons-wrapper');
+    const callerName = document.createElement('div');
+    callerName.innerText = `${players[callerId].displayName}`;
 
-    const callerName = document.getElementById('caller-display-name');
-    callerName.innerText = `${players[callerId].displayName}`
+    const callerImage = document.createElement('img');
+    callerImage.setAttribute('id', 'caller-image');
+    callerImage.src = "https://media-exp1.licdn.com/dms/image/C4D03AQEvRvRJmKWoDg/profile-displayphoto-shrink_200_200/0/1589619361084?e=1617235200&v=beta&t=3-uo_2qiaKJTSj3k0e5XcL2a3kAZZEM3Yd37i82tZqQ";
 
-    // const callerImg = document.getElementById('caller-image');
-    // callerImg.src = players[callerId].photoURL;
+    const callerInfo = document.createElement('div');
+    callerInfo.setAttribute('id', 'caller-info')
+    callerInfo.innerText = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.";
 
-    console.log(players[callerId])
-
+  /**
+   * Buttons
+   */
     const acceptButton = document.createElement('button');
-    acceptButton.setAttribute('id', 'accept');
+    acceptButton.setAttribute('id', 'accept-button');
     acceptButton.innerText = 'Accept';
-
+    
     const declineButton = document.createElement('button');
-    declineButton.setAttribute('id', 'decline');
+    declineButton.setAttribute('id', 'decline-button');
     declineButton.innerText = 'Decline';
+    
+    acceptButton.addEventListener('click', () => acceptButtonCallback(callerId));
+    declineButton.addEventListener('click', () => declineButtonCallback(callerId));
 
-    acceptButton.addEventListener('click', () => acceptButtonCallback(acceptButton, declineButton, callerWrapper, callerId));
-    declineButton.addEventListener('click', () => declineButtonCallback(declineButton, acceptButton, callerWrapper, callerId));
+    const buttonWrapper = document.createElement('div');
+    buttonWrapper.setAttribute('id', 'caller-buttons-wrapper');
     buttonWrapper.appendChild(acceptButton);
     buttonWrapper.appendChild(declineButton);
+
+    const callerPlaceholder = document.getElementById('caller-card-placeholder');
+    callerPlaceholder.style.display = 'flex';
+
+    const callerCard = document.createElement('div');
+    callerCard.setAttribute('id', 'caller-card');
+
+    callerCard.appendChild(callerImage);
+    callerCard.appendChild(callerName);
+    callerCard.appendChild(callerInfo);
+    callerCard.appendChild(buttonWrapper);
+    callerPlaceholder.appendChild(callerCard);
   }
+
+  removeIncomingCallInterface() {
+    const callerPlaceholder = document.getElementById('caller-card-placeholder');
+    if (callerPlaceholder) {
+      callerPlaceholder.style.display = 'none';
+    }
+
+    // iterate through the placeholder to remove all child nodes
+    while (callerPlaceholder.firstChild) {
+      callerPlaceholder.removeChild(callerPlaceholder.lastChild);
+    }
+  }
+
 
   createChatButtons(stream, modalWrapper, toggleVideoButtonCallback, toggleAudioButtonCallback, endCallButtonCallback) {
     const inCallButtonWrapper = document.getElementById('in-call-button-wrapper');
@@ -74,7 +105,7 @@ class UserInterfaceManager {
     if (this.toggleAudioButton) { this.toggleAudioButton.remove(); }
   }
 
-  removeIncomingCallInterface() { }
+
 
   addStreamToVideoElement(elementId, stream, setMute = false) {
     const videoElement = document.getElementById(elementId);
@@ -112,4 +143,4 @@ class UserInterfaceManager {
   }
 }
 
-export default new UserInterfaceManager();
+export default UserInterfaceManager;

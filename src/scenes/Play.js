@@ -2,7 +2,6 @@ import PlayerContainer from "../entities/Container.js";
 import userInterfaceManager from '../UserInterfaceManager.js';
 
 class Play extends Phaser.Scene {
-  peer = null;
   players = {};
 
   constructor(config) {
@@ -15,7 +14,7 @@ class Play extends Phaser.Scene {
   }
 
   create() {
-    this.userInterfaceManager = userInterfaceManager;
+
 
     this.myPlayer = {
       socketId: undefined,
@@ -24,6 +23,11 @@ class Play extends Phaser.Scene {
     };
 
     this.socket = io('/game');
+    this.myPeer = null;
+    this.myStream = null;
+
+    this.userInterfaceManager = new userInterfaceManager();
+
     this.otherPlayers = this.physics.add.group();
     this.callButtonPressedDown = false;
 
@@ -404,11 +408,13 @@ class Play extends Phaser.Scene {
   }
 
   // receiver - accept call
-  acceptButtonCallback(acceptButton, declienButton, buttonWrapper, callerId) {
+  acceptButtonCallback(callerId) {
     console.log('debug: call accepted');
-    buttonWrapper.style.display = 'none';
-    acceptButton.remove();
-    declienButton.remove();
+    // Arrow functions establish "this" when it is defined
+    // Traditional functions establish "this" at runtime
+    // That is why in some cases functions do things like myFcn.call(obj)
+    // this attaches obj as the this context when myFcn is called
+    this.userInterfaceManager.removeIncomingCallInterface();
 
     navigator.mediaDevices.enumerateDevices()
       .then(this.setMediaConstraints)
@@ -441,13 +447,11 @@ class Play extends Phaser.Scene {
     tracks.forEach(track => track.stop())
   }
 
-  declineButtonCallback(declineButton, acceptButton, buttonWrapper, callerId) {
-    console.log('debug: call declined');
+  declineButtonCallback(callerId) {
+    console.log('debug: call declined', this);
     this.socket.emit('call-declined', { callerId })
 
-    buttonWrapper.style.display = 'none';
-    declineButton.remove();
-    acceptButton.remove();
+    this.userInterfaceManager.removeIncomingCallInterface();
   }
 
   endCallButtonCallback(modalWrapper, endCallButton) {
