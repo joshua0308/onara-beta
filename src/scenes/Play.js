@@ -235,6 +235,7 @@ class Play extends Phaser.Scene {
      */
     const container = this.add.container(x, y);
     container.setSize(32, 38);
+    container.setScale(1.2);
     this.add.existing(container);
     this.physics.add.existing(container);
 
@@ -245,25 +246,19 @@ class Play extends Phaser.Scene {
     })
 
     /**
-   * TEXT
-   */
-    const text = this.add.text(0, 30, player.displayName);
-    text.setOrigin(0.5, 0.5);
-    container.add(text);
-
-    /**
      * SPRITE
      */
     const otherPlayer = this.add.sprite(0, 0, 'player', 0);
     otherPlayer.name = 'sprite';
     container.add(otherPlayer);
 
-    /**
-     * PLAYER INFO
-     */
-    const playerInfoText = this.createPlayerInfoText(this, container, player);
-    const buyDrinkButtonGroup = this.createBuyDrinkButton(this, container, player);
-    this.setPlayerInfoInteraction(container, playerInfoText, buyDrinkButtonGroup);
+    const textElement = document.createElement('div');
+    textElement.innerText = player.displayName;
+    const text = this.add.dom(0, 30, textElement);
+    container.add(text);
+
+    const buyDrinkButton = this.createBuyDrinkButton(this, container, player);
+    this.setPlayerInfoInteraction(container, buyDrinkButton);
 
     this.otherPlayers.add(container);
     return container;
@@ -273,68 +268,18 @@ class Play extends Phaser.Scene {
     /**
      * BUY DRINK BUTTON
      */
-    const buyDrinkButtonOver = scene.add.image(0, 0, 'button1');
-    const buyDrinkButtonDown = scene.add.image(0, 0, 'button3');
-    const buttons = [buyDrinkButtonOver, buyDrinkButtonDown]
-    container.add(buttons);
-
-    buttons.forEach(button => {
-      button
-        .setOrigin(0.5, 2.5)
-        .setScale(1, 0.5)
-        .setVisible(false)
+    const buyDrinkButtonElement = document.createElement('button');
+    buyDrinkButtonElement.innerText = 'buy a drink!';
+    buyDrinkButtonElement.addEventListener('click', () => {
+      console.log('button clicked')
+      this.socket.emit('request-call', { callerId: this.myPlayer.socketId, receiverId: player.socketId })
     })
 
-    buyDrinkButtonOver
-      .setInteractive()
-      .on(Phaser.Input.Events.GAMEOBJECT_POINTER_DOWN, () => {
-        buyDrinkButtonDown.setVisible(true);
-        this.callButtonPressedDown = true;
-      })
-      .on(Phaser.Input.Events.GAMEOBJECT_POINTER_UP, () => {
-        buyDrinkButtonDown.setVisible(false);
-        if (this.callButtonPressedDown) {
-          console.log('debug: call ' + player.socketId);
-          this.socket.emit('request-call', { callerId: this.myPlayer.socketId, receiverId: player.socketId })
-        }
-      })
-      .on(Phaser.Input.Events.GAMEOBJECT_POINTER_OUT, () => {
-        buyDrinkButtonDown.setVisible(false);
-      });
+    const buyDrinkButton = scene.add.dom(0, -40, buyDrinkButtonElement);
+    buyDrinkButton.setVisible(false);
 
-    /**
-     * BUY DRINK TEXT
-     */
-    const buyDrinkText = scene.add.text(0, 0, 'Buy a drink!');
-    container.add(buyDrinkText);
-
-    buyDrinkText
-      .setFill('#353d42')
-      .setPadding(10, 20)
-      .setOrigin(0.5, 1.3)
-      .setVisible(false);
-
-    return {
-      buyDrinkButtonDown,
-      buyDrinkButtonOver,
-      buyDrinkText
-    }
-  }
-
-  createPlayerInfoText(scene, container, playerInfo) {
-    const playerInfoTextContent = `name: ${playerInfo.displayName}\nemail: ${playerInfo.email}
-    `;
-    const playerInfoText = scene.add.text(0, 0, playerInfoTextContent);
-    container.add(playerInfoText);
-
-    playerInfoText
-      .setFill('black')
-      .setBackgroundColor('#8cd1ff')
-      .setPadding(30, 20)
-      .setOrigin(0.5, 1.3)
-      .setVisible(false);
-
-    return playerInfoText;
+    container.add(buyDrinkButton);
+    return buyDrinkButton;
   }
 
   getPlayerZones(playerZonesLayer) {
@@ -352,12 +297,11 @@ class Play extends Phaser.Scene {
     this.cameras.main.startFollow(player);
   }
 
-  setPlayerInfoInteraction(container, playerInfoText, buyDrinkButtonGroup) {
+  setPlayerInfoInteraction(container, element) {
     container.setInteractive()
       .on(Phaser.Input.Events.GAMEOBJECT_POINTER_DOWN, () => {
-        playerInfoText.setVisible(!playerInfoText.visible);
-        buyDrinkButtonGroup.buyDrinkButtonOver.setVisible(!buyDrinkButtonGroup.buyDrinkButtonOver.visible);
-        buyDrinkButtonGroup.buyDrinkText.setVisible(!buyDrinkButtonGroup.buyDrinkText.visible);
+        console.log('down');
+        element.setVisible(!element.visible);
       });
   }
 
