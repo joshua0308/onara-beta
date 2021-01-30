@@ -221,7 +221,8 @@ class Play extends Phaser.Scene {
     houseObjects.forEach(houseObject => {
       this.add.tileSprite(houseObject.x, houseObject.y, houseObject.width, houseObject.height, houseObject.name)
         .setOrigin(0, 1)
-        .setDepth(-5);
+        .setDepth(-5)
+        .setScale(0.8);
     })
   }
 
