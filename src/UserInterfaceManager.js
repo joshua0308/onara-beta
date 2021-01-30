@@ -1,4 +1,3 @@
-
 class UserInterfaceManager {
 
   createInCallInterface(stream, toggleVideoButtonCallback, toggleAudioButtonCallback, endCallButtonCallback) {
