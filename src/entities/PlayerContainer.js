@@ -19,8 +19,9 @@ class PlayerContainer extends Phaser.GameObjects.Container {
     this.add(player);
 
     // ADD TEXT
-    const text = scene.add.text(0, 30, this.playerInfo.displayName);
-    text.setOrigin(0.5, 0.5)
+    const textElement = document.createElement('div');
+    textElement.innerText = this.playerInfo.displayName;
+    const text = scene.add.dom(0, 30, textElement);
     this.add(text);
 
     // Mixins

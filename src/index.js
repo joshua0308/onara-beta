@@ -1,13 +1,12 @@
 import PlayScene from './scenes/Play.js';
 import PreloadScene from './scenes/Preload.js';
+import DemoScene from './scenes/Demo.js';
 
 // const MAP_WIDTH = 1600;
 // const MAP_HEIGHT = 640;
 
 const WIDTH = document.body.offsetWidth;
 const HEIGHT = document.body.offsetHeight;
-
-// const phaserCanvas = document.getElementById('phaser-canvas');
 
 // shared config will be available to all scenes
 const SHARED_CONFIG = {
@@ -17,13 +16,18 @@ const SHARED_CONFIG = {
   // zoomFactor: 1
 }
 
+
 const Scenes = [PreloadScene, PlayScene];
 const createScene = Scene => new Scene(SHARED_CONFIG);
 const initScenes = () => Scenes.map(createScene);
 
 const config = {
+  ...SHARED_CONFIG,
   type: Phaser.AUTO, // webGL is default
   parent: 'game-wrapper',
+  dom: {
+    createContainer: true
+  },
   scale: {
     mode: Phaser.Scale.ENVELOP,
     // mode: Phaser.Scale.FIT,
@@ -32,7 +36,6 @@ const config = {
     // mode: Phaser.Scale.WIDTH_CONTROLS_HEIGHT,
     autoCenter: Phaser.Scale.CENTER_BOTH,
   },
-  ...SHARED_CONFIG,
   pixelArt: true,
   physics: { // interaction of your objects
     default: 'arcade', // arcade phsyics plugin manages physics simulation like gravity, velocity, etc
@@ -40,6 +43,7 @@ const config = {
       // debug: true
     }
   },
+  // scene: [DemoScene]
   scene: initScenes()
 }
 
