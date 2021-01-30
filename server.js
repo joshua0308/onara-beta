@@ -9,19 +9,26 @@ const peerServer = ExpressPeerServer(server);
 const PORT = process.env.PORT || 3000;
 
 const players = {};
+// const rooms = {
+//   bar: {
+//     players: []
+//   }
+// }
 
 const gameIO = io.of('/game');
 
 gameIO.on('connection', socket => {
   // GAME SOCKETS
   // add player to the object keyed by socket.id
-  players[socket.id] = {
-    socketId: socket.id
-  };
 
   // need to wait until socket listener is set up on the client side.
-  socket.on('join-game', (playerInfo) => {
+  socket.on('join-room', ({ playerInfo }) => {
     console.log('debug: user connected (game)', socket.id);
+
+    players[socket.id] = {
+      socketId: socket.id
+    };
+
     players[socket.id].displayName = playerInfo.displayName;
     players[socket.id].email = playerInfo.email;
     

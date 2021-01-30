@@ -18,10 +18,16 @@ class Play extends Phaser.Scene {
     this.myPlayer = {
       socketId: undefined,
       displayName: this.game.playerInfo.displayName,
-      email: this.game.playerInfo.email
+      email: this.game.playerInfo.email,
+      room: this.getCurrentMap()
     };
 
-    this.socket = io('/game');
+    if (this.getCurrentMap() !== 'town') {
+      this.socket = io('/game');
+    } else {
+      this.socket = { emit: () => { } }
+    }
+
     this.myPeer = null;
     this.myStream = null;
 
@@ -51,17 +57,18 @@ class Play extends Phaser.Scene {
         this.registry.set('map', 'bar');
       } else {
         this.registry.set('map', 'town');
+        this.socket.close();
       }
-      this.socket.close();
       this.scene.restart();
     })
-    // }
-
 
     this.setupFollowupCameraOn(myPlayer);
     this.createHouses(map);
     this.createBG(map);
-    this.setupSocket();
+
+    if (this.getCurrentMap() !== 'town') {
+      this.setupSocket();
+    }
   }
 
   getCurrentMap() {
@@ -74,7 +81,7 @@ class Play extends Phaser.Scene {
 
       // tell the server it's ready to listen
       console.log("debug: socket on connect", this.myPlayer.socketId);
-      this.socket.emit('join-game', this.myPlayer);
+      this.socket.emit('join-room', { playerInfo: this.myPlayer });
     })
 
     // I can't tell if this event handler is working properly
