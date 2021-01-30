@@ -1,7 +1,7 @@
 import collidable from '../mixins/collidable.js';
 import initAnimations from './playerAnims.js';
 
-class PlayerContainer extends Phaser.GameObjects.Container {
+class MyPlayer extends Phaser.GameObjects.Container {
   constructor(scene, x, y, socket, playerInfo) {
     super(scene, x, y);
 
@@ -116,4 +116,4 @@ class PlayerContainer extends Phaser.GameObjects.Container {
   }
 }
 
-export default PlayerContainer;
+export default MyPlayer;

@@ -1,4 +1,5 @@
-import PlayerContainer from "../entities/PlayerContainer.js";
+import MyPlayer from "../entities/MyPlayer.js";
+import OtherPlayer from "../entities/OtherPlayer.js";
 import userInterfaceManager from '../UserInterfaceManager.js';
 
 class Play extends Phaser.Scene {
@@ -26,17 +27,17 @@ class Play extends Phaser.Scene {
 
     this.userInterfaceManager = new userInterfaceManager();
 
-    this.otherPlayers = this.physics.add.group();
+    this.otherPlayersGroup = this.physics.add.group();
     this.callButtonPressedDown = false;
 
     const map = this.createMap();
     const layers = this.createLayers(map);
     this.playerZones = this.getPlayerZones(layers.playerZones);
 
-    const container = new PlayerContainer(this, this.playerZones.start.x, this.playerZones.start.y, this.socket, this.myPlayer);
-    container.addCollider(layers.platformsColliders);
+    const myPlayer = new MyPlayer(this, this.playerZones.start.x, this.playerZones.start.y, this.socket, this.myPlayer);
+    myPlayer.addCollider(layers.platformsColliders);
 
-    this.setupFollowupCameraOn(container);
+    this.setupFollowupCameraOn(myPlayer);
     this.createHouses(map);
     this.createBG(map);
     this.setupSocket();
@@ -62,19 +63,28 @@ class Play extends Phaser.Scene {
 
     // receive live players in the room
     this.socket.on('current-players', (players) => {
-      console.log('debug: current players', players);
+      console.log('socket-on: current players', players);
       this.players = players;
-      const socketId = this.socket.id;
 
       Object.keys(players).forEach(id => {
-        const isCurrentPlayer = id === socketId;
+        if (this.socket.id === id) {
+          this.userInterfaceManager.addPlayerToOnlineList(this.players[id].displayName, id, true);
+          return;
+        };
+        
+        console.log('create player')
+        new OtherPlayer(this, this.players[id].x, this.players[id].y, this.socket, this.players[id], this.otherPlayersGroup);
 
-        if (!isCurrentPlayer) {
-          this.createOtherPlayerContainer(players[id], false);
-        }
-
-        this.userInterfaceManager.addPlayerToOnlineList(players[id].displayName, id, isCurrentPlayer);
+        this.userInterfaceManager.addPlayerToOnlineList(this.players[id].displayName, id, false);
       })
+    })
+
+    // receive info about newly connected players
+    this.socket.on('new-player', (player) => {
+      console.log('socket-on: new-player', player)
+      this.players[player.socketId] = player;
+      new OtherPlayer(this, this.playerZones.x, this.playerZones.y, this.socket, this.players[player.socketId], this.otherPlayersGroup);
+      this.userInterfaceManager.addPlayerToOnlineList(player.displayName, player.socketId, false);
     })
 
     // receiver - when caller requests a call
@@ -140,18 +150,9 @@ class Play extends Phaser.Scene {
 
     })
 
-    // receive info about newly connected players
-    this.socket.on('new-player', (player) => {
-      if (!this.players[player.socketId]) {
-        players[player.socketId] = player;
-      }
-
-      this.createOtherPlayerContainer(player, true)
-    })
-
     // player movement
     this.socket.on('player-moved', otherPlayerInfo => {
-      this.otherPlayers.getChildren().forEach(otherPlayer => {
+      this.otherPlayersGroup.getChildren().forEach(otherPlayer => {
         if (otherPlayerInfo.socketId === otherPlayer.socketId) {
           /**
            * CONTAINER
@@ -179,7 +180,7 @@ class Play extends Phaser.Scene {
         this.peerSocketId = undefined;
       }
 
-      this.otherPlayers.getChildren().forEach(player => {
+      this.otherPlayersGroup.getChildren().forEach(player => {
         if (otherPlayerSocketId === player.socketId) {
           player.removeAll(true); // remove all children and destroy
           player.body.destroy(); // destroy the container itself
@@ -224,62 +225,6 @@ class Play extends Phaser.Scene {
         .setDepth(-5)
         .setScale(0.8);
     })
-  }
-
-  createOtherPlayerContainer(player, isNew) {
-    const x = isNew ? this.playerZones.x : player.x;
-    const y = isNew ? this.playerZones.y : player.y;
-
-    /**
-     * CONTAINER
-     */
-    const container = this.add.container(x, y);
-    container.setSize(32, 38);
-    container.setScale(1.2);
-    this.add.existing(container);
-    this.physics.add.existing(container);
-
-    container.socketId = player.socketId;
-    container.setInteractive();
-    container.on('pointerover', () => {
-      console.log('debug: player on hover socket Id', player.socketId);
-    })
-
-    /**
-     * SPRITE
-     */
-    const otherPlayer = this.add.sprite(0, 0, 'player', 0);
-    otherPlayer.name = 'sprite';
-    container.add(otherPlayer);
-
-    const textElement = document.createElement('div');
-    textElement.innerText = player.displayName;
-    const text = this.add.dom(0, 30, textElement);
-    container.add(text);
-
-    const buyDrinkButton = this.createBuyDrinkButton(this, container, player);
-    this.setPlayerInfoInteraction(container, buyDrinkButton);
-
-    this.otherPlayers.add(container);
-    return container;
-  }
-
-  createBuyDrinkButton(scene, container, player) {
-    /**
-     * BUY DRINK BUTTON
-     */
-    const buyDrinkButtonElement = document.createElement('button');
-    buyDrinkButtonElement.innerText = 'buy a drink!';
-    buyDrinkButtonElement.addEventListener('click', () => {
-      console.log('button clicked')
-      this.socket.emit('request-call', { callerId: this.myPlayer.socketId, receiverId: player.socketId })
-    })
-
-    const buyDrinkButton = scene.add.dom(0, -40, buyDrinkButtonElement);
-    buyDrinkButton.setVisible(false);
-
-    container.add(buyDrinkButton);
-    return buyDrinkButton;
   }
 
   getPlayerZones(playerZonesLayer) {
@@ -409,7 +354,6 @@ class Play extends Phaser.Scene {
     this.myPeer.destroy();
     this.peerSocketId = undefined;
   }
-
 }
 
 export default Play;
