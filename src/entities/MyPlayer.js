@@ -54,6 +54,8 @@ class MyPlayer extends Phaser.GameObjects.Container {
   }
 
   update() {
+    if (!this.body) return;
+
     const { left, right, up, space } = this.cursors;
     const isSpaceJustDown = Phaser.Input.Keyboard.JustDown(space);
     const isUpJustDown = Phaser.Input.Keyboard.JustDown(up);

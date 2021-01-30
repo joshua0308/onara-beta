@@ -37,10 +37,35 @@ class Play extends Phaser.Scene {
     const myPlayer = new MyPlayer(this, this.playerZones.start.x, this.playerZones.start.y, this.socket, this.myPlayer);
     myPlayer.addCollider(layers.platformsColliders);
 
+    const doorZone = this.playerZones.door;
+    console.log("debug: doorZone", doorZone);
+    const door = this.physics.add.sprite(doorZone.x, doorZone.y, 'door')
+    door.setSize(doorZone.width, doorZone.height)
+    door.setAlpha(0);
+    door.setOrigin(0, 0)
+
+    const doorOverlap = this.physics.add.overlap(myPlayer, door, () => {
+      console.log('overlap with door')
+      doorOverlap.active = false;
+      if (this.getCurrentMap() === 'town') {
+        this.registry.set('map', 'bar');
+      } else {
+        this.registry.set('map', 'town');
+      }
+      this.socket.close();
+      this.scene.restart();
+    })
+    // }
+
+
     this.setupFollowupCameraOn(myPlayer);
     this.createHouses(map);
     this.createBG(map);
     this.setupSocket();
+  }
+
+  getCurrentMap() {
+    return this.registry.get('map') || 'town';
   }
 
   setupSocket() {
@@ -190,7 +215,7 @@ class Play extends Phaser.Scene {
   }
 
   createMap() {
-    const map = this.make.tilemap({ key: 'map' });
+    const map = this.make.tilemap({ key: `map-${this.getCurrentMap()}` }); // map-town or map-bar
     map.addTilesetImage('main_lev_build_1', 'tiles-1');
     map.addTilesetImage('tilemap_packed', 'tiles-2');
     return map;
@@ -212,25 +237,35 @@ class Play extends Phaser.Scene {
 
   createBG(map) {
     const bgObject = map.getObjectLayer('distance_bg').objects[0];
-    this.add.tileSprite(bgObject.x, bgObject.y, 1600, bgObject.height, 'sky')
-      .setOrigin(0, 1)
-      .setDepth(-10);
+
+    if (this.getCurrentMap() === 'bar') {
+      this.add.tileSprite(bgObject.x, bgObject.y, 1600, bgObject.height, 'bar-background')
+        .setOrigin(0, 1)
+        .setDepth(-10);
+    } else {
+        this.add.tileSprite(bgObject.x, bgObject.y, 1600, bgObject.height, 'sky')
+        .setOrigin(0, 1)
+        .setDepth(-10);
+      }
   }
 
   createHouses(map) {
-    const houseObjects = map.getObjectLayer('houses').objects;
-    houseObjects.forEach(houseObject => {
-      this.add.tileSprite(houseObject.x, houseObject.y, houseObject.width, houseObject.height, houseObject.name)
-        .setOrigin(0, 1)
-        .setDepth(-5)
-        .setScale(0.8);
-    })
+    if (map.getObjectLayer('houses')) {
+      const houseObjects = map.getObjectLayer('houses').objects;
+      houseObjects.forEach(houseObject => {
+        this.add.tileSprite(houseObject.x, houseObject.y, houseObject.width, houseObject.height, houseObject.name)
+          .setOrigin(0, 1)
+          .setDepth(-5)
+          .setScale(0.8);
+      })
+    }
   }
 
   getPlayerZones(playerZonesLayer) {
     const playerZones = playerZonesLayer.objects;
     return {
-      start: playerZones.find(zone => zone.name === 'startZone')
+      start: playerZones.find(zone => zone.name === 'startZone'),
+      door: playerZones.find(zone => zone.name === 'doorZone')
     }
   }
 
