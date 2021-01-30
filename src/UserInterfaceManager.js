@@ -4,6 +4,7 @@ class UserInterfaceManager {
   createInCallInterface(stream, toggleVideoButtonCallback, toggleAudioButtonCallback, endCallButtonCallback) {
     const inCallModalWrapper = document.getElementById('in-call-modal-wrapper');
     inCallModalWrapper.style.display = 'inline';
+    inCallModalWrapper.isGameVisible = true;
 
     const videosWrapper = document.createElement('div');
     videosWrapper.setAttribute('id', 'videos-wrapper');
@@ -70,7 +71,23 @@ class UserInterfaceManager {
     toggleAudioButton.setAttribute('id', 'toggle-audio');
     toggleAudioButton.innerText = 'Mute';
     toggleAudioButton.addEventListener('click', () => toggleAudioButtonCallback(toggleAudioButton, stream))
-    
+
+    const toggleBackgroundButton = document.createElement('button');
+    toggleBackgroundButton.setAttribute('id', 'toggle-background');
+    toggleBackgroundButton.innerText = 'Hide game';
+    toggleBackgroundButton.addEventListener('click', () => {
+      const inCallModalWrapper = document.getElementById('in-call-modal-wrapper');
+      if (inCallModalWrapper.isGameVisible) {
+        inCallModalWrapper.style.backgroundColor = '#000000';
+        inCallModalWrapper.isGameVisible = false;
+        toggleBackgroundButton.innerText = 'Show game'
+      } else {
+        inCallModalWrapper.style.backgroundColor = 'rgba(74, 67, 67, 0.4)';
+        inCallModalWrapper.isGameVisible = true;
+        toggleBackgroundButton.innerText = 'Hide game'
+      }
+    })
+
     const endCallButton = document.createElement('button');
     endCallButton.classList.add('button');
     endCallButton.setAttribute('id', 'end-call-button');
@@ -82,6 +99,7 @@ class UserInterfaceManager {
 
     inCallButtonsWrapper.appendChild(toggleVideoButton);
     inCallButtonsWrapper.appendChild(toggleAudioButton);
+    inCallButtonsWrapper.appendChild(toggleBackgroundButton);
     inCallButtonsWrapper.appendChild(endCallButton);
 
     return inCallButtonsWrapper;
