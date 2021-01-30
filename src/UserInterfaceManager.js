@@ -5,6 +5,7 @@ class UserInterfaceManager {
     const inCallModalWrapper = document.getElementById('in-call-modal-wrapper');
     inCallModalWrapper.style.display = 'inline';
     inCallModalWrapper.isGameVisible = true;
+    inCallModalWrapper.style.backgroundColor = 'rgba(74, 67, 67, 0.4)';
 
     const videosWrapper = document.createElement('div');
     videosWrapper.setAttribute('id', 'videos-wrapper');
@@ -162,6 +163,14 @@ class UserInterfaceManager {
   removePlayerFromOnlineList(playerSocketId) {
     if (document.getElementById(playerSocketId)) {
       document.getElementById(playerSocketId).remove();
+    }
+  }
+
+  removeAllPlayersFromOnlineList() {
+    const onlineList = document.getElementById('online-list');
+
+    while (onlineList.firstChild) {
+      onlineList.removeChild(onlineList.lastChild);
     }
   }
 }

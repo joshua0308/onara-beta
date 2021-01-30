@@ -57,6 +57,7 @@ class Play extends Phaser.Scene {
         this.registry.set('map', 'bar');
       } else {
         this.registry.set('map', 'town');
+        this.userInterfaceManager.removeAllPlayersFromOnlineList();
         this.socket.close();
       }
       this.scene.restart();
@@ -69,6 +70,8 @@ class Play extends Phaser.Scene {
     if (this.getCurrentMap() !== 'town') {
       this.setupSocket();
     }
+
+    this.userInterfaceManager.addPlayerToOnlineList(this.myPlayer.displayName, 'my-unqiue-id', true);
   }
 
   getCurrentMap() {
@@ -99,10 +102,7 @@ class Play extends Phaser.Scene {
       this.players = players;
 
       Object.keys(players).forEach(id => {
-        if (this.socket.id === id) {
-          this.userInterfaceManager.addPlayerToOnlineList(this.players[id].displayName, id, true);
-          return;
-        };
+        if (this.socket.id === id) return;
         
         console.log('create player')
         new OtherPlayer(this, this.players[id].x, this.players[id].y, this.socket, this.players[id], this.otherPlayersGroup);
