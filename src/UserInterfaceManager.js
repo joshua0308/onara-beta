@@ -17,6 +17,29 @@ class UserInterfaceManager {
 
   createOutgoingCallInterface() { }
 
+  createOnlineList(barId) {
+    if (!barId) { barId = 'Town'; }
+    else { barId = 'Bar - ' + barId; }
+
+    const onlineListWrapper = document.getElementById('online-list-wrapper');
+
+    const barName = document.createElement('div');
+    barName.innerText = barId;
+
+    const ul = document.createElement('ul');
+    ul.setAttribute('id', 'online-list');
+
+    onlineListWrapper.appendChild(barName);
+    onlineListWrapper.appendChild(ul);
+  }
+
+  removeOnlineList() {
+    const onlineListWrapper = document.getElementById('online-list-wrapper');
+    while (onlineListWrapper.firstChild) {
+      onlineListWrapper.removeChild(onlineListWrapper.lastChild);
+    }
+  }
+
   removeBarQuestionnaireInterface() {
     const barQuestionnaireModalWrapper = document.getElementById('bar-questionnaire-modal-wrapper');
     if (barQuestionnaireModalWrapper.style.display === 'none') return;
@@ -94,7 +117,8 @@ class UserInterfaceManager {
       if (scene.getCurrentMap() === 'bar') {
         scene.registry.set('map', 'town');
         scene.socket.close();
-        this.removeAllPlayersFromOnlineList();
+        // this.removeAllPlayersFromOnlineList();
+        this.removeOnlineList();
         scene.scene.restart();
       }
       this.removeBarQuestionnaireInterface();
@@ -118,8 +142,9 @@ class UserInterfaceManager {
       } else {
         scene.socket.close();
         scene.registry.set('map', 'bar');
+        this.removeOnlineList();
         this.removeBarQuestionnaireInterface();
-        this.removeAllPlayersFromOnlineList();
+        // this.removeAllPlayersFromOnlineList();
         scene.scene.restart({ barId: selectedBar });
       }
     })

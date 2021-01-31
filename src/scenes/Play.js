@@ -25,6 +25,7 @@ class Play extends Phaser.Scene {
   create({ barId }) {
     console.log('debug: barId', barId)
     this.userInterfaceManager = new userInterfaceManager();
+    this.userInterfaceManager.createOnlineList(barId);
 
     this.myPlayer = {
       socketId: undefined,
