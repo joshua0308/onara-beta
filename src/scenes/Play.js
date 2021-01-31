@@ -15,6 +15,11 @@ class Play extends Phaser.Scene {
   }
 
   create() {
+    this.userInterfaceManager = new userInterfaceManager();
+
+    this.userInterfaceManager.createBarQuestionnaireInterface();
+
+
     this.myPlayer = {
       socketId: undefined,
       displayName: this.game.playerInfo.displayName,
@@ -31,7 +36,6 @@ class Play extends Phaser.Scene {
     this.myPeer = null;
     this.myStream = null;
 
-    this.userInterfaceManager = new userInterfaceManager();
 
     this.otherPlayersGroup = this.physics.add.group();
     this.callButtonPressedDown = false;
@@ -60,7 +64,9 @@ class Play extends Phaser.Scene {
         this.userInterfaceManager.removeAllPlayersFromOnlineList();
         this.socket.close();
       }
-      this.scene.restart();
+      // this.scene.restart();
+      this.userInterfaceManager.createBarQuestionnaireInterface();
+      // this.pause();
     })
 
     this.setupFollowupCameraOn(myPlayer);

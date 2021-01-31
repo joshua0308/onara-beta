@@ -17,6 +17,93 @@ class UserInterfaceManager {
 
   createOutgoingCallInterface() { }
 
+  removeBarQuestionnaireInterface() {
+    const barQuestionnaireModalWrapper = document.getElementById('bar-questionnaire-modal-wrapper');
+    barQuestionnaireModalWrapper.style.display = 'none';
+
+    while (barQuestionnaireModalWrapper.firstChild) {
+      barQuestionnaireModalWrapper.removeChild(barQuestionnaireModalWrapper.lastChild);
+    }
+  }
+
+  createBarQuestionnaireInterface() {
+    const barQuestionnaireModalWrapper = document.getElementById('bar-questionnaire-modal-wrapper');
+    barQuestionnaireModalWrapper.style.display = 'flex';
+
+    const questionnaireQuestion = document.createElement('div');
+    questionnaireQuestion.setAttribute('id', 'questionnaire-question');
+    questionnaireQuestion.innerText = 'What are you here for?';
+
+    const levelOneLearn = document.createElement('div');
+    levelOneLearn.setAttribute('id', 'level-one-option');
+    levelOneLearn.innerText = "Learn";
+
+    const levelOneBusiness = document.createElement('div');
+    levelOneBusiness.setAttribute('id', 'level-one-option');
+    levelOneBusiness.innerText = "Business";
+
+    const levelOneHealth = document.createElement('div');
+    levelOneHealth.setAttribute('id', 'level-one-option');
+    levelOneHealth.innerText = "Health";
+
+    const levelOneFun = document.createElement('div');
+    levelOneFun.setAttribute('id', 'level-one-option');
+    levelOneFun.innerText = "Fun";
+
+    const levelOneOptionWrapper = document.createElement('div');
+    levelOneOptionWrapper.setAttribute('id', 'level-one-option-wrapper');
+
+    levelOneOptionWrapper.appendChild(levelOneLearn);
+    levelOneOptionWrapper.appendChild(levelOneBusiness);
+    levelOneOptionWrapper.appendChild(levelOneHealth);
+    levelOneOptionWrapper.appendChild(levelOneFun);
+
+    const levelOneOptionButtons = [levelOneLearn, levelOneBusiness, levelOneHealth, levelOneFun];
+    levelOneOptionButtons.forEach(button => {
+      button.addEventListener('click', () => {
+        const selectedColor = 'rgb(100, 201, 80)';
+        const unselectedColor = 'rgb(167, 242, 176)';
+
+        if (button.style.backgroundColor === selectedColor) {
+          button.style.backgroundColor = unselectedColor;
+        } else {
+          button.style.backgroundColor = selectedColor;
+          levelOneOptionButtons.forEach(otherButton => {
+            if (button !== otherButton) {
+              otherButton.style.backgroundColor = unselectedColor;
+            }
+          })
+        }
+      })
+    })
+
+    const backToGameButton = document.createElement('div');
+    backToGameButton.setAttribute('id', 'back-to-game-button');
+    backToGameButton.innerText = "Go back to town";
+    backToGameButton.addEventListener('click', () => {
+      this.removeBarQuestionnaireInterface();
+    })
+
+    const joinBarButton = document.createElement('div');
+    joinBarButton.setAttribute('id', 'join-bar-button');
+    joinBarButton.innerText = "Join bar";
+
+    const actionButtonsWrapper = document.createElement('div');
+    actionButtonsWrapper.setAttribute('id', 'action-buttons-wrapper');
+
+    actionButtonsWrapper.appendChild(backToGameButton)
+    actionButtonsWrapper.appendChild(joinBarButton)
+
+    const questionnaireWrapper = document.createElement('div');
+    questionnaireWrapper.setAttribute('id', 'questionnaire-wrapper');
+
+    questionnaireWrapper.appendChild(questionnaireQuestion);
+    questionnaireWrapper.appendChild(levelOneOptionWrapper);
+    questionnaireWrapper.appendChild(actionButtonsWrapper);
+
+    barQuestionnaireModalWrapper.appendChild(questionnaireWrapper);
+
+  }
   createIncomingCallInterface(players, callerId, acceptButtonCallback, declineButtonCallback) {
     console.log('debug: incoming call from', players[callerId]);
 

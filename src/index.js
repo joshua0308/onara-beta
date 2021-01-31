@@ -26,7 +26,7 @@ const config = {
   type: Phaser.AUTO, // webGL is default
   parent: 'game-wrapper',
   dom: {
-    createContainer: true
+    createContainer: true // scale manager gets messed up when window is resized.
   },
   scale: {
     mode: Phaser.Scale.ENVELOP,
