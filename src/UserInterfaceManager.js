@@ -19,6 +19,8 @@ class UserInterfaceManager {
 
   removeBarQuestionnaireInterface() {
     const barQuestionnaireModalWrapper = document.getElementById('bar-questionnaire-modal-wrapper');
+    if (barQuestionnaireModalWrapper.style.display === 'none') return;
+
     barQuestionnaireModalWrapper.style.display = 'none';
 
     while (barQuestionnaireModalWrapper.firstChild) {
@@ -26,8 +28,11 @@ class UserInterfaceManager {
     }
   }
 
-  createBarQuestionnaireInterface() {
+  createBarQuestionnaireInterface({ scene }) {
     const barQuestionnaireModalWrapper = document.getElementById('bar-questionnaire-modal-wrapper');
+
+    if (barQuestionnaireModalWrapper.style.display === 'flex') return;
+
     barQuestionnaireModalWrapper.style.display = 'flex';
 
     const questionnaireQuestion = document.createElement('div');
@@ -81,16 +86,24 @@ class UserInterfaceManager {
       })
     })
 
-    const backToGameButton = document.createElement('div');
-    backToGameButton.setAttribute('id', 'back-to-game-button');
-    backToGameButton.innerText = "Go back to town";
-    backToGameButton.addEventListener('click', () => {
+    const backToTownButton = document.createElement('div');
+    backToTownButton.setAttribute('id', 'back-to-game-button');
+    backToTownButton.innerText = "Go back to town";
+    backToTownButton.addEventListener('click', () => {
+      console.log(scene.getCurrentMap())
+      if (scene.getCurrentMap() === 'bar') {
+        scene.registry.set('map', 'town');
+        scene.socket.close();
+        this.removeAllPlayersFromOnlineList();
+        scene.scene.restart();
+      }
       this.removeBarQuestionnaireInterface();
     })
 
     const joinBarButton = document.createElement('div');
     joinBarButton.setAttribute('id', 'join-bar-button');
     joinBarButton.innerText = "Join bar";
+
     joinBarButton.addEventListener('click', () => {
       let selectedBar;
       levelOneOptionButtons.forEach(button => {
@@ -98,18 +111,25 @@ class UserInterfaceManager {
           selectedBar = button.innerText.toLowerCase();
         }
       })
+      console.log('selectedBar', selectedBar)
 
       if (!selectedBar) {
         alert('Please select a bar to join 🙂')
+      } else {
+        scene.socket.close();
+        scene.registry.set('map', 'bar');
+        this.removeBarQuestionnaireInterface();
+        this.removeAllPlayersFromOnlineList();
+        scene.scene.restart({ barId: selectedBar });
       }
-      console.log('selectedBar', selectedBar)
-      // this.removeBarQuestionnaireInterface();
     })
 
     const actionButtonsWrapper = document.createElement('div');
     actionButtonsWrapper.setAttribute('id', 'action-buttons-wrapper');
 
-    actionButtonsWrapper.appendChild(backToGameButton)
+    if (!(scene.getCurrentMap() === 'town')) {
+      actionButtonsWrapper.appendChild(backToTownButton)
+    }
     actionButtonsWrapper.appendChild(joinBarButton)
 
     const questionnaireWrapper = document.createElement('div');

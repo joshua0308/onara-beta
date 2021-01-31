@@ -9,11 +9,6 @@ const peerServer = ExpressPeerServer(server);
 const PORT = process.env.PORT || 3000;
 
 const players = {};
-// const rooms = {
-//   bar: {
-//     players: []
-//   }
-// }
 
 const gameIO = io.of('/game');
 
@@ -22,18 +17,29 @@ gameIO.on('connection', socket => {
   // add player to the object keyed by socket.id
 
   // need to wait until socket listener is set up on the client side.
-  socket.on('join-room', ({ playerInfo }) => {
-    console.log('debug: user connected (game)', socket.id);
-
-    players[socket.id] = {
-      socketId: socket.id
-    };
-
-    players[socket.id].displayName = playerInfo.displayName;
-    players[socket.id].email = playerInfo.email;
+  socket.on('join-room', ({ playerInfo, barId }) => {
+    console.log('debug: user connected', socket.id, barId);
     
-    socket.emit('current-players', players);
-    socket.broadcast.emit('new-player', players[socket.id]);
+    players[socket.id] = {
+      barId,
+      socketId: socket.id,
+      displayName: playerInfo.displayName,
+      email: playerInfo.email
+    };
+    
+    console.log('debug: current players', players)
+
+    socket.join(barId);
+
+    const playersInBar = Object.values(players).reduce((acc, cur) => {
+      if (cur.barId === barId) {
+        acc[cur.socketId] = cur;
+      }
+      return acc;
+    }, {})
+
+    socket.emit('current-players', playersInBar);
+    socket.to(barId).emit('new-player', players[socket.id]);
   });
 
   socket.on('player-movement', movementData => {
@@ -43,7 +49,7 @@ gameIO.on('connection', socket => {
       players[socket.id].flipX = movementData.flipX;
       players[socket.id].motion = movementData.motion;
 
-      socket.broadcast.emit('player-moved', players[socket.id]);
+      socket.to(players[socket.id].barId).emit('player-moved', players[socket.id]);
     }
   })
 

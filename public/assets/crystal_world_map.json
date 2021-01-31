@@ -143,13 +143,14 @@
                  "y":528
                 }, 
                 {
-                 "height":32,
-                 "id":34,
+                 "height":0,
+                 "id":38,
                  "name":"doorZone",
+                 "point":true,
                  "rotation":0,
                  "type":"",
                  "visible":true,
-                 "width":128,
+                 "width":0,
                  "x":496,
                  "y":576
                 }],
@@ -160,7 +161,7 @@
          "y":0
         }],
  "nextlayerid":10,
- "nextobjectid":38,
+ "nextobjectid":39,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.4.3",

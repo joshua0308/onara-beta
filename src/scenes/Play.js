@@ -14,11 +14,17 @@ class Play extends Phaser.Scene {
     this.endCallButtonCallback = this.endCallButtonCallback.bind(this);
   }
 
-  create() {
+  update() {
+    if (!this.myPlayerSprite.body.touching.none) {
+      this.userInterfaceManager.createBarQuestionnaireInterface({ scene: this });
+    } else {
+      this.userInterfaceManager.removeBarQuestionnaireInterface();
+    }
+  }
+
+  create({ barId }) {
+    console.log('debug: barId', barId)
     this.userInterfaceManager = new userInterfaceManager();
-
-    this.userInterfaceManager.createBarQuestionnaireInterface();
-
 
     this.myPlayer = {
       socketId: undefined,
@@ -28,14 +34,14 @@ class Play extends Phaser.Scene {
     };
 
     if (this.getCurrentMap() !== 'town') {
+      this.barId = barId;
       this.socket = io('/game');
     } else {
-      this.socket = { emit: () => { } }
+      this.socket = { emit: () => { }, close: () => { } }
     }
 
     this.myPeer = null;
     this.myStream = null;
-
 
     this.otherPlayersGroup = this.physics.add.group();
     this.callButtonPressedDown = false;
@@ -44,34 +50,20 @@ class Play extends Phaser.Scene {
     const layers = this.createLayers(map);
     this.playerZones = this.getPlayerZones(layers.playerZones);
 
-    const myPlayer = new MyPlayer(this, this.playerZones.start.x, this.playerZones.start.y, this.socket, this.myPlayer);
-    myPlayer.addCollider(layers.platformsColliders);
+    this.myPlayerSprite = new MyPlayer(this, this.playerZones.start.x, this.playerZones.start.y, this.socket, this.myPlayer);
+    this.myPlayerSprite.addCollider(layers.platformsColliders);
 
     const doorZone = this.playerZones.door;
-    console.log("debug: doorZone", doorZone);
+
     const door = this.physics.add.sprite(doorZone.x, doorZone.y, 'door')
-    door.setSize(doorZone.width, doorZone.height)
-    door.setAlpha(0);
-    door.setOrigin(0, 0)
+    door.setSize(15, 50).setAlpha(0).setOrigin(0, 0);
 
-    const doorOverlap = this.physics.add.overlap(myPlayer, door, () => {
-      console.log('overlap with door')
-      doorOverlap.active = false;
-      if (this.getCurrentMap() === 'town') {
-        this.registry.set('map', 'bar');
-      } else {
-        this.registry.set('map', 'town');
-        this.userInterfaceManager.removeAllPlayersFromOnlineList();
-        this.socket.close();
-      }
-      // this.scene.restart();
-      this.userInterfaceManager.createBarQuestionnaireInterface();
-      // this.pause();
-    })
-
-    this.setupFollowupCameraOn(myPlayer);
+    
+    this.setupFollowupCameraOn(this.myPlayerSprite);
     this.createHouses(map);
     this.createBG(map);
+    
+    this.physics.add.overlap(this.myPlayerSprite, door);
 
     if (this.getCurrentMap() !== 'town') {
       this.setupSocket();
@@ -90,7 +82,7 @@ class Play extends Phaser.Scene {
 
       // tell the server it's ready to listen
       console.log("debug: socket on connect", this.myPlayer.socketId);
-      this.socket.emit('join-room', { playerInfo: this.myPlayer });
+      this.socket.emit('join-room', { playerInfo: this.myPlayer, barId: this.barId });
     })
 
     // I can't tell if this event handler is working properly
@@ -106,10 +98,11 @@ class Play extends Phaser.Scene {
     this.socket.on('current-players', (players) => {
       console.log('socket-on: current players', players);
       this.players = players;
+      console.log('my socket id', this.socket.id)
 
       Object.keys(players).forEach(id => {
         if (this.socket.id === id) return;
-        
+
         console.log('create player')
         new OtherPlayer(this, this.players[id].x, this.players[id].y, this.socket, this.players[id], this.otherPlayersGroup);
 
