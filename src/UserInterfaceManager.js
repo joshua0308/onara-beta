@@ -66,14 +66,18 @@ class UserInterfaceManager {
 
         if (button.style.backgroundColor === selectedColor) {
           button.style.backgroundColor = unselectedColor;
+          button.selected = false;
         } else {
+          button.selected = true;
           button.style.backgroundColor = selectedColor;
           levelOneOptionButtons.forEach(otherButton => {
             if (button !== otherButton) {
+              otherButton.selected = false;
               otherButton.style.backgroundColor = unselectedColor;
             }
           })
         }
+        console.log(button.innerText, button.selected)
       })
     })
 
@@ -87,6 +91,20 @@ class UserInterfaceManager {
     const joinBarButton = document.createElement('div');
     joinBarButton.setAttribute('id', 'join-bar-button');
     joinBarButton.innerText = "Join bar";
+    joinBarButton.addEventListener('click', () => {
+      let selectedBar;
+      levelOneOptionButtons.forEach(button => {
+        if (button.selected) {
+          selectedBar = button.innerText.toLowerCase();
+        }
+      })
+
+      if (!selectedBar) {
+        alert('Please select a bar to join 🙂')
+      }
+      console.log('selectedBar', selectedBar)
+      // this.removeBarQuestionnaireInterface();
+    })
 
     const actionButtonsWrapper = document.createElement('div');
     actionButtonsWrapper.setAttribute('id', 'action-buttons-wrapper');
