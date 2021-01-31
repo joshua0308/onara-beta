@@ -19,7 +19,7 @@ class UserInterfaceManager {
 
   createOnlineList(barId) {
     if (!barId) { barId = 'Town'; }
-    else { barId = 'Bar - ' + barId; }
+    else { barId = `Bar (${barId})`; }
 
     const onlineListWrapper = document.getElementById('online-list-wrapper');
 
