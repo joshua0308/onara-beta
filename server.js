@@ -24,7 +24,8 @@ gameIO.on('connection', socket => {
       barId,
       socketId: socket.id,
       displayName: playerInfo.displayName,
-      email: playerInfo.email
+      email: playerInfo.email,
+      available: true
     };
     
     console.log('debug: current players', players)
@@ -57,7 +58,36 @@ gameIO.on('connection', socket => {
     console.log('debug: request-call')
     console.log('caller -', socket.id)
     console.log('receiver -', receiverId)
-    socket.to(receiverId).emit('call-received', { callerId: socket.id })
+    console.log(players);
+
+    if (players[socket.id].available && players[receiverId].available) {
+      players[receiverId].available = false;
+      players[socket.id].available = false;
+      socket.to(receiverId).emit('call-received', { callerId: socket.id })
+    } else if (!players[receiverId].available) {
+      socket.emit('alert', { message: 'Your call is already on the way.' })
+    } else if (!players[socket.id].available) {
+      socket.emit('call-request-declined', { receiverId, message: 'You cannot make multiple calls at the same time' })
+    }
+  })
+
+  socket.on('cancel-call', ({ receiverId }) => {
+    console.log('debug: cancel-call')
+    if (players[receiverId]) players[receiverId].available = true;
+    if (players[socket.id]) players[socket.id].available = true;
+
+    socket.to(receiverId).emit('call-cancelled');
+  })
+
+  socket.on('call-declined', ({ callerId }) => {
+    console.log('debug: call declined');
+    console.log('caller -', callerId)
+    console.log('receiver -', socket.id)
+
+    if (players[socket.id]) players[socket.id].available = true;
+    if (players[callerId]) players[callerId].available = true;
+
+    socket.to(callerId).emit('call-request-declined', { receiverId: socket.id, message: `${players[socket.id].displayName} has declined your call` });
   })
 
   socket.on('init-peer-connection', ({ receiverSignalData, callerSocketId }) => {
@@ -70,15 +100,12 @@ gameIO.on('connection', socket => {
     socket.to(receiverSocketId).emit('peer-connection-answered', { callerSignalData })
   })
 
-  socket.on('call-declined', ({ callerId }) => {
-    console.log('debug: call declined');
-    console.log('caller -', callerId)
-    console.log('receiver -', socket.id)
-    socket.to(callerId).emit('call-request-declined', { receiverId: socket.id });
-  })
-
   socket.on('end-call', ({ peerSocketId }) => {
     console.log("debug: end-call")
+    players[socket.id].available = true;
+
+    if (players[peerSocketId]) players[peerSocketId].available = true;
+
     socket.to(peerSocketId).emit('call-ended', { peerSocketId })
   })
 

@@ -23,7 +23,8 @@ class Play extends Phaser.Scene {
   }
 
   create({ barId }) {
-    console.log('debug: barId', barId)
+    console.log('debug: barId', barId);
+
     this.userInterfaceManager = new userInterfaceManager();
     this.userInterfaceManager.createOnlineList(barId);
 
@@ -105,7 +106,7 @@ class Play extends Phaser.Scene {
         if (this.socket.id === id) return;
 
         console.log('create player')
-        new OtherPlayer(this, this.players[id].x, this.players[id].y, this.socket, this.players[id], this.otherPlayersGroup);
+        new OtherPlayer(this, this.players[id].x, this.players[id].y, this.socket, this.players[id], this.otherPlayersGroup, this.userInterfaceManager);
 
         this.userInterfaceManager.addPlayerToOnlineList(this.players[id].displayName, id, false);
       })
@@ -115,7 +116,7 @@ class Play extends Phaser.Scene {
     this.socket.on('new-player', (player) => {
       console.log('socket-on: new-player', player)
       this.players[player.socketId] = player;
-      new OtherPlayer(this, this.playerZones.x, this.playerZones.y, this.socket, this.players[player.socketId], this.otherPlayersGroup);
+      new OtherPlayer(this, this.playerZones.x, this.playerZones.y, this.socket, this.players[player.socketId], this.otherPlayersGroup, this.userInterfaceManager);
       this.userInterfaceManager.addPlayerToOnlineList(player.displayName, player.socketId, false);
     })
 
@@ -127,9 +128,19 @@ class Play extends Phaser.Scene {
       this.userInterfaceManager.createIncomingCallInterface(this.players, callerId, this.acceptButtonCallback, this.declineButtonCallback);
     })
 
+    this.socket.on('alert', ({ message }) => {
+      alert(message);
+    })
+
+    this.socket.on('call-cancelled', () => {
+      alert('Call was cancelled');
+      this.userInterfaceManager.removeIncomingCallInterface();
+    })
+
     // caller - when receiver accepts the call and initiates peer connection
     this.socket.on('peer-connection-initiated', ({ receiverSignalData, receiverSocketId }) => {
       console.log('debug: call accepted by receiver', receiverSignalData)
+      this.userInterfaceManager.removePlayerProfileInterface();
       this.peerSocketId = receiverSocketId;
 
       navigator.mediaDevices.enumerateDevices()
@@ -167,9 +178,10 @@ class Play extends Phaser.Scene {
       this.myPeer.signal(callerSignalData)
     })
 
-    this.socket.on('call-request-declined', ({ receiverId }) => {
+    this.socket.on('call-request-declined', ({ receiverId, message }) => {
       console.log('debug: declined', receiverId)
-      alert(`${this.players[receiverId].displayName} has declined your call`)
+      this.userInterfaceManager.removePlayerProfileInterface();
+      alert(message)
     })
 
     this.socket.on('call-ended', ({ peerSocketId }) => {
@@ -205,6 +217,7 @@ class Play extends Phaser.Scene {
 
       if (this.peerSocketId === otherPlayerSocketId) {
         console.log('debug: chat peer disconnected')
+        this.socket.emit('end-call', { peerSocketId: this.peerSocketId });
         this.userInterfaceManager.removeInCallInterface();
         this.stopStream();
 

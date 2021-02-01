@@ -1,4 +1,5 @@
 class UserInterfaceManager {
+  profilePlayerId;
 
   createInCallInterface(stream, toggleVideoButtonCallback, toggleAudioButtonCallback, endCallButtonCallback) {
     const inCallModalWrapper = document.getElementById('in-call-modal-wrapper');
@@ -167,6 +168,81 @@ class UserInterfaceManager {
     barQuestionnaireModalWrapper.appendChild(questionnaireWrapper);
 
   }
+
+  removePlayerProfileInterface() {
+    const playerProfileWrapper = document.getElementById('player-profile-wrapper');
+    playerProfileWrapper.style.width = '0px';
+
+    setTimeout(() => {
+      while (playerProfileWrapper.firstChild) {
+        playerProfileWrapper.removeChild(playerProfileWrapper.lastChild);
+      }
+    }, 500)
+  }
+
+  createPlayerProfileInterface(player, socket) {
+    console.log(player);
+
+    const playerProfileWrapper = document.getElementById('player-profile-wrapper');
+    console.log(playerProfileWrapper.style.width)
+
+    // if selecting the same player but the profile is already opened, return
+    if (playerProfileWrapper.style.width !== '0px' && this.profilePlayerId === player.socketId) {
+      return;
+    } else if (playerProfileWrapper.style.width !== '0px' && this.profilePlayerId !== player.socketId) {
+      // if selecting a different profile 
+      while (playerProfileWrapper.firstChild) {
+        playerProfileWrapper.removeChild(playerProfileWrapper.lastChild);
+      }
+    }
+
+    this.profilePlayerId = player.socketId;
+
+    const playerImage = document.createElement('img');
+    playerImage.setAttribute('id', 'player-image');
+    playerImage.src = "https://media-exp1.licdn.com/dms/image/C4D03AQEvRvRJmKWoDg/profile-displayphoto-shrink_200_200/0/1589619361084?e=1617235200&v=beta&t=3-uo_2qiaKJTSj3k0e5XcL2a3kAZZEM3Yd37i82tZqQ";
+
+    const playerName = document.createElement('div');
+    playerName.setAttribute('id', 'player-name')
+    playerName.innerText = player.displayName;
+
+    const playerBio = document.createElement('div');
+    playerBio.setAttribute('id', 'player-bio');
+    playerBio.innerText = "Product-driven software engineer with a passion for solving everyday problems.";
+
+    const closeButton = document.createElement('button');
+    closeButton.setAttribute('id', 'decline-button');
+    closeButton.innerText = 'Close';
+    closeButton.addEventListener('click', () => {
+      if (closeButton.innerText === 'Cancel call') {
+        socket.emit('cancel-call', { receiverId: player.socketId });
+        this.profilePlayerId = null;
+      }
+
+      this.removePlayerProfileInterface();
+    })
+
+    const buyADrinkButton = document.createElement('button');
+    buyADrinkButton.setAttribute('id', 'accept-button');
+    buyADrinkButton.innerText = 'Buy a drink!';
+    buyADrinkButton.addEventListener('click', () => {
+      buyADrinkButton.innerText = 'Calling...';
+      closeButton.innerText = 'Cancel call';
+      buyADrinkButton.style.backgroundColor = '#c9a747';
+      socket.emit('request-call', { receiverId: player.socketId })
+    });
+
+
+
+    playerProfileWrapper.appendChild(playerImage);
+    playerProfileWrapper.appendChild(playerName);
+    playerProfileWrapper.appendChild(playerBio);
+    playerProfileWrapper.appendChild(buyADrinkButton);
+    playerProfileWrapper.appendChild(closeButton);
+
+    playerProfileWrapper.style.width = '250px';
+  }
+
   createIncomingCallInterface(players, callerId, acceptButtonCallback, declineButtonCallback) {
     console.log('debug: incoming call from', players[callerId]);
 
@@ -179,7 +255,7 @@ class UserInterfaceManager {
 
     const callerInfo = document.createElement('div');
     callerInfo.setAttribute('id', 'caller-info');
-    callerInfo.innerText = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.";
+    callerInfo.innerText = "Product-driven software engineer with a passion for solving everyday problems.";
 
     const acceptButton = document.createElement('button');
     acceptButton.setAttribute('id', 'accept-button');

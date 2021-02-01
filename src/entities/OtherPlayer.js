@@ -1,9 +1,10 @@
 class OtherPlayer extends Phaser.GameObjects.Container {
-  constructor(scene, x, y, socket, playerInfo, otherPlayersGroup) {
+  constructor(scene, x, y, socket, playerInfo, otherPlayersGroup, userInterfaceManager) {
     super(scene, x, y);
 
     this.socket = socket;
     this.socketId = playerInfo.socketId;
+    this.userInterfaceManager = userInterfaceManager;
     this.setInteractive();
     this.setSize(32, 38);
     this.setScale(1.2);
@@ -29,7 +30,8 @@ class OtherPlayer extends Phaser.GameObjects.Container {
     this.setInteractive()
       .on(Phaser.Input.Events.GAMEOBJECT_POINTER_DOWN, () => {
         console.log('down');
-        buyDrinkButton.setVisible(!buyDrinkButton.visible);
+        this.userInterfaceManager.createPlayerProfileInterface(playerInfo, socket);
+        // buyDrinkButton.setVisible(!buyDrinkButton.visible);
       });
 
     otherPlayersGroup.add(this);
