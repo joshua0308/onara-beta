@@ -22,8 +22,14 @@ class Play extends Phaser.Scene {
     }
   }
 
+  testDevEnv() {
+    this.registry.set('map', 'bar');
+    return 'learn';
+  }
+
   create({ barId }) {
     console.log('debug: barId', barId);
+    // barId = this.testDevEnv(barId);
 
     this.userInterfaceManager = new userInterfaceManager();
     this.userInterfaceManager.createOnlineList(barId);
@@ -138,7 +144,7 @@ class Play extends Phaser.Scene {
     })
 
     // caller - when receiver accepts the call and initiates peer connection
-    this.socket.on('peer-connection-initiated', ({ receiverSignalData, receiverSocketId }) => {
+    this.socket.on('peer-offer-received', ({ receiverSignalData, receiverSocketId }) => {
       console.log('debug: call accepted by receiver', receiverSignalData)
       this.userInterfaceManager.removePlayerProfileInterface();
       this.peerSocketId = receiverSocketId;
@@ -161,7 +167,7 @@ class Play extends Phaser.Scene {
 
           this.myPeer.on('signal', callerSignalData => {
             console.log('debug: send caller signal to receiver', callerSignalData)
-            this.socket.emit('answer-peer-connection', { callerSignalData, receiverSocketId })
+            this.socket.emit('send-peer-answer', { callerSignalData, receiverSocketId })
           })
 
           this.myPeer.on('stream', receiverStream => {
@@ -173,7 +179,7 @@ class Play extends Phaser.Scene {
     })
 
     // receiver - receiver initiated the peer connection. caller is now answering with its signal data.
-    this.socket.on('peer-connection-answered', ({ callerSignalData }) => {
+    this.socket.on('peer-answer-received', ({ callerSignalData }) => {
       console.log('debug: received caller signal data', callerSignalData)
       this.myPeer.signal(callerSignalData)
     })
@@ -189,9 +195,7 @@ class Play extends Phaser.Scene {
       this.userInterfaceManager.removeInCallInterface();
       this.stopStream();
 
-      this.myPeer.destroy();
-      this.peerSocketId = undefined;
-
+      this.removePeerConnection();
     })
 
     // player movement
@@ -220,9 +224,7 @@ class Play extends Phaser.Scene {
         this.socket.emit('end-call', { peerSocketId: this.peerSocketId });
         this.userInterfaceManager.removeInCallInterface();
         this.stopStream();
-
-        this.myPeer.destroy();
-        this.peerSocketId = undefined;
+        this.removePeerConnection();
       }
 
       this.otherPlayersGroup.getChildren().forEach(player => {
@@ -232,6 +234,16 @@ class Play extends Phaser.Scene {
         }
       })
     })
+  }
+
+  removePeerConnection() {
+    if (this.myPeer) {
+      this.myPeer.destroy();
+    }
+
+    if (this.peerSocketId) {
+      this.peerSocketId = undefined;
+    }
   }
 
   createMap() {
@@ -378,7 +390,7 @@ class Play extends Phaser.Scene {
 
         this.myPeer.on('signal', receiverSignalData => {
           console.log('debug: sending receiver signal data to caller', receiverSignalData)
-          this.socket.emit('init-peer-connection', { receiverSignalData, receiverSocketId: this.socket.id, callerSocketId: callerId })
+          this.socket.emit('send-peer-offer', { receiverSignalData, receiverSocketId: this.socket.id, callerSocketId: callerId })
         })
 
         this.myPeer.on('stream', callerStream => {
@@ -388,8 +400,10 @@ class Play extends Phaser.Scene {
   }
 
   stopStream() {
-    const tracks = this.myStream.getTracks()
-    tracks.forEach(track => track.stop())
+    if (this.myStream) {
+      const tracks = this.myStream.getTracks()
+      tracks.forEach(track => track.stop())
+    }
   }
 
   declineButtonCallback(callerId) {
@@ -406,8 +420,7 @@ class Play extends Phaser.Scene {
     endCallButton.remove();
 
     this.socket.emit('end-call', { peerSocketId: this.peerSocketId });
-    this.myPeer.destroy();
-    this.peerSocketId = undefined;
+    this.removePeerConnection();
   }
 }
 

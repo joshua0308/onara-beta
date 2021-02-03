@@ -12,6 +12,13 @@ const players = {};
 
 const gameIO = io.of('/game');
 
+const PLAYER_STATUS = {
+  IN_CALL: 'in-call',
+  AVAILABLE: 'available',
+  INCOMING_CALL: 'incoming-call',
+  OUTGOING_CALL: 'outgoing-call'
+}
+
 gameIO.on('connection', socket => {
   // GAME SOCKETS
   // add player to the object keyed by socket.id
@@ -25,7 +32,7 @@ gameIO.on('connection', socket => {
       socketId: socket.id,
       displayName: playerInfo.displayName,
       email: playerInfo.email,
-      available: true
+      status: PLAYER_STATUS.AVAILABLE
     };
     
     console.log('debug: current players', players)
@@ -60,21 +67,35 @@ gameIO.on('connection', socket => {
     console.log('receiver -', receiverId)
     console.log(players);
 
-    if (players[socket.id].available && players[receiverId].available) {
-      players[receiverId].available = false;
-      players[socket.id].available = false;
-      socket.to(receiverId).emit('call-received', { callerId: socket.id })
-    } else if (!players[receiverId].available) {
-      socket.emit('alert', { message: 'Your call is already on the way.' })
-    } else if (!players[socket.id].available) {
-      socket.emit('call-request-declined', { receiverId, message: 'You cannot make multiple calls at the same time' })
+    if (players[socket.id].status === PLAYER_STATUS.AVAILABLE && players[receiverId].status === PLAYER_STATUS.AVAILABLE) {
+      players[receiverId].status = PLAYER_STATUS.INCOMING_CALL;
+      players[socket.id].status = PLAYER_STATUS.OUTGOING_CALL;
+
+      return socket.to(receiverId).emit('call-received', { callerId: socket.id })
+    }
+
+    if (players[receiverId].status === PLAYER_STATUS.INCOMING_CALL) {
+      return socket.emit('call-request-declined', { receiverId, message: `${players[receiverId].displayName} just got a drink from someone else. Let's wait to see if ${players[receiverId].displayName} accepts 🤞` })
+    }
+
+    if (players[receiverId].status === PLAYER_STATUS.OUTGOING_CALL) {
+      return socket.emit('call-request-declined', { receiverId, message: `${players[receiverId].displayName} just got a drink for someone else. Let's wait to see if the other person accepts 🤞` })
+    }
+
+    if (players[receiverId].status === PLAYER_STATUS.IN_CALL) {
+      return socket.emit('call-request-declined', { receiverId, message: `${players[receiverId].displayName} is already having a drink with someone else 😢` })
+    }
+
+    if (players[socket.id].status === PLAYER_STATUS.OUTGOING_CALL
+      || players[socket.id].status === PLAYER_STATUS.IN_CALL) {
+      return socket.emit('call-request-declined', { receiverId, message: 'Hey there! You cannot buy more than one drink at once 😬' })
     }
   })
 
   socket.on('cancel-call', ({ receiverId }) => {
     console.log('debug: cancel-call')
-    if (players[receiverId]) players[receiverId].available = true;
-    if (players[socket.id]) players[socket.id].available = true;
+    if (players[receiverId]) players[receiverId].status = PLAYER_STATUS.AVAILABLE;
+    if (players[socket.id]) players[socket.id].status = PLAYER_STATUS.AVAILABLE;
 
     socket.to(receiverId).emit('call-cancelled');
   })
@@ -84,27 +105,30 @@ gameIO.on('connection', socket => {
     console.log('caller -', callerId)
     console.log('receiver -', socket.id)
 
-    if (players[socket.id]) players[socket.id].available = true;
-    if (players[callerId]) players[callerId].available = true;
+    if (players[socket.id]) players[socket.id].status = PLAYER_STATUS.AVAILABLE;
+    if (players[callerId]) players[callerId].status = PLAYER_STATUS.AVAILABLE;
 
-    socket.to(callerId).emit('call-request-declined', { receiverId: socket.id, message: `${players[socket.id].displayName} has declined your call` });
+    socket.to(callerId).emit('call-request-declined', { receiverId: socket.id, message: `${players[socket.id].displayName} wants to pass this round 😢` });
   })
 
-  socket.on('init-peer-connection', ({ receiverSignalData, callerSocketId }) => {
-    console.log('debug: init-peer-connection')
-    socket.to(callerSocketId).emit('peer-connection-initiated', { receiverSignalData, receiverSocketId: socket.id })
+  socket.on('send-peer-offer', ({ receiverSignalData, callerSocketId }) => {
+    console.log('debug: send-peer-offer')
+    socket.to(callerSocketId).emit('peer-offer-received', { receiverSignalData, receiverSocketId: socket.id })
+
+    players[socket.id].status = PLAYER_STATUS.IN_CALL;
   })
 
-  socket.on('answer-peer-connection', ({ callerSignalData, receiverSocketId }) => {
-    console.log('debug: answer-peer-connection')
-    socket.to(receiverSocketId).emit('peer-connection-answered', { callerSignalData })
+  socket.on('send-peer-answer', ({ callerSignalData, receiverSocketId }) => {
+    console.log('debug: send-peer-answer')
+    socket.to(receiverSocketId).emit('peer-answer-received', { callerSignalData })
+
+    players[socket.id].status = PLAYER_STATUS.IN_CALL;
   })
 
   socket.on('end-call', ({ peerSocketId }) => {
     console.log("debug: end-call")
-    players[socket.id].available = true;
-
-    if (players[peerSocketId]) players[peerSocketId].available = true;
+    if (players[socket.id]) players[socket.id].status = PLAYER_STATUS.AVAILABLE;
+    if (players[peerSocketId]) players[peerSocketId].status = PLAYER_STATUS.AVAILABLE;
 
     socket.to(peerSocketId).emit('call-ended', { peerSocketId })
   })
