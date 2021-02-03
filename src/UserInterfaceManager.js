@@ -118,9 +118,9 @@ class UserInterfaceManager {
       if (scene.getCurrentMap() === 'bar') {
         scene.registry.set('map', 'town');
         scene.socket.close();
-        // this.removeAllPlayersFromOnlineList();
+
         this.removeOnlineList();
-        scene.scene.restart();
+        scene.scene.restart({ barId: undefined });
       }
       this.removeBarQuestionnaireInterface();
     })
@@ -181,7 +181,7 @@ class UserInterfaceManager {
   }
 
   createPlayerProfileInterface(player, socket) {
-    console.log(player);
+    console.log("debug: createPlayerProfileInterface", player);
 
     const playerProfileWrapper = document.getElementById('player-profile-wrapper');
     console.log(playerProfileWrapper.style.width)
@@ -225,14 +225,16 @@ class UserInterfaceManager {
     const buyADrinkButton = document.createElement('button');
     buyADrinkButton.setAttribute('id', 'accept-button');
     buyADrinkButton.innerText = 'Buy a drink!';
-    buyADrinkButton.addEventListener('click', () => {
+
+    const buyADrinkButtonCallback = () => {
       buyADrinkButton.innerText = 'Calling...';
       closeButton.innerText = 'Cancel call';
       buyADrinkButton.style.backgroundColor = '#c9a747';
       socket.emit('request-call', { receiverId: player.socketId })
-    });
+      buyADrinkButton.removeEventListener('click', buyADrinkButtonCallback);
+    }
 
-
+    buyADrinkButton.addEventListener('click', buyADrinkButtonCallback);
 
     playerProfileWrapper.appendChild(playerImage);
     playerProfileWrapper.appendChild(playerName);
