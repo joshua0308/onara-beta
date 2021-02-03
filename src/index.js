@@ -47,8 +47,10 @@ const config = {
   scene: initScenes()
 }
 
+const firebaseAuth = firebase.auth();
+
 // initiate game only when user is logged in
-firebase.auth().onAuthStateChanged((player) => {
+firebaseAuth.onAuthStateChanged((player) => {
   if (player) {
     new AronaGame(config, player);
   } else {
@@ -59,6 +61,7 @@ firebase.auth().onAuthStateChanged((player) => {
 class AronaGame extends Phaser.Game {
   constructor(config, playerInfo) {
     super(config);
+    this.firebaseAuth = firebaseAuth;
     this.playerInfo = playerInfo;
   }
 }

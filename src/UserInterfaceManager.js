@@ -1,5 +1,10 @@
 class UserInterfaceManager {
   profilePlayerId;
+  firebaseAuth;
+
+  constructor(firebaseAuth) {
+    this.firebaseAuth = firebaseAuth;
+  }
 
   createInCallInterface(stream, toggleVideoButtonCallback, toggleAudioButtonCallback, endCallButtonCallback) {
     const inCallModalWrapper = document.getElementById('in-call-modal-wrapper');
@@ -169,6 +174,29 @@ class UserInterfaceManager {
 
   }
 
+  createMenuButtons() {
+    const menuButtonsWrapper = document.getElementById('menu-buttons-wrapper');
+
+    if (menuButtonsWrapper.childNodes.length) return;
+
+    const profileButton = document.createElement('button');
+    profileButton.classList.add("btn", "btn-light", "profile-button")
+    profileButton.innerText = "Profile";
+    profileButton.addEventListener('click', () => {
+      this.createProfileFormInterface();
+    })
+
+    const logoutButton = document.createElement('button');
+    logoutButton.classList.add("btn", "btn-light", "profile-button")
+    logoutButton.innerText = "Logout";
+    logoutButton.addEventListener('click', () => {
+      this.firebaseAuth.signOut();
+    })
+
+    menuButtonsWrapper.appendChild(profileButton)
+    menuButtonsWrapper.appendChild(logoutButton)
+  }
+
   removePlayerProfileInterface() {
     const playerProfileWrapper = document.getElementById('player-profile-wrapper');
     playerProfileWrapper.style.width = '0px';
@@ -243,6 +271,27 @@ class UserInterfaceManager {
     playerProfileWrapper.appendChild(closeButton);
 
     playerProfileWrapper.style.width = '250px';
+  }
+
+  createProfileFormInterface() {
+    const profileFormWrapper = document.getElementById('profile-form-wrapper');
+
+    profileFormWrapper.style.display = 'flex';
+
+    const closeButton = document.getElementById('close-profile-button')
+    closeButton.addEventListener('click', () => {
+      this.removeProfileFormInterface();
+    })
+  }
+
+  removeProfileFormInterface() {
+    const profileFormWrapper = document.getElementById('profile-form-wrapper');
+    profileFormWrapper.style.display = 'none';
+  }
+
+  removeProfileFormInterface() {
+    const profileFormWrapper = document.getElementById('profile-form-wrapper');
+    profileFormWrapper.style.display = 'none';
   }
 
   createIncomingCallInterface(players, callerId, acceptButtonCallback, declineButtonCallback) {

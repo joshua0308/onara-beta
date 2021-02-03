@@ -17,21 +17,16 @@ class OtherPlayer extends Phaser.GameObjects.Container {
     this.add(player);
 
     const textElement = document.createElement('div');
-    // textElement.innerText = playerInfo.displayName;
-    // const text = scene.add.dom(0, 30, textElement);
     textElement.setAttribute('id', 'player-sprite');
     textElement.innerText = playerInfo.displayName;
     const text = scene.add.dom(0, 0, textElement);
     text.setOrigin(0.5, -2.3)
     this.add(text);
 
-    const buyDrinkButton = this.createBuyDrinkButton();
-
     this.setInteractive()
       .on(Phaser.Input.Events.GAMEOBJECT_POINTER_DOWN, () => {
         console.log('down');
         this.userInterfaceManager.createPlayerProfileInterface(playerInfo, socket);
-        // buyDrinkButton.setVisible(!buyDrinkButton.visible);
       });
 
     otherPlayersGroup.add(this);

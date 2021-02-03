@@ -3,60 +3,59 @@
 
 <head>
   <meta charset="utf-8">
-  <!-- download phaser and socket.io on the client side -->
-  <script src="https://cdn.jsdelivr.net/npm/phaser@3.52.0/dist/phaser.min.js"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+    integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
 
 </head>
 
 <body>
-  <div id='game-wrapper'></div>
-  <!-- <script type="module" src="src/index.js" defer></script> -->
-  <script>
-    var config = {
-      type: Phaser.AUTO,
-      parent: 'phaser-example',
-      width: 800,
-      height: 600,
-      backgroundColor: '#2d2d2d',
-      dom: {
-        createContainer: true
-      },
-      scene: {
-        create: create
-      }
-    };
-
-    var game = new Phaser.Game(config);
-
-    function create() {
-      var style = {
-        'background-color': 'lime',
-        'width': '220px',
-        'height': '100px',
-        'font': '48px Arial',
-        'font-weight': 'bold'
-      };
-
-      var element = this.add.dom(400, 300, 'div', style, 'Phaser 3');
-
-      // this.tweens.add({
-      //     targets: element,
-      //     _y: 600,
-      //     _alpha: 0.5,
-      //     angle: 200,
-      //     duration: 3000,
-      //     scaleX: 2,
-      //     scaleY: 2,
-      //     ease: 'Sine.easeInOut',
-      //     loop: -1,
-      //     yoyo: true
-      // });
-
-      // this.add.image(400, 300, 'einstein');
-    }
-  </script>
-
+  <div class="container rounded bg-white mt-5 mb-5">
+    <div class="row">
+      <div class="col-md-4 border-right d-flex flex-column align-items-center text-center justify-content-center">
+        <div class="d-flex flex-column align-items-center text-center justify-content-center"><img class="rounded-circle"
+            src="https://i.imgur.com/O1RmJXT.jpg" width="150">
+          <span class="font-weight-bold mt-2">John Doe</span>
+          <span class="text-black-50 mt-2">john_doe12@bbb.com</span>
+          <span class="mt-1">United States</span>
+        </div>
+      </div>
+      <div class="col-md-8">
+        <div class="p-3 py-5">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h6 class="text-right">Edit your profile</h6>
+          </div>
+          <div class="row mt-2">
+            <div class="col-md-6"><label class="labels">First Name</label><input type="text" class="form-control"
+                placeholder="John"></div>
+            <div class="col-md-6"><label class="labels">Last Name</label><input type="text" class="form-control"
+                placeholder="Doe"></div>
+          </div>
+          <div class="row mt-3">
+            <div class="col-md-12 mt-3"><label class="labels">Current position</label><input type="text"
+                class="form-control" placeholder="Software Engineer"></div>
+            <div class="col-md-12  mt-3"><label class="labels">Education</label><input type="text" class="form-control"
+                placeholder="U of Michigan"></div>
+          </div>
+          <div class="row mt-3">
+            <div class="col-md-6 mt-3"><label class="labels">City / State</label><input type="text" class="form-control"
+                placeholder="Montreal"></div>
+            <div class="col-md-6 mt-3"><label class="labels">Country</label><input type="text" class="form-control"
+                placeholder="Canada"></div>
+          </div>
+          <div class="mt-5 text-center"><button class="btn btn-primary profile-button" type="button">Save Profile</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
+                                                                                integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+                                                                              <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
+                                                                                integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+                                                                              <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
+                                                                                integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script> -->
 </body>
 
 </html>

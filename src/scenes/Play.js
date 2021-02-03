@@ -31,8 +31,11 @@ class Play extends Phaser.Scene {
     console.log('debug: barId', barId);
     // barId = this.testDevEnv(barId);
 
-    this.userInterfaceManager = new userInterfaceManager();
+    this.firebaseAuth = this.game.firebaseAuth;
+
+    this.userInterfaceManager = new userInterfaceManager(this.firebaseAuth);
     this.userInterfaceManager.createOnlineList(barId);
+    this.userInterfaceManager.createMenuButtons();
 
     this.myPlayer = {
       socketId: undefined,
