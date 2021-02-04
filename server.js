@@ -19,6 +19,20 @@ const PLAYER_STATUS = {
   OUTGOING_CALL: 'outgoing-call'
 }
 
+class Player {
+  constructor({ barId, socketId, displayName, email, status }) {
+    this.barId = barId;
+    this.socketId = socketId;
+    this.displayName = displayName;
+    this.email = email;
+    this.status = status;
+    this.x = undefined;
+    this.y = undefined;
+    this.flipX = undefined;
+    this.motion = undefined;
+  }
+}
+
 gameIO.on('connection', socket => {
   // GAME SOCKETS
   // add player to the object keyed by socket.id
@@ -27,13 +41,13 @@ gameIO.on('connection', socket => {
   socket.on('join-room', ({ playerInfo, barId }) => {
     console.log('debug: user connected', socket.id, barId);
     
-    players[socket.id] = {
-      barId,
-      socketId: socket.id,
-      displayName: playerInfo.displayName,
-      email: playerInfo.email,
-      status: PLAYER_STATUS.AVAILABLE
-    };
+    players[socket.id] = new Player({ 
+      barId, 
+      socketId: socket.id, 
+      displayName: playerInfo.displayName, 
+      email: playerInfo.email, 
+      status: PLAYER_STATUS.AVAILABLE 
+    });
     
     console.log('debug: current players', players)
 

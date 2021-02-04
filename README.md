@@ -21,6 +21,12 @@
 2. Call doesn't work when I call Won. Only works when Won calls me. Look into turn and stun server.
 
 ## Resources
+### Firebase
+- [Auth and DB](https://www.youtube.com/watch?v=q5J5ho7YUhA&ab_channel=Fireship)
+
+### Bootstrap
+- [Profile page](https://bbbootstrap.com/snippets/bootstrap-edit-job-profile-form-add-experience-94553916)
+
 ### Video Chat
 - [Build a Zoom Clone with Node JS for Beginners](https://youtu.be/ZVznzY7EjuY)
 - [How To Create A Video Chat App With WebRTC](https://youtu.be/DvlyzDZDEq4)
