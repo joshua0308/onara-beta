@@ -208,12 +208,13 @@ class Play extends Phaser.Scene {
             initiator: false,
             trickle: false,
             stream: this.myStream,
+            reconnectTimer: 3000,
             config: {
               iceServers: [
                 { urls: 'stun:stun.l.google.com:19302' },
                 // { urls: 'stun:global.stun.twilio.com:3478?transport=udp' },
                 {
-                  url: 'turn:numb.viagenie.ca',
+                  urls: 'turn:numb.viagenie.ca',
                   username: 'joshua940308@gmail.com',
                   credential: 'ju2B4vN9mze6Ld6Q'
                 }
@@ -443,11 +444,12 @@ class Play extends Phaser.Scene {
           initiator: true,
           trickle: false,
           stream: this.myStream,
+          reconnectTimer: 3000,
           config: {
             iceServers: [
-              { urls: 'stun.l.google.com:19302' },
+              { urls: 'stun:stun.l.google.com:19302' },
               {
-                url: 'turn:numb.viagenie.ca',
+                urls: 'turn:numb.viagenie.ca',
                 username: 'joshua940308@gmail.com',
                 credential: 'ju2B4vN9mze6Ld6Q'
               }

@@ -29,13 +29,18 @@
 - [Vertical navbar](https://getbootstrap.com/docs/4.0/components/navs/#javascript-behavior)
 
 ### WebRTC
-- [simple-peer troubleshooting](https://github.com/feross/simple-peer/issues/202#issue-262008686)
+- [ERROR: ICE connection failed thread](https://github.com/feross/simple-peer/issues/202#issue-262008686)
+- [ERROR: connection failed thread](https://github.com/feross/simple-peer/issues/732)
+  - You may be taking too long to paste the signals. You don't have very much time before it will time out.
+- [NAT or symmetric](https://jsfiddle.net/5ftsd5c2/17/)
+- [trickle ICE](https://github.com/feross/simple-peer/issues/67#issuecomment-187955362)
 - [free turn server](https://gist.github.com/yetithefoot/7592580#gistcomment-3337249)
   - https://numb.viagenie.ca/
 - [STUN & TURN](https://www.viagenie.ca/publications/2008-08-cluecon-stun-turn-ice.pdf)
 - [ICE protocol](https://webrtchacks.com/trickle-ice/)
 - [Get started with WebRTC](https://www.html5rocks.com/en/tutorials/webrtc/basics/)
 - [Build the backend services needed for a WebRTC app](https://www.html5rocks.com/en/tutorials/webrtc/infrastructure/)
+- [addStream](https://github.com/feross/simple-peer/issues/638)
 
 ### Pusher
 - [pusher tutorials](https://pusher.com/tutorials)
