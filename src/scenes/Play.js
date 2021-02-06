@@ -207,7 +207,17 @@ class Play extends Phaser.Scene {
           const callerPeer = new SimplePeer({
             initiator: false,
             trickle: false,
-            stream: this.myStream
+            stream: this.myStream,
+            config: {
+              iceServers: [
+                { urls: 'stun.l.google.com:19302' },
+                {
+                  url: 'turn:numb.viagenie.ca',
+                  username: 'joshua940308@gmail.com',
+                  credential: 'ju2B4vN9mze6Ld6Q'
+                }
+              ]
+            }
           })
 
           this.myPeer = callerPeer;
@@ -431,7 +441,17 @@ class Play extends Phaser.Scene {
         const receiverPeer = new SimplePeer({
           initiator: true,
           trickle: false,
-          stream: this.myStream
+          stream: this.myStream,
+          config: {
+            iceServers: [
+              { urls: 'stun.l.google.com:19302' },
+              {
+                url: 'turn:numb.viagenie.ca',
+                username: 'joshua940308@gmail.com',
+                credential: 'ju2B4vN9mze6Ld6Q'
+              }
+            ]
+          }
         })
 
         this.myPeer = receiverPeer;

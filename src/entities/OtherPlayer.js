@@ -2,6 +2,7 @@ class OtherPlayer extends Phaser.GameObjects.Container {
   constructor(scene, x, y, socket, playerInfo, otherPlayersGroup, userInterfaceManager) {
     super(scene, x, y);
 
+    this.uid = playerInfo.uid;
     this.socket = socket;
     this.socketId = playerInfo.socketId;
     this.userInterfaceManager = userInterfaceManager;

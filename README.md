@@ -28,13 +28,17 @@
 - [Profile page](https://bbbootstrap.com/snippets/bootstrap-edit-job-profile-form-add-experience-94553916)
 - [Vertical navbar](https://getbootstrap.com/docs/4.0/components/navs/#javascript-behavior)
 
-### Video Chat
-- [Build a Zoom Clone with Node JS for Beginners](https://youtu.be/ZVznzY7EjuY)
-- [How To Create A Video Chat App With WebRTC](https://youtu.be/DvlyzDZDEq4)
+### WebRTC
+- [simple-peer troubleshooting](https://github.com/feross/simple-peer/issues/202#issue-262008686)
+- [free turn server](https://gist.github.com/yetithefoot/7592580#gistcomment-3337249)
+  - https://numb.viagenie.ca/
+- [STUN & TURN](https://www.viagenie.ca/publications/2008-08-cluecon-stun-turn-ice.pdf)
+- [ICE protocol](https://webrtchacks.com/trickle-ice/)
+- [Get started with WebRTC](https://www.html5rocks.com/en/tutorials/webrtc/basics/)
+- [Build the backend services needed for a WebRTC app](https://www.html5rocks.com/en/tutorials/webrtc/infrastructure/)
 
-### Phaser tutorials
-  - [Udemy - The Complete Guide to Phaser 3](https://www.udemy.com/course/game-development-in-js-the-complete-guide-w-phaser-3/)
-
+### Pusher
+- [pusher tutorials](https://pusher.com/tutorials)
 ### Smooth movement in multiplayer game
   - [tween](https://www.html5gamedevs.com/topic/21644-smooth-texture-movement-from-point-to-point/?do=findComment&comment=123395)
   - [direction and velocity](https://www.html5gamedevs.com/topic/21028-smooth-movement-in-multiplayer/?do=findComment&comment=119741)
@@ -82,3 +86,10 @@ https://phaser.io/phaser3/devlog/120
 ## Game Assets
 - https://www.kenney.nl/assets
 - https://www.codeandweb.com/texturepacker
+
+### Video Chat tutorials
+- [Build a Zoom Clone with Node JS for Beginners](https://youtu.be/ZVznzY7EjuY)
+- [How To Create A Video Chat App With WebRTC](https://youtu.be/DvlyzDZDEq4)
+
+### Phaser tutorials
+  - [Udemy - The Complete Guide to Phaser 3](https://www.udemy.com/course/game-development-in-js-the-complete-guide-w-phaser-3/)

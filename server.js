@@ -20,12 +20,14 @@ const PLAYER_STATUS = {
 }
 
 class Player {
-  constructor({ barId, socketId, displayName, email, status }) {
+  constructor({ barId, socketId, displayName, email, status, uid }) {
     this.barId = barId;
     this.socketId = socketId;
     this.displayName = displayName;
     this.email = email;
     this.status = status;
+    this.uid = uid;
+
     this.x = undefined;
     this.y = undefined;
     this.flipX = undefined;
@@ -52,7 +54,8 @@ gameIO.on('connection', socket => {
       socketId: socket.id,
       displayName: playerInfo.displayName, 
       email: playerInfo.email, 
-      status: PLAYER_STATUS.AVAILABLE 
+      status: PLAYER_STATUS.AVAILABLE,
+      uid: playerInfo.uid
     });
     
     console.log('debug: current players', players)

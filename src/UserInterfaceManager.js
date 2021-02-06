@@ -203,7 +203,7 @@ class UserInterfaceManager {
     }, 500)
   }
 
-  createPlayerProfileInterface(player, socket) {
+  async createPlayerProfileInterface(player, socket) {
     console.log("debug: createPlayerProfileInterface", player);
 
     const playerProfileWrapper = document.getElementById('player-profile-wrapper');
@@ -221,17 +221,24 @@ class UserInterfaceManager {
 
     this.profilePlayerId = player.socketId;
 
+    const playerDocRef = this.firebaseDb.collection('players').doc(player.uid);
+
+    const doc = await playerDocRef.get();
+    const playerData = doc.data();
+    // eslint-disable-next-line no-console
+    console.log("debug: playerData", playerData);
+
     const playerImage = document.createElement('img');
     playerImage.setAttribute('id', 'player-image');
-    playerImage.src = "https://media-exp1.licdn.com/dms/image/C4D03AQEvRvRJmKWoDg/profile-displayphoto-shrink_200_200/0/1589619361084?e=1617235200&v=beta&t=3-uo_2qiaKJTSj3k0e5XcL2a3kAZZEM3Yd37i82tZqQ";
+    playerImage.src = playerData.profilePicURL || "public/assets/placeholder-profile-pic.png";
 
     const playerName = document.createElement('div');
     playerName.setAttribute('id', 'player-name')
-    playerName.innerText = player.displayName;
+    playerName.innerText = playerData.displayName;
 
     const playerBio = document.createElement('div');
     playerBio.setAttribute('id', 'player-bio');
-    playerBio.innerText = "Product-driven software engineer with a passion for solving everyday problems.";
+    playerBio.innerText = `Position: ${playerData.position}\nEducation: ${playerData.education}\nLocation: ${playerData.city}`;
 
     const closeButton = document.createElement('button');
     closeButton.setAttribute('id', 'decline-button');
@@ -322,8 +329,6 @@ class UserInterfaceManager {
         this.scene.updateMyPlayerInfo(formInputValues);
         this.updateOnlineList(myPlayer.socketId, formInputValues.displayName);
         this.scene.myPlayerSprite.updatePlayerName(formInputValues.displayName);
-        // eslint-disable-next-line no-console
-        console.log("debug: this.scene.socket", this.scene.socket);
         this.scene.socket.emit('update-player', this.scene.myPlayer);
         document.getElementById('profile-update-status').style.visibility = 'visible';
       });
@@ -339,18 +344,6 @@ class UserInterfaceManager {
       document.getElementById('profile-update-status').style.visibility = 'hidden';
     }
 
-    // const formSubmitCallback = (e) => {
-    //   console.log('form submit callback');
-
-    //   if (profileEditForm.checkValidity() === false) {
-    //     e.preventDefault();
-    //     e.stopPropagation();
-    //   }
-
-    //   profileEditForm.classList.add('was-validated');
-    // }
-    // profileEditForm.addEventListener('submit', formSubmitCallback);
-
     saveButton.addEventListener('click', saveButtonCallback);
     closeButton.addEventListener('click', closeButtonCallback);
 
@@ -365,19 +358,23 @@ class UserInterfaceManager {
     profileForm.classList.remove('was-validated');
   }
 
-  createIncomingCallInterface(players, callerId, acceptButtonCallback, declineButtonCallback) {
+  async createIncomingCallInterface(players, callerId, acceptButtonCallback, declineButtonCallback) {
     console.log('debug: incoming call from', players[callerId]);
 
+    const callerDocRef = this.firebaseDb.collection('players').doc(players[callerId].uid);
+    const doc = await callerDocRef.get();
+    const callerData = doc.data();
+
     const callerName = document.createElement('div');
-    callerName.innerText = `${players[callerId].displayName}`;
+    callerName.innerText = `${callerData.displayName}`;
 
     const callerImage = document.createElement('img');
     callerImage.setAttribute('id', 'caller-image');
-    callerImage.src = "https://media-exp1.licdn.com/dms/image/C4D03AQEvRvRJmKWoDg/profile-displayphoto-shrink_200_200/0/1589619361084?e=1617235200&v=beta&t=3-uo_2qiaKJTSj3k0e5XcL2a3kAZZEM3Yd37i82tZqQ";
+    callerImage.src = callerData.profilePicURL || "public/assets/placeholder-profile-pic.png";
 
     const callerInfo = document.createElement('div');
     callerInfo.setAttribute('id', 'caller-info');
-    callerInfo.innerText = "Product-driven software engineer with a passion for solving everyday problems.";
+    callerInfo.innerText = `Position: ${callerData.position}\nEducation: ${callerData.education}\nLocation: ${callerData.city}`;
 
     const acceptButton = document.createElement('button');
     acceptButton.setAttribute('id', 'accept-button');
