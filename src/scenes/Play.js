@@ -193,7 +193,7 @@ class Play extends Phaser.Scene {
 
     // caller - when receiver accepts the call and initiates peer connection
     this.socket.on('peer-offer-received', ({ receiverSignalData, receiverSocketId }) => {
-      console.log('debug: call accepted by receiver', receiverSignalData)
+      console.log('debug: received peer offer', receiverSignalData, new Date().toISOString())
       this.userInterfaceManager.removePlayerProfileInterface();
       this.peerSocketId = receiverSocketId;
 
@@ -212,7 +212,7 @@ class Play extends Phaser.Scene {
             config: {
               iceServers: [
                 { urls: 'stun:stun.l.google.com:19302' },
-                // { urls: 'stun:global.stun.twilio.com:3478?transport=udp' },
+                { urls: 'stun:global.stun.twilio.com:3478?transport=udp' },
                 {
                   urls: 'turn:numb.viagenie.ca',
                   username: 'joshua940308@gmail.com',
@@ -223,14 +223,14 @@ class Play extends Phaser.Scene {
           })
 
           this.myPeer = callerPeer;
-          console.log('debug: callerPeer', this.myPeer)
 
           this.myPeer.on('signal', callerSignalData => {
-            console.log('debug: send caller signal to receiver', callerSignalData)
+            console.log('debug: send peer answer', callerSignalData, new Date().toISOString())
             this.socket.emit('send-peer-answer', { callerSignalData, receiverSocketId })
           })
 
           this.myPeer.on('stream', receiverStream => {
+            console.log('debug: remote stream received')
             this.userInterfaceManager.addStreamToVideoElement(receiverStream, false);
           })
 
@@ -240,7 +240,7 @@ class Play extends Phaser.Scene {
 
     // receiver - receiver initiated the peer connection. caller is now answering with its signal data.
     this.socket.on('peer-answer-received', ({ callerSignalData }) => {
-      console.log('debug: received caller signal data', callerSignalData)
+      console.log('debug: received peer answer', callerSignalData, new Date().toISOString())
       this.myPeer.signal(callerSignalData)
     })
 
@@ -448,6 +448,7 @@ class Play extends Phaser.Scene {
           config: {
             iceServers: [
               { urls: 'stun:stun.l.google.com:19302' },
+              { urls: 'stun:global.stun.twilio.com:3478?transport=udp' },
               {
                 urls: 'turn:numb.viagenie.ca',
                 username: 'joshua940308@gmail.com',
@@ -460,11 +461,12 @@ class Play extends Phaser.Scene {
         this.myPeer = receiverPeer;
 
         this.myPeer.on('signal', receiverSignalData => {
-          console.log('debug: sending receiver signal data to caller', receiverSignalData)
+          console.log('debug: send peer offer', receiverSignalData, new Date().toISOString())
           this.socket.emit('send-peer-offer', { receiverSignalData, receiverSocketId: this.socket.id, callerSocketId: callerId })
         })
 
         this.myPeer.on('stream', callerStream => {
+          console.log('debug: remote stream received')
           this.userInterfaceManager.addStreamToVideoElement(callerStream, false);
         })
       })
