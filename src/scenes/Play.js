@@ -35,8 +35,12 @@ class Play extends Phaser.Scene {
   }
 
   testDevEnv() {
-    this.registry.set('map', 'bar');
-    return 'learn';
+    // enter bar scene
+    // this.registry.set('map', 'bar');
+    // return 'learn';
+
+    // open bar questionnaire
+    this.userInterfaceManager.createBarQuestionnaireInterface();
   }
 
   updateMyPlayerInfo(updatedPlayerInfo) {
@@ -54,13 +58,14 @@ class Play extends Phaser.Scene {
   }
   async create({ barId }) {
     this.scene.pause();
-    console.log('debug: barId', barId);
-    // barId = this.testDevEnv(barId);
-
+    
     this.firebase = this.game.firebase;
     this.firebaseAuth = this.game.firebaseAuth;
     this.firebaseDb = this.game.firebaseDb;
     this.userInterfaceManager = new userInterfaceManager(this, this.firebase, this.firebaseAuth, this.firebaseDb);
+    
+    // barId = this.testDevEnv(barId);
+    console.log('debug: barId', barId);
 
     this.myPlayer = {
       socketId: undefined,

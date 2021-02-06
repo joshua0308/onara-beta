@@ -55,6 +55,105 @@ class UserInterfaceManager {
     }
   }
 
+  createLevelOneFilter(id, text, color = 'primary') {
+    const button = document.createElement('button');
+    button.classList.add('btn', `btn-outline-${color}`)
+    button.setAttribute('id', id);
+    button.innerText = text;
+    button.name = text;
+    return button;
+  }
+
+  createLevelThreeRoom(levelTwoFilter, roomName) {
+    const room = document.createElement('button');
+    room.setAttribute('id', 'room-container');
+    room.classList.add('btn', 'btn-warning');
+    room.levelTwoFilter = levelTwoFilter;
+    room.style.display = 'none';
+    room.selected = false;
+    room.innerText = `${roomName}\nPlayers online: X`;
+    room.addEventListener('click', () => {
+      if (room.selected) {
+        room.selected = false;
+        this.selectedBar = undefined;
+        room.classList.remove('room-selected')
+      } else {
+        room.selected = true;
+        room.classList.add('room-selected')
+        this.selectedBar = roomName;
+
+        const rooms = document.querySelectorAll('#room-container');
+        rooms.forEach(otherRoom => {
+          if (room !== otherRoom) {
+            otherRoom.classList.remove('room-selected')
+            otherRoom.selected = false;
+          }
+        })
+      }
+
+      // eslint-disable-next-line no-console
+      console.log("debug: this.selectedBar", this.selectedBar);
+    })
+    return room;
+  }
+
+  createLevelTwoFilters(levelTwoFilters) {
+    // eslint-disable-next-line no-console
+    console.log("debug: levelTwoFilters", levelTwoFilters);
+    const levelTwoFiltersButtons = Object.keys(levelTwoFilters).map(levelTwoFilter => this.createLevelOneFilter('level-one-option', levelTwoFilter, 'success'));
+
+
+    // create all level three rooms
+    const levelThreeRooms = [];
+    Object.entries(levelTwoFilters).forEach(([level_two, level_three]) => {
+      levelThreeRooms.push(...level_three.map(room => this.createLevelThreeRoom(level_two, room)))
+    })
+
+    levelTwoFiltersButtons.forEach(button => {
+      button.addEventListener('click', () => {
+        const isSelected = button.classList.contains('btn-success');
+
+        if (isSelected) {
+          button.selected = false;
+          button.classList.remove('btn-success');
+          button.classList.add('btn-outline-success');
+          levelThreeRooms.forEach(room => {
+            if (room.levelTwoFilter === button.name) {
+              room.style.display = 'none';
+            }
+          })
+        } else {
+          button.selected = true;
+          button.classList.remove('btn-outline-success')
+          button.classList.add('btn-success')
+          levelThreeRooms.forEach(room => {
+            if (room.levelTwoFilter === button.name) {
+              room.style.display = 'inline-block';
+            }
+          })
+        }
+      })
+    })
+
+    const levelTwoFiltersWrapper = document.getElementById('level-two-option-wrapper');
+    levelTwoFiltersWrapper.append(...levelTwoFiltersButtons);
+    const levelThreeRoomsWrapper = document.getElementById('level-three-option-wrapper');
+    levelThreeRoomsWrapper.append(...levelThreeRooms);
+  }
+
+  removeLevelTwoFilters() {
+    const levelTwoFiltersWrapper = document.getElementById('level-two-option-wrapper');
+    const levelThreeFiltersWrapper = document.getElementById('level-three-option-wrapper');
+
+    while (levelTwoFiltersWrapper.firstChild) {
+      levelTwoFiltersWrapper.removeChild(levelTwoFiltersWrapper.lastChild);
+    }
+
+    while (levelThreeFiltersWrapper.firstChild) {
+      levelThreeFiltersWrapper.removeChild(levelThreeFiltersWrapper.lastChild);
+    }
+  }
+
   createBarQuestionnaireInterface() {
     const barQuestionnaireModalWrapper = document.getElementById('bar-questionnaire-modal-wrapper');
 
@@ -66,51 +165,65 @@ class UserInterfaceManager {
     questionnaireQuestion.setAttribute('id', 'questionnaire-question');
     questionnaireQuestion.innerText = 'What are you here for?';
 
-    const levelOneLearn = document.createElement('div');
-    levelOneLearn.setAttribute('id', 'level-one-option');
-    levelOneLearn.innerText = "Learn";
+    const filters = {
+      learn: {
+        language: ['chinese', 'english', 'spanish'],
+        professional: ['career', 'resume'],
+        life: ['investing', 'tax']
+      },
+      business: {
+        recruiting: ['designers', 'engineers', 'finance'],
+        pitch_prep: ['seed', 'early stage', 'post series C']
+      },
+      health: {
+        mental_awareness: ['yoga', 'meditation', 'talk to a therapist'],
+        physical_fitness: ['weight', 'strength', 'endurance'],
+        // religion: ['buddhism', 'protestant', 'catholic']
+      },
+      fun: {
+        dating: ['serious', 'fun'],
+        activity: ['karaoke', 'cook', 'watch'],
+        chat: ['sports', 'books', 'travel']
+      }
+    }
 
-    const levelOneBusiness = document.createElement('div');
-    levelOneBusiness.setAttribute('id', 'level-one-option');
-    levelOneBusiness.innerText = "Business";
+    const levelOneFilters = Object.keys(filters).map(levelOneFilter => this.createLevelOneFilter('level-one-option', levelOneFilter));
 
-    const levelOneHealth = document.createElement('div');
-    levelOneHealth.setAttribute('id', 'level-one-option');
-    levelOneHealth.innerText = "Health";
-
-    const levelOneFun = document.createElement('div');
-    levelOneFun.setAttribute('id', 'level-one-option');
-    levelOneFun.innerText = "Fun";
-
-    const levelOneOptionWrapper = document.createElement('div');
-    levelOneOptionWrapper.setAttribute('id', 'level-one-option-wrapper');
-
-    levelOneOptionWrapper.appendChild(levelOneLearn);
-    levelOneOptionWrapper.appendChild(levelOneBusiness);
-    levelOneOptionWrapper.appendChild(levelOneHealth);
-    levelOneOptionWrapper.appendChild(levelOneFun);
-
-    const levelOneOptionButtons = [levelOneLearn, levelOneBusiness, levelOneHealth, levelOneFun];
-    levelOneOptionButtons.forEach(button => {
+    levelOneFilters.forEach(button => {
       button.addEventListener('click', () => {
-        const selectedColor = 'rgb(100, 201, 80)';
-        const unselectedColor = 'rgb(167, 242, 176)';
+        const isSelected = button.classList.contains('btn-primary');
 
-        if (button.style.backgroundColor === selectedColor) {
-          button.style.backgroundColor = unselectedColor;
+        if (isSelected) {
+          this.removeLevelTwoFilters();
           button.selected = false;
+          button.classList.remove('btn-primary')
+          button.classList.add('btn-outline-primary')
         } else {
+          this.removeLevelTwoFilters();
+          this.createLevelTwoFilters(filters[button.name]);
           button.selected = true;
-          button.style.backgroundColor = selectedColor;
-          levelOneOptionButtons.forEach(otherButton => {
+          button.classList.remove('btn-outline-primary')
+          button.classList.add('btn-primary')
+          levelOneFilters.forEach(otherButton => {
             if (button !== otherButton) {
+              otherButton.classList.remove('btn-primary')
+              otherButton.classList.add('btn-outline-primary')
               otherButton.selected = false;
-              otherButton.style.backgroundColor = unselectedColor;
             }
           })
         }
       })
     })
+
+    const levelOneFiltersWrapper = document.createElement('div');
+    levelOneFiltersWrapper.setAttribute('id', 'level-one-option-wrapper');
+    levelOneFiltersWrapper.append(...levelOneFilters);
+
+    const levelTwoFiltersWrapper = document.createElement('div');
+    levelTwoFiltersWrapper.setAttribute('id', 'level-two-option-wrapper');
+
+    const levelThreeRoomWrapper = document.createElement('div');
+    levelThreeRoomWrapper.setAttribute('id', 'level-three-option-wrapper');
 
     const backToTownButton = document.createElement('div');
     backToTownButton.setAttribute('id', 'back-to-game-button');
@@ -132,21 +245,14 @@ class UserInterfaceManager {
     joinBarButton.innerText = "Join bar";
 
     joinBarButton.addEventListener('click', () => {
-      let selectedBar;
-      levelOneOptionButtons.forEach(button => {
-        if (button.selected) {
-          selectedBar = button.innerText.toLowerCase();
-        }
-      })
-
-      if (!selectedBar) {
+      if (!this.selectedBar) {
         alert('Please select a bar to join 🙂')
       } else {
         this.scene.socket.close();
         this.scene.registry.set('map', 'bar');
         this.removeOnlineList();
         this.removeBarQuestionnaireInterface();
-        this.scene.scene.restart({ barId: selectedBar });
+        this.scene.scene.restart({ barId: this.selectedBar });
       }
     })
 
@@ -162,7 +268,9 @@ class UserInterfaceManager {
     questionnaireWrapper.setAttribute('id', 'questionnaire-wrapper');
 
     questionnaireWrapper.appendChild(questionnaireQuestion);
-    questionnaireWrapper.appendChild(levelOneOptionWrapper);
+    questionnaireWrapper.appendChild(levelOneFiltersWrapper);
+    questionnaireWrapper.appendChild(levelTwoFiltersWrapper);
+    questionnaireWrapper.appendChild(levelThreeRoomWrapper);
     questionnaireWrapper.appendChild(actionButtonsWrapper);
 
     barQuestionnaireModalWrapper.appendChild(questionnaireWrapper);
