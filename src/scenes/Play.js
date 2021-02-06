@@ -210,7 +210,8 @@ class Play extends Phaser.Scene {
             stream: this.myStream,
             config: {
               iceServers: [
-                { urls: 'stun.l.google.com:19302' },
+                { urls: 'stun:stun.l.google.com:19302' },
+                // { urls: 'stun:global.stun.twilio.com:3478?transport=udp' },
                 {
                   url: 'turn:numb.viagenie.ca',
                   username: 'joshua940308@gmail.com',
