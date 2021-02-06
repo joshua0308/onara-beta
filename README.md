@@ -26,6 +26,7 @@
 
 ### Bootstrap
 - [Profile page](https://bbbootstrap.com/snippets/bootstrap-edit-job-profile-form-add-experience-94553916)
+- [Vertical navbar](https://getbootstrap.com/docs/4.0/components/navs/#javascript-behavior)
 
 ### Video Chat
 - [Build a Zoom Clone with Node JS for Beginners](https://youtu.be/ZVznzY7EjuY)

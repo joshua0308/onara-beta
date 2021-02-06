@@ -1,9 +1,9 @@
 class UserInterfaceManager {
-  profilePlayerId;
-  firebaseAuth;
-
-  constructor(firebaseAuth) {
+  constructor(scene, firebase, firebaseAuth, firebaseDb) {
+    this.scene = scene;
+    this.firebase = firebase;
     this.firebaseAuth = firebaseAuth;
+    this.firebaseDb = firebaseDb;
   }
 
   createInCallInterface(stream, toggleVideoButtonCallback, toggleAudioButtonCallback, endCallButtonCallback) {
@@ -20,8 +20,6 @@ class UserInterfaceManager {
     inCallModalWrapper.appendChild(videosWrapper);
     inCallModalWrapper.appendChild(inCallButtonsWrapper);
   }
-
-  createOutgoingCallInterface() { }
 
   createOnlineList(barId) {
     if (!barId) { barId = 'Town'; }
@@ -57,7 +55,7 @@ class UserInterfaceManager {
     }
   }
 
-  createBarQuestionnaireInterface({ scene }) {
+  createBarQuestionnaireInterface() {
     const barQuestionnaireModalWrapper = document.getElementById('bar-questionnaire-modal-wrapper');
 
     if (barQuestionnaireModalWrapper.style.display === 'flex') return;
@@ -111,7 +109,6 @@ class UserInterfaceManager {
             }
           })
         }
-        console.log(button.innerText, button.selected)
       })
     })
 
@@ -119,13 +116,13 @@ class UserInterfaceManager {
     backToTownButton.setAttribute('id', 'back-to-game-button');
     backToTownButton.innerText = "Go back to town";
     backToTownButton.addEventListener('click', () => {
-      console.log(scene.getCurrentMap())
-      if (scene.getCurrentMap() === 'bar') {
-        scene.registry.set('map', 'town');
-        scene.socket.close();
+      console.log(this.scene.getCurrentMap())
+      if (this.scene.getCurrentMap() === 'bar') {
+        this.scene.registry.set('map', 'town');
+        this.scene.socket.close();
 
         this.removeOnlineList();
-        scene.scene.restart({ barId: undefined });
+        this.scene.scene.restart({ barId: undefined });
       }
       this.removeBarQuestionnaireInterface();
     })
@@ -141,24 +138,22 @@ class UserInterfaceManager {
           selectedBar = button.innerText.toLowerCase();
         }
       })
-      console.log('selectedBar', selectedBar)
 
       if (!selectedBar) {
         alert('Please select a bar to join 🙂')
       } else {
-        scene.socket.close();
-        scene.registry.set('map', 'bar');
+        this.scene.socket.close();
+        this.scene.registry.set('map', 'bar');
         this.removeOnlineList();
         this.removeBarQuestionnaireInterface();
-        // this.removeAllPlayersFromOnlineList();
-        scene.scene.restart({ barId: selectedBar });
+        this.scene.scene.restart({ barId: selectedBar });
       }
     })
 
     const actionButtonsWrapper = document.createElement('div');
     actionButtonsWrapper.setAttribute('id', 'action-buttons-wrapper');
 
-    if (!(scene.getCurrentMap() === 'town')) {
+    if (!(this.scene.getCurrentMap() === 'town')) {
       actionButtonsWrapper.appendChild(backToTownButton)
     }
     actionButtonsWrapper.appendChild(joinBarButton)
@@ -174,7 +169,7 @@ class UserInterfaceManager {
 
   }
 
-  createMenuButtons() {
+  createMenuButtons(myPlayer) {
     const menuButtonsWrapper = document.getElementById('menu-buttons-wrapper');
 
     if (menuButtonsWrapper.childNodes.length) return;
@@ -183,7 +178,7 @@ class UserInterfaceManager {
     profileButton.classList.add("btn", "btn-light", "profile-button")
     profileButton.innerText = "Profile";
     profileButton.addEventListener('click', () => {
-      this.createProfileFormInterface();
+      this.createProfileFormInterface(myPlayer);
     })
 
     const logoutButton = document.createElement('button');
@@ -273,25 +268,101 @@ class UserInterfaceManager {
     playerProfileWrapper.style.width = '250px';
   }
 
-  createProfileFormInterface() {
+  updateOnlineList(playerSocketId, updatedName) {
+    let listItem;
+    if (document.getElementById(playerSocketId)) {
+      listItem = document.getElementById(playerSocketId)
+    } else {
+      listItem = document.getElementById('my-unique-id')
+    }
+
+    listItem.innerText = updatedName;
+  }
+
+  async createProfileFormInterface(myPlayer) {
+    const myPlayerDocRef = this.firebaseDb.collection('players').doc(myPlayer.uid);
+
+    const doc = await myPlayerDocRef.get();
+    const myPlayerData = doc.data();
+
+    console.log("debug: ", myPlayerData);
+
     const profileFormWrapper = document.getElementById('profile-form-wrapper');
+    const profileEditForm = document.getElementById("profile-edit-form");
+    const profileImage = document.getElementById("profile-image");
+
+    profileEditForm.elements['name'].value = myPlayerData.displayName;
+    if (myPlayerData.profilePicURL) profileImage.src = myPlayerData.profilePicURL;
+    if (myPlayerData.position) profileEditForm.elements['position'].value = myPlayerData.position;
+    if (myPlayerData.education) profileEditForm.elements['education'].value = myPlayerData.education;
+    if (myPlayerData.city) profileEditForm.elements['city'].value = myPlayerData.city;
+    if (myPlayerData.country) profileEditForm.elements['country'].value = myPlayerData.country;
+
+    const saveButton = document.getElementById('save-profile-button');
+    const closeButton = document.getElementById('close-profile-button');
+
+    const saveButtonCallback = (e) => {
+      console.log('save profile');
+      e.preventDefault();
+      if (profileEditForm.checkValidity() === false) {
+        profileEditForm.classList.add('was-validated');
+        return;
+      }
+
+      const formInputValues = {
+        displayName: profileEditForm.elements['name'].value,
+        position: profileEditForm.elements['position'].value,
+        education: profileEditForm.elements['education'].value,
+        city: profileEditForm.elements['city'].value,
+        country: profileEditForm.elements['country'].value,
+        updatedAt: this.firebase.firestore.Timestamp.now()
+      }
+
+      this.firebaseDb.collection('players').doc(myPlayer.uid).set(formInputValues, { merge: true }).then(() => {
+        this.scene.updateMyPlayerInfo(formInputValues);
+        this.updateOnlineList(myPlayer.socketId, formInputValues.displayName);
+        this.scene.myPlayerSprite.updatePlayerName(formInputValues.displayName);
+        // eslint-disable-next-line no-console
+        console.log("debug: this.scene.socket", this.scene.socket);
+        this.scene.socket.emit('update-player', this.scene.myPlayer);
+        document.getElementById('profile-update-status').style.visibility = 'visible';
+      });
+    }
+
+    const closeButtonCallback = () => {
+      console.log('close profile');
+
+      closeButton.removeEventListener('click', closeButtonCallback);
+      saveButton.removeEventListener('click', saveButtonCallback);
+      this.removeProfileFormInterface();
+
+      document.getElementById('profile-update-status').style.visibility = 'hidden';
+    }
+
+    // const formSubmitCallback = (e) => {
+    //   console.log('form submit callback');
+
+    //   if (profileEditForm.checkValidity() === false) {
+    //     e.preventDefault();
+    //     e.stopPropagation();
+    //   }
+
+    //   profileEditForm.classList.add('was-validated');
+    // }
+    // profileEditForm.addEventListener('submit', formSubmitCallback);
+
+    saveButton.addEventListener('click', saveButtonCallback);
+    closeButton.addEventListener('click', closeButtonCallback);
 
     profileFormWrapper.style.display = 'flex';
-
-    const closeButton = document.getElementById('close-profile-button')
-    closeButton.addEventListener('click', () => {
-      this.removeProfileFormInterface();
-    })
   }
 
   removeProfileFormInterface() {
     const profileFormWrapper = document.getElementById('profile-form-wrapper');
     profileFormWrapper.style.display = 'none';
-  }
 
-  removeProfileFormInterface() {
-    const profileFormWrapper = document.getElementById('profile-form-wrapper');
-    profileFormWrapper.style.display = 'none';
+    const profileForm = document.getElementById('profile-edit-form');
+    profileForm.classList.remove('was-validated');
   }
 
   createIncomingCallInterface(players, callerId, acceptButtonCallback, declineButtonCallback) {

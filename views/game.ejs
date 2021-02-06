@@ -7,9 +7,9 @@
   <!-- download phaser and socket.io on the client side -->
   <script src="//cdn.jsdelivr.net/npm/phaser@3.52.0/dist/phaser.min.js"></script>
   <script src="/socket.io/socket.io.js"></script>
-    <!-- bootstrap -->
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
-      integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+  <!-- bootstrap -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+    integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
 
   <style>
     body {
@@ -101,7 +101,7 @@
       font-size: 30px;
       line-height: 80px;
       cursor: pointer;
-    } 
+    }
 
     #join-bar-button:hover {
       background-color: rgb(63, 228, 115);
@@ -123,8 +123,9 @@
       display: flex;
       justify-content: center;
     }
-    
-    #back-to-game-button, #join-bar-button {
+
+    #back-to-game-button,
+    #join-bar-button {
       margin: 10px;
       min-width: 150px;
       height: 30px;
@@ -248,9 +249,9 @@
       align-items: center;
       justify-content: space-evenly;
     }
-    
-    #caller-info { }
-    
+
+    #caller-info {}
+
     #caller-buttons-wrapper {
       display: flex;
     }
@@ -272,7 +273,7 @@
       background-color: rgb(218, 74, 74);
       color: white;
     }
-    
+
     #decline-button:hover {
       background-color: rgb(199, 59, 59);
     }
@@ -292,6 +293,15 @@
       justify-content: center;
       align-items: center;
     }
+
+    #profile-update-status {
+      visibility: hidden;
+    }
+
+    .invalid-feedback {
+      margin: 0;
+      padding: 0;
+    }
   </style>
 </head>
 
@@ -306,51 +316,49 @@
   <div id='profile-form-wrapper' class="background-overlay">
     <div class="container rounded bg-white mt-5 mb-5 w-50">
       <div class="row">
-        <div class="col-md-4 border-right d-flex flex-column align-items-center text-center justify-content-center">
-          <div class="d-flex flex-column align-items-center text-center justify-content-center">
-            <img class="rounded-circle"
-              src="https://media-exp1.licdn.com/dms/image/C4D03AQEvRvRJmKWoDg/profile-displayphoto-shrink_200_200/0/1589619361084?e=1617235200&v=beta&t=3-uo_2qiaKJTSj3k0e5XcL2a3kAZZEM3Yd37i82tZqQ"
-              width="150">
-            <span class="font-weight-bold mt-2">Josh Kim</span>
-            <span class="text-black-50 mt-2">@sungatae</span>
+        <div class="col-md-3 border-right d-flex flex-column align-items-center text-center justify-content-center">
+          <div class="nav flex-column nav-pills" role="tablist" aria-orientation="vertical">
+            <a class="nav-link active" data-toggle="pill" href="#" role="tab">Profile</a>
           </div>
         </div>
-        <div class="col-md-8">
+        <div class="col-md-9">
           <div class="p-3 py-5">
-            <div class="row mt-2">
-              <div class="col-md-6">
-                <label class="labels">First Name</label>
-                <input type="text" class="form-control" placeholder="Josh">
-              </div>
-              <div class="col-md-6">
-                <label class="labels">Last Name</label>
-                <input type="text" class="form-control" placeholder="Kim">
-              </div>
+            <div class="d-flex flex-column align-items-center text-center justify-content-center">
+              <img id="profile-image" class="rounded-circle" src="public/assets/placeholder-profile-pic.png" width="150">
             </div>
-            <div class="row mt-3">
-              <div class="col-md-12 mt-3">
-                <label class="labels">Current position</label>
-                <input type="text" class="form-control" placeholder="Software Engineer">
+            <form id='profile-edit-form' class="main-form needs-validation">
+              <div class="row mt-2">
+                <div class="col-md-12 mt-3">
+                  <label class="labels">Name</label>
+                  <input type="text" name="name" class="form-control" placeholder="Josh" required>
+                </div>
               </div>
-              <div class="col-md-12  mt-3">
-                <label class="labels">Education</label>
-                <input type="text" class="form-control" placeholder="U of Michigan">
+              <div class="row mt-3">
+                <div class="col-md-12 mt-3">
+                  <label class="labels">Current position</label>
+                  <input type="text" name="position" class="form-control" placeholder="Software Engineer" required>
+                </div>
+                <div class="col-md-12  mt-3">
+                  <label class="labels">Education</label>
+                  <input type="text" name="education" class="form-control" placeholder="U of Michigan" required>
+                </div>
               </div>
-            </div>
-            <div class="row mt-3">
-              <div class="col-md-6 mt-3">
-                <label class="labels">City / State</label>
-                <input type="text" class="form-control" placeholder="Montreal">
+              <div class="row mt-3">
+                <div class="col-md-6 mt-3">
+                  <label class="labels">City</label>
+                  <input type="text" name="city" class="form-control" placeholder="Montreal" required>
+                </div>
+                <div class="col-md-6 mt-3">
+                  <label class="labels">Country</label>
+                  <input type="text" name="country" class="form-control" placeholder="Canada" required>
+                </div>
               </div>
-              <div class="col-md-6 mt-3">
-                <label class="labels">Country</label>
-                <input type="text" class="form-control" placeholder="Canada">
+              <div class="mt-5 text-center">
+                <button class="btn btn-success" id="save-profile-button" type="submit">Save Profile</button>
+                <button class="btn btn-danger" id="close-profile-button" type="button">Close</button>
               </div>
-            </div>
-            <div class="mt-5 text-center">
-              <button class="btn btn-primary" id="save-profile-button" type="button">Save Profile</button>
-              <button class="btn btn-danger" id="close-profile-button" type="button">Close</button>
-            </div>
+              <div class="text-center mt-2 alert-success" id='profile-update-status'>Your profile has been updated</div>
+              </form>
           </div>
         </div>
       </div>
@@ -361,6 +369,7 @@
   <!-- firebase -->
   <script src="https://www.gstatic.com/firebasejs/8.2.3/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.2.3/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.2.3/firebase-firestore.js"></script>
   <script src="public/simplepeer.min.js"></script>
   <script src="public/firebase.js"></script>
   <script src="public/game.js"></script>

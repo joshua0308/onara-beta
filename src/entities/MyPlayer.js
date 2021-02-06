@@ -7,36 +7,15 @@ class MyPlayer extends Phaser.GameObjects.Container {
 
     this.playerInfo = playerInfo;
     this.socket = socket;
-    this.setSize(32, 38);
-    this.setScale(1.2);
-
-    // add existing context - this will add image and set gravity
-    scene.add.existing(this);
-    scene.physics.add.existing(this);
-
-    // ADD PLAYER
-    const player = scene.add.sprite(0, 0, 'player', 0);
-    player.name = 'sprite';
-    this.add(player);
-
-    // ADD TEXT
-    const textElement = document.createElement('div');
-    textElement.setAttribute('id', 'player-sprite');
-    textElement.innerText = this.playerInfo.displayName;
-    const text = scene.add.dom(0, 0, textElement);
-    text.setOrigin(0.5, -2.3)
-    this.add(text);
-
-    // Mixins
     Object.assign(this, collidable);
 
-
+    this.setupContainer();
+    this.createSprite();
+    this.createPlayerName(this.playerInfo.displayName);
     this.init();
-    this.initEvents();
-    this.motion = 'idle';
+
     this.socket.emit('player-movement', { x, y, flipX: false, motion: this.motion })
   }
-
 
   init() {
     this.gravity = 500;
@@ -49,10 +28,41 @@ class MyPlayer extends Phaser.GameObjects.Container {
     this.body.setCollideWorldBounds(true);
 
     initAnimations(this.scene.anims);
+    this.motion = 'idle';
+    this.scene.events.on(Phaser.Scenes.Events.UPDATE, this.update, this);
   }
 
-  initEvents() {
-    this.scene.events.on(Phaser.Scenes.Events.UPDATE, this.update, this)
+  setupContainer() {
+    this.setSize(32, 38);
+    this.setScale(1.2);
+
+    // add existing context - this will add image and set gravity
+    this.scene.add.existing(this);
+    this.scene.physics.add.existing(this);
+  }
+  createSprite() {
+    const player = this.scene.add.sprite(0, 0, 'player', 0);
+    player.name = 'sprite';
+    this.add(player);
+  }
+
+  createPlayerName(name) {
+    // ADD TEXT
+    const nameElement = document.createElement('div');
+    nameElement.setAttribute('id', 'player-sprite');
+    nameElement.innerText = name;
+    this.nameChild = this.scene.add.dom(0, 0, nameElement);
+    this.nameChild.setOrigin(0.5, -2.3)
+    this.add(this.nameChild);
+  }
+
+  removePlayerName() {
+    this.remove(this.nameChild, true)
+  }
+
+  updatePlayerName(updatedName) {
+    this.removePlayerName();
+    this.createPlayerName(updatedName);
   }
 
   update() {
@@ -80,6 +90,8 @@ class MyPlayer extends Phaser.GameObjects.Container {
     }
 
     if ((isSpaceJustDown || isUpJustDown) && (onFloor || this.jumpCount < this.consecutiveJumps)) {
+      // eslint-disable-next-line no-console
+      console.log("debug: spacebar");
       this.body.setVelocityY(-this.playerSpeed * 1.5);
       this.jumpCount += 1;
     }

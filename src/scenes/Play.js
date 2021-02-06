@@ -2,6 +2,15 @@ import MyPlayer from "../entities/MyPlayer.js";
 import OtherPlayer from "../entities/OtherPlayer.js";
 import userInterfaceManager from '../UserInterfaceManager.js';
 
+class Player {
+  constructor() {
+    this.displayName;
+    this.barId;
+    this.socketId;
+    this.uid;
+  }
+}
+
 class Play extends Phaser.Scene {
   players = {};
 
@@ -12,11 +21,14 @@ class Play extends Phaser.Scene {
     this.acceptButtonCallback = this.acceptButtonCallback.bind(this);
     this.declineButtonCallback = this.declineButtonCallback.bind(this);
     this.endCallButtonCallback = this.endCallButtonCallback.bind(this);
+    this.updateMyPlayerInfo = this.updateMyPlayerInfo.bind(this);
   }
 
   update() {
+    if (!this.myPlayerSprite) return;
+
     if (!this.myPlayerSprite.body.touching.none) {
-      this.userInterfaceManager.createBarQuestionnaireInterface({ scene: this });
+      this.userInterfaceManager.createBarQuestionnaireInterface();
     } else {
       this.userInterfaceManager.removeBarQuestionnaireInterface();
     }
@@ -27,22 +39,45 @@ class Play extends Phaser.Scene {
     return 'learn';
   }
 
-  create({ barId }) {
+  updateMyPlayerInfo(updatedPlayerInfo) {
+    this.game.playerInfo = {
+      ...this.game.playerInfo,
+      ...updatedPlayerInfo
+    }
+
+    this.myPlayer = {
+      ...this.myPlayer,
+      ...updatedPlayerInfo
+    }
+
+    console.log("debug: this.myPlayer", this.myPlayer);
+  }
+  async create({ barId }) {
+    this.scene.pause();
     console.log('debug: barId', barId);
     // barId = this.testDevEnv(barId);
 
+    this.firebase = this.game.firebase;
     this.firebaseAuth = this.game.firebaseAuth;
-
-    this.userInterfaceManager = new userInterfaceManager(this.firebaseAuth);
-    this.userInterfaceManager.createOnlineList(barId);
-    this.userInterfaceManager.createMenuButtons();
+    this.firebaseDb = this.game.firebaseDb;
+    this.userInterfaceManager = new userInterfaceManager(this, this.firebase, this.firebaseAuth, this.firebaseDb);
 
     this.myPlayer = {
       socketId: undefined,
-      displayName: this.game.playerInfo.displayName,
-      email: this.game.playerInfo.email,
-      room: this.getCurrentMap()
+      ...this.game.playerInfo
     };
+
+    if (this.game.isNew) {
+      this.userInterfaceManager.createProfileFormInterface(this.myPlayer);
+      this.game.isNew = false;
+    }
+
+    this.userInterfaceManager.createOnlineList(barId);
+    this.userInterfaceManager.createMenuButtons(this.myPlayer);
+
+
+    // eslint-disable-next-line no-console
+    console.log("debug: this.myPlayer", this.myPlayer);
 
     if (this.getCurrentMap() !== 'town') {
       this.barId = barId;
@@ -80,7 +115,9 @@ class Play extends Phaser.Scene {
       this.setupSocket();
     }
 
-    this.userInterfaceManager.addPlayerToOnlineList(this.myPlayer.displayName, 'my-unqiue-id', true);
+    this.userInterfaceManager.addPlayerToOnlineList(this.myPlayer.displayName, 'my-unique-id', true);
+
+    this.scene.resume();
   }
 
   getCurrentMap() {
@@ -105,16 +142,24 @@ class Play extends Phaser.Scene {
       this.socket.close();
     }
 
+    this.socket.on('player-updated', (player) => {
+      console.log('socket-on: player-updated');
+      this.userInterfaceManager.updateOnlineList(player.socketId, player.displayName);
+      const otherPlayer = this.otherPlayersGroup.getMatching('socketId', player.socketId);
+
+      if (otherPlayer.length) {
+        otherPlayer[0].updatePlayerName(player.displayName);
+      }
+    })
+
     // receive live players in the room
     this.socket.on('current-players', (players) => {
       console.log('socket-on: current players', players);
       this.players = players;
-      console.log('my socket id', this.socket.id)
 
       Object.keys(players).forEach(id => {
         if (this.socket.id === id) return;
 
-        console.log('create player')
         new OtherPlayer(this, this.players[id].x, this.players[id].y, this.socket, this.players[id], this.otherPlayersGroup, this.userInterfaceManager);
 
         this.userInterfaceManager.addPlayerToOnlineList(this.players[id].displayName, id, false);
@@ -259,9 +304,9 @@ class Play extends Phaser.Scene {
   createLayers(map) {
     const tileset = map.getTileset('main_lev_build_1');
     const tileset2 = map.getTileset('tilemap_packed');
-    const platformsColliders = map.createStaticLayer('platforms_colliders', tileset);
-    const environment = map.createStaticLayer('environment', tileset);
-    const platforms = map.createStaticLayer('platforms', tileset2);
+    const platformsColliders = map.createLayer('platforms_colliders', tileset);
+    const environment = map.createLayer('environment', tileset);
+    const platforms = map.createLayer('platforms', tileset2);
     const playerZones = map.getObjectLayer('player_zones');
 
     // collide player with platform

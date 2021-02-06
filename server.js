@@ -31,6 +31,12 @@ class Player {
     this.flipX = undefined;
     this.motion = undefined;
   }
+
+  update(playerInfo) {
+    if (this.displayName !== playerInfo.displayName) {
+      this.displayName = playerInfo.displayName;
+    }
+  }
 }
 
 gameIO.on('connection', socket => {
@@ -42,8 +48,8 @@ gameIO.on('connection', socket => {
     console.log('debug: user connected', socket.id, barId);
     
     players[socket.id] = new Player({ 
-      barId, 
-      socketId: socket.id, 
+      barId,
+      socketId: socket.id,
       displayName: playerInfo.displayName, 
       email: playerInfo.email, 
       status: PLAYER_STATUS.AVAILABLE 
@@ -63,6 +69,17 @@ gameIO.on('connection', socket => {
     socket.emit('current-players', playersInBar);
     socket.to(barId).emit('new-player', players[socket.id]);
   });
+
+  socket.on('update-player', playerInfo => {
+    console.log('debug: update-player', playerInfo)
+    const player = players[socket.id];
+    player.update(playerInfo);
+
+    if (players[socket.id].barId) {
+      console.log('debug: update-player socket emit')
+      socket.to(players[socket.id].barId).emit('player-updated', player);
+    }
+  })
 
   socket.on('player-movement', movementData => {
     if (players[socket.id]) {
@@ -173,9 +190,10 @@ app.get('/login', (req, res) => {
   res.render('login');
 })
 
-app.get('/profile', (req, res) => {
-  res.render('profile');
-})
+// deprecated
+// app.get('/profile', (req, res) => {
+//   res.render('profile');
+// })
 
 app.get('/', (req, res) => {
   res.redirect('/login')

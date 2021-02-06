@@ -5,23 +5,11 @@ class OtherPlayer extends Phaser.GameObjects.Container {
     this.socket = socket;
     this.socketId = playerInfo.socketId;
     this.userInterfaceManager = userInterfaceManager;
-    this.setInteractive();
-    this.setSize(32, 38);
-    this.setScale(1.2);
 
-    scene.add.existing(this);
-    scene.physics.add.existing(this);
+    this.setupContainer();
+    this.createSprite();
+    this.createPlayerName(playerInfo.displayName);
 
-    const player = scene.add.sprite(0, 0, 'player', 0);
-    player.name = 'sprite';
-    this.add(player);
-
-    const textElement = document.createElement('div');
-    textElement.setAttribute('id', 'player-sprite');
-    textElement.innerText = playerInfo.displayName;
-    const text = scene.add.dom(0, 0, textElement);
-    text.setOrigin(0.5, -2.3)
-    this.add(text);
 
     this.setInteractive()
       .on(Phaser.Input.Events.GAMEOBJECT_POINTER_DOWN, () => {
@@ -30,6 +18,39 @@ class OtherPlayer extends Phaser.GameObjects.Container {
       });
 
     otherPlayersGroup.add(this);
+  }
+
+  setupContainer() {
+    this.setSize(32, 38);
+    this.setScale(1.2);
+    this.setInteractive();
+
+    this.scene.add.existing(this);
+    this.scene.physics.add.existing(this);
+  }
+
+  createSprite() {
+    const player = this.scene.add.sprite(0, 0, 'player', 0);
+    player.name = 'sprite';
+    this.add(player);
+  }
+
+  createPlayerName(name) {
+    const nameElement = document.createElement('div');
+    nameElement.setAttribute('id', 'player-sprite');
+    nameElement.innerText = name;
+    this.nameChild = this.scene.add.dom(0, 0, nameElement);
+    this.nameChild.setOrigin(0.5, -2.3)
+    this.add(this.nameChild);
+  }
+
+  removePlayerName() {
+    this.remove(this.nameChild, true);
+  }
+
+  updatePlayerName(updatedName) {
+    this.removePlayerName();
+    this.createPlayerName(updatedName);
   }
 
   createBuyDrinkButton() {
