@@ -164,10 +164,12 @@
     }
 
     video {
-      height: 400px;
+      /* Make sure your video element doesn't overflow its container. We've added width and max-width to set a preferred size and a maximum size for the video. The browser will calculate the height automatically */
+      max-width: 100%;
       width: 400px;
+      height: 400px;
       object-fit: cover;
-      padding: 8px;
+      margin: 20px;
       border-radius: 200px;
     }
 

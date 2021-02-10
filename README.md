@@ -29,6 +29,9 @@
 - [Vertical navbar](https://getbootstrap.com/docs/4.0/components/navs/#javascript-behavior)
 
 ### WebRTC
+- [Codelabs webRTC](https://codelabs.developers.google.com/codelabs/webrtc-web#0)
+- [Get started with WebRTC](https://www.html5rocks.com/en/tutorials/webrtc/basics/)
+- [Build the backend services needed for a WebRTC app](https://www.html5rocks.com/en/tutorials/webrtc/infrastructure/)
 - [ERROR: ICE connection failed thread](https://github.com/feross/simple-peer/issues/202#issue-262008686)
 - [ERROR: connection failed thread](https://github.com/feross/simple-peer/issues/732)
   - You may be taking too long to paste the signals. You don't have very much time before it will time out.
@@ -38,9 +41,9 @@
   - https://numb.viagenie.ca/
 - [STUN & TURN](https://www.viagenie.ca/publications/2008-08-cluecon-stun-turn-ice.pdf)
 - [ICE protocol](https://webrtchacks.com/trickle-ice/)
-- [Get started with WebRTC](https://www.html5rocks.com/en/tutorials/webrtc/basics/)
-- [Build the backend services needed for a WebRTC app](https://www.html5rocks.com/en/tutorials/webrtc/infrastructure/)
+
 - [addStream](https://github.com/feross/simple-peer/issues/638)
+- [switch video and audio](https://simpl.info/getusermedia/sources/)
 
 ### Pusher
 - [pusher tutorials](https://pusher.com/tutorials)

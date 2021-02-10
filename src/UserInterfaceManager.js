@@ -98,8 +98,6 @@ class UserInterfaceManager {
   }
 
   createLevelTwoFilters(levelTwoFilters) {
-    // eslint-disable-next-line no-console
-    console.log("debug: levelTwoFilters", levelTwoFilters);
     const levelTwoFiltersButtons = Object.keys(levelTwoFilters).map(levelTwoFilter => this.createLevelOneFilter('level-one-option', levelTwoFilter, 'success'));
 
 
