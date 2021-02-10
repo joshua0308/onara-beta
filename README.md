@@ -28,6 +28,9 @@
 - [Profile page](https://bbbootstrap.com/snippets/bootstrap-edit-job-profile-form-add-experience-94553916)
 - [Vertical navbar](https://getbootstrap.com/docs/4.0/components/navs/#javascript-behavior)
 
+### Crashes
+- `TypeError: Cannot read property 'status' of undefined`
+
 ### WebRTC
 - [Codelabs webRTC](https://codelabs.developers.google.com/codelabs/webrtc-web#0)
 - [Get started with WebRTC](https://www.html5rocks.com/en/tutorials/webrtc/basics/)
@@ -41,7 +44,6 @@
   - https://numb.viagenie.ca/
 - [STUN & TURN](https://www.viagenie.ca/publications/2008-08-cluecon-stun-turn-ice.pdf)
 - [ICE protocol](https://webrtchacks.com/trickle-ice/)
-
 - [addStream](https://github.com/feross/simple-peer/issues/638)
 - [switch video and audio](https://simpl.info/getusermedia/sources/)
 
