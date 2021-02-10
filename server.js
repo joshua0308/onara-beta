@@ -158,6 +158,14 @@ gameIO.on('connection', socket => {
     players[socket.id].status = PLAYER_STATUS.IN_CALL;
   })
 
+  socket.on('peer-offer', ({ receiverSignalData, callerSocketId }) => {
+    socket.to(callerSocketId).emit('peer-offer', { receiverSignalData, receiverSocketId: socket.id })
+  })
+
+  socket.on('peer-answer', ({ callerSignalData, receiverSocketId }) => {
+    socket.to(receiverSocketId).emit('peer-answer', { callerSignalData })
+  })
+
   socket.on('end-call', ({ peerSocketId }) => {
     console.log("debug: end-call")
     if (players[socket.id]) players[socket.id].status = PLAYER_STATUS.AVAILABLE;

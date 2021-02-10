@@ -36,8 +36,8 @@ class Play extends Phaser.Scene {
 
   testDevEnv() {
     // enter bar scene
-    // this.registry.set('map', 'bar');
-    // return 'learn';
+    this.registry.set('map', 'bar');
+    return 'learn';
 
     // open bar questionnaire
     this.userInterfaceManager.createBarQuestionnaireInterface();
@@ -64,7 +64,7 @@ class Play extends Phaser.Scene {
     this.firebaseDb = this.game.firebaseDb;
     this.userInterfaceManager = new userInterfaceManager(this, this.firebase, this.firebaseAuth, this.firebaseDb);
     
-    // barId = this.testDevEnv(barId);
+    barId = this.testDevEnv(barId);
     console.log('debug: barId', barId);
 
     this.myPlayer = {
@@ -196,58 +196,124 @@ class Play extends Phaser.Scene {
       this.userInterfaceManager.removeIncomingCallInterface();
     })
 
-    // caller - when receiver accepts the call and initiates peer connection
-    this.socket.on('peer-offer-received', ({ receiverSignalData, receiverSocketId }) => {
-      console.log('debug: received peer offer', receiverSignalData, new Date().toISOString())
+    this.socket.on('peer-answer', ({ callerSignalData }) => {
+      console.log('debug: receive peer answer', callerSignalData, new Date().toISOString())
+      console.log('debug: set remote SDP', callerSignalData)
+      this.myPeer.signal(callerSignalData)
+
       this.userInterfaceManager.removePlayerProfileInterface();
-      this.peerSocketId = receiverSocketId;
-
-      navigator.mediaDevices.enumerateDevices()
-        .then(this.setMediaConstraints)
-        .then(stream => {
-          this.myStream = stream;
-          this.userInterfaceManager.createInCallInterface(this.myStream, this.toggleVideoButtonCallback, this.toggleAudioButtonCallback, this.endCallButtonCallback);
-          this.userInterfaceManager.addStreamToVideoElement(this.myStream, true);
-
-          const callerPeer = new SimplePeer({
-            initiator: false,
-            trickle: false,
-            stream: this.myStream,
-            reconnectTimer: 3000,
-            config: {
-              iceServers: [
-                { urls: 'stun:stun.l.google.com:19302' },
-                { urls: 'stun:global.stun.twilio.com:3478?transport=udp' },
-                {
-                  urls: 'turn:numb.viagenie.ca',
-                  username: 'joshua940308@gmail.com',
-                  credential: 'ju2B4vN9mze6Ld6Q'
-                }
-              ]
-            }
-          })
-
-          this.myPeer = callerPeer;
-
-          this.myPeer.on('signal', callerSignalData => {
-            console.log('debug: send peer answer', callerSignalData, new Date().toISOString())
-            this.socket.emit('send-peer-answer', { callerSignalData, receiverSocketId })
-          })
-
-          this.myPeer.on('stream', receiverStream => {
-            console.log('debug: remote stream received')
-            this.userInterfaceManager.addStreamToVideoElement(receiverStream, false);
-          })
-
-          this.myPeer.signal(receiverSignalData);
-        })
+      this.userInterfaceManager.createInCallInterface(this.myStream, this.toggleVideoButtonCallback, this.toggleAudioButtonCallback, this.endCallButtonCallback);
     })
+
+    this.socket.on('peer-offer', ({ receiverSignalData, receiverSocketId }) => {
+      console.log('debug: receive peer offer', receiverSignalData)
+      if (this.myPeer) {
+        console.log('debug: set remote SDP', receiverSignalData)
+        this.myPeer.signal(receiverSignalData)
+      } else {
+        this.peerSocketId = receiverSocketId;
+
+        console.log('debug: init peer')
+        this.myPeer = new SimplePeer({
+          initiator: false,
+          trickle: false,
+          reconnectTimer: 3000,
+          config: {
+            iceServers: [
+              { urls: 'stun:stun.l.google.com:19302' },
+              { urls: 'stun:global.stun.twilio.com:3478?transport=udp' },
+              {
+                urls: 'turn:numb.viagenie.ca',
+                username: 'joshua940308@gmail.com',
+                credential: 'ju2B4vN9mze6Ld6Q'
+              }
+            ]
+          }
+        })
+
+        console.log('debug: set remote SDP', receiverSignalData)
+        this.myPeer.signal(receiverSignalData)
+
+        this.myPeer.on('signal', callerSignalData => {
+          console.log('debug: send peer answer', callerSignalData, new Date().toISOString())
+          this.socket.emit('peer-answer', { callerSignalData, receiverSocketId })
+        })
+
+        this.myPeer.on('stream', receiverStream => {
+          console.log('debug: receive stream')
+          this.userInterfaceManager.addStreamToVideoElement(receiverStream, false);
+        })
+
+        this.myPeer.on('close', () => {
+          console.log('debug: close peer')
+          this.stopStream();
+          this.removePeerConnection();
+        })
+
+        this.userInterfaceManager.removePlayerProfileInterface();
+        this.userInterfaceManager.createInCallInterface(this.myStream, this.toggleVideoButtonCallback, this.toggleAudioButtonCallback, this.endCallButtonCallback);
+
+        navigator.mediaDevices.getUserMedia({ video: true, audio: true }).then(stream => {
+          this.myStream = stream;
+          this.userInterfaceManager.addStreamToVideoElement(this.myStream, true);
+          console.log('debug: add stream');
+          this.myPeer.addStream(this.myStream);
+        })
+      }
+    })
+
+    // caller - when receiver accepts the call and initiates peer connection
+    // this.socket.on('peer-offer-received', ({ receiverSignalData, receiverSocketId }) => {
+    //   console.log('debug: received peer offer', receiverSignalData, new Date().toISOString())
+    //   this.userInterfaceManager.removePlayerProfileInterface();
+    //   this.peerSocketId = receiverSocketId;
+
+    //   navigator.mediaDevices.enumerateDevices()
+    //     .then(this.setMediaConstraints)
+    //     .then(stream => {
+    //       this.myStream = stream;
+    //       this.userInterfaceManager.createInCallInterface(this.myStream, this.toggleVideoButtonCallback, this.toggleAudioButtonCallback, this.endCallButtonCallback);
+    //       this.userInterfaceManager.addStreamToVideoElement(this.myStream, true);
+
+    //       const callerPeer = new SimplePeer({
+    //         initiator: false,
+    //         trickle: false,
+    //         stream: this.myStream,
+    //         reconnectTimer: 3000,
+    //         config: {
+    //           iceServers: [
+    //             { urls: 'stun:stun.l.google.com:19302' },
+    //             { urls: 'stun:global.stun.twilio.com:3478?transport=udp' },
+    //             {
+    //               urls: 'turn:numb.viagenie.ca',
+    //               username: 'joshua940308@gmail.com',
+    //               credential: 'ju2B4vN9mze6Ld6Q'
+    //             }
+    //           ]
+    //         }
+    //       })
+
+    //       this.myPeer = callerPeer;
+
+    //       this.myPeer.on('signal', callerSignalData => {
+    //         console.log('debug: send peer answer', callerSignalData, new Date().toISOString())
+    //         this.socket.emit('send-peer-answer', { callerSignalData, receiverSocketId })
+    //       })
+
+    //       this.myPeer.on('stream', receiverStream => {
+    //         console.log('debug: remote stream received')
+    //         this.userInterfaceManager.addStreamToVideoElement(receiverStream, false);
+    //       })
+
+    //       this.myPeer.signal(receiverSignalData);
+    //     })
+    // })
 
     // receiver - receiver initiated the peer connection. caller is now answering with its signal data.
-    this.socket.on('peer-answer-received', ({ callerSignalData }) => {
-      console.log('debug: received peer answer', callerSignalData, new Date().toISOString())
-      this.myPeer.signal(callerSignalData)
-    })
+    // this.socket.on('peer-answer-received', ({ callerSignalData }) => {
+    //   console.log('debug: received peer answer', callerSignalData, new Date().toISOString())
+    //   this.myPeer.signal(callerSignalData)
+    // })
 
     this.socket.on('call-request-declined', ({ receiverId, message }) => {
       console.log('debug: declined', receiverId)
@@ -304,11 +370,14 @@ class Play extends Phaser.Scene {
   removePeerConnection() {
     if (this.myPeer) {
       this.myPeer.destroy();
+      this.myPeer = undefined;
     }
 
     if (this.peerSocketId) {
       this.peerSocketId = undefined;
     }
+
+    console.log('debug: remove peer', this.myPeer)
   }
 
   createMap() {
@@ -428,56 +497,105 @@ class Play extends Phaser.Scene {
     return navigator.mediaDevices.getUserMedia(mediaConstraints);
   }
 
-  // receiver - accept call
   acceptButtonCallback(callerId) {
     console.log('debug: accepted call');
-    // Arrow functions establish "this" when it is defined
-    // Traditional functions establish "this" at runtime
-    // That is why in some cases functions do things like myFcn.call(obj)
-    // this attaches obj as the this context when myFcn is called
-    this.userInterfaceManager.removeIncomingCallInterface();
 
-    navigator.mediaDevices.enumerateDevices()
-      .then(this.setMediaConstraints)
-      .then(stream => {
-        this.myStream = stream;
-
-        this.userInterfaceManager.createInCallInterface(this.myStream, this.toggleVideoButtonCallback, this.toggleAudioButtonCallback, this.endCallButtonCallback);
-        this.userInterfaceManager.addStreamToVideoElement(this.myStream, true);
-
-        const receiverPeer = new SimplePeer({
-          initiator: true,
-          trickle: false,
-          stream: this.myStream,
-          reconnectTimer: 3000,
-          config: {
-            iceServers: [
-              { urls: 'stun:stun.l.google.com:19302' },
-              { urls: 'stun:global.stun.twilio.com:3478?transport=udp' },
-              {
-                urls: 'turn:numb.viagenie.ca',
-                username: 'joshua940308@gmail.com',
-                credential: 'ju2B4vN9mze6Ld6Q'
-              }
-            ]
+    console.log('debug: init peer')
+    this.myPeer = new SimplePeer({
+      initiator: true,
+      trickle: false,
+      reconnectTimer: 3000,
+      config: {
+        iceServers: [
+          { urls: 'stun:stun.l.google.com:19302' },
+          { urls: 'stun:global.stun.twilio.com:3478?transport=udp' },
+          {
+            urls: 'turn:numb.viagenie.ca',
+            username: 'joshua940308@gmail.com',
+            credential: 'ju2B4vN9mze6Ld6Q'
           }
-        })
+        ]
+      }
+    })
 
-        this.myPeer = receiverPeer;
+    this.myPeer.on('signal', receiverSignalData => {
+      console.log('debug: send peer offer', receiverSignalData, new Date().toISOString())
+      this.socket.emit('peer-offer', { receiverSignalData, receiverSocketId: this.socket.id, callerSocketId: callerId })
+})
 
-        this.myPeer.on('signal', receiverSignalData => {
-          console.log('debug: send peer offer', receiverSignalData, new Date().toISOString())
-          this.socket.emit('send-peer-offer', { receiverSignalData, receiverSocketId: this.socket.id, callerSocketId: callerId })
-        })
+    this.myPeer.on('stream', callerStream => {
+      console.log('debug: receive stream')
+      this.userInterfaceManager.addStreamToVideoElement(callerStream, false);
+    })
 
-        this.myPeer.on('stream', callerStream => {
-          console.log('debug: remote stream received')
-          this.userInterfaceManager.addStreamToVideoElement(callerStream, false);
-        })
-      })
+    this.myPeer.on('close', () => {
+      console.log('debug: close peer')
+      this.stopStream();
+      this.removePeerConnection();
+    })
+
+    this.userInterfaceManager.removeIncomingCallInterface();
+    this.userInterfaceManager.createInCallInterface(this.myStream, this.toggleVideoButtonCallback, this.toggleAudioButtonCallback, this.endCallButtonCallback);
+
+    navigator.mediaDevices.getUserMedia({ video: true, audio: true }).then(stream => {
+      this.myStream = stream;
+      this.userInterfaceManager.addStreamToVideoElement(this.myStream, true);
+      console.log('debug: add stream');
+      this.myPeer.addStream(this.myStream);
+    })
   }
+  // receiver - accept call
+  // acceptButtonCallback(callerId) {
+  //   console.log('debug: accepted call');
+  //   // Arrow functions establish "this" when it is defined
+  //   // Traditional functions establish "this" at runtime
+  //   // That is why in some cases functions do things like myFcn.call(obj)
+  //   // this attaches obj as the this context when myFcn is called
+  //   this.userInterfaceManager.removeIncomingCallInterface();
+
+  //   navigator.mediaDevices.enumerateDevices()
+  //     .then(this.setMediaConstraints)
+  //     .then(stream => {
+  //       this.myStream = stream;
+
+  //       this.userInterfaceManager.createInCallInterface(this.myStream, this.toggleVideoButtonCallback, this.toggleAudioButtonCallback, this.endCallButtonCallback);
+  //       this.userInterfaceManager.addStreamToVideoElement(this.myStream, true);
+
+  //       const receiverPeer = new SimplePeer({
+  //         initiator: true,
+  //         trickle: false,
+  //         stream: this.myStream,
+  //         reconnectTimer: 3000,
+  //         config: {
+  //           iceServers: [
+  //             { urls: 'stun:stun.l.google.com:19302' },
+  //             { urls: 'stun:global.stun.twilio.com:3478?transport=udp' },
+  //             {
+  //               urls: 'turn:numb.viagenie.ca',
+  //               username: 'joshua940308@gmail.com',
+  //               credential: 'ju2B4vN9mze6Ld6Q'
+  //             }
+  //           ]
+  //         }
+  //       })
+
+  //       this.myPeer = receiverPeer;
+
+  //       this.myPeer.on('signal', receiverSignalData => {
+  //         console.log('debug: send peer offer', receiverSignalData, new Date().toISOString())
+  //         this.socket.emit('peer-offer', { receiverSignalData, receiverSocketId: this.socket.id, callerSocketId: callerId })
+  //         // this.socket.emit('send-peer-offer', { receiverSignalData, receiverSocketId: this.socket.id, callerSocketId: callerId })
+  //       })
+
+  //       this.myPeer.on('stream', callerStream => {
+  //         console.log('debug: remote stream received')
+  //         this.userInterfaceManager.addStreamToVideoElement(callerStream, false);
+  //       })
+  //     })
+  // }
 
   stopStream() {
+    console.log('debug: stop stream')
     if (this.myStream) {
       const tracks = this.myStream.getTracks()
       tracks.forEach(track => track.stop())
