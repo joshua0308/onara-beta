@@ -216,7 +216,7 @@ class Play extends Phaser.Scene {
         console.log('debug: init peer')
         this.myPeer = new SimplePeer({
           initiator: false,
-          trickle: false,
+          trickle: true,
           reconnectTimer: 3000,
           config: {
             iceServers: [
@@ -277,7 +277,7 @@ class Play extends Phaser.Scene {
 
     //       const callerPeer = new SimplePeer({
     //         initiator: false,
-    //         trickle: false,
+    //         trickle: true,
     //         stream: this.myStream,
     //         reconnectTimer: 3000,
     //         config: {
@@ -503,7 +503,7 @@ class Play extends Phaser.Scene {
     console.log('debug: init peer')
     this.myPeer = new SimplePeer({
       initiator: true,
-      trickle: false,
+      trickle: true,
       reconnectTimer: 3000,
       config: {
         iceServers: [
@@ -563,7 +563,7 @@ class Play extends Phaser.Scene {
 
   //       const receiverPeer = new SimplePeer({
   //         initiator: true,
-  //         trickle: false,
+  //         trickle: true,
   //         stream: this.myStream,
   //         reconnectTimer: 3000,
   //         config: {
