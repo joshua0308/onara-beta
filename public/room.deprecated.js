@@ -11,19 +11,22 @@ myVideoElement.muted = true;
 init();
 
 function init() {
-  navigator.mediaDevices.enumerateDevices()
-    .then(devices => {
+  navigator.mediaDevices
+    .enumerateDevices()
+    .then((devices) => {
       // we can iterate over devices to access the front facing camera from mobile devices
       // https://github.com/siemprecollective/online-town-public-release/blob/master/src/client/components/GameVideosContainer.jsx#L125-L158
 
-      return navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+      return navigator.mediaDevices.getUserMedia({ video: true, audio: true });
     })
-    .then(stream => {
+    .then((stream) => {
       myStream = stream;
       addVideoStream(myVideoElement, myStream);
     })
-    .catch(err => {
-      alert(`Onara requires video and audio access.\nPlease refresh this page after enabling camera in your browser settings!`)
+    .catch((err) => {
+      alert(
+        `Onara requires video and audio access.\nPlease refresh this page after enabling camera in your browser settings!`
+      );
       myStream = createMediaStreamFake();
 
       setUnmuteButton();
@@ -37,64 +40,64 @@ function init() {
       sendMessageListener();
       newMessageListener(socket);
       userDisconnectListener(socket, peers);
-    })
+    });
 }
 
 // close socket connection when user leaves the room
 // this is needed bc there is a delay firing the disconnect event
 window.onbeforeunload = () => {
   socket.close();
-}
+};
 
 // when I receive a call from the other user,
 // 1. answer with my video stream
 // 2. display other user's video stream on my screen
 function incomingCallListener(peer, myVideoStream) {
-  peer.on('call', call => {
+  peer.on('call', (call) => {
     console.log('debug: incoming call', call.peer);
     call.answer(myVideoStream);
 
     const otherUserVideoElement = document.createElement('video');
-    call.on('stream', otherUserVideoStream => {
+    call.on('stream', (otherUserVideoStream) => {
       addVideoStream(otherUserVideoElement, otherUserVideoStream);
-    })
+    });
 
     addToPeers(call.peer, call, otherUserVideoElement);
-  })
+  });
 }
 
-  // when a new user enters, make a call to the new user
-  // 1. call and send my video stream
-  // 2. display other user's video stream on my screen
-  // ** the user already in the room will be making the call to the new user
+// when a new user enters, make a call to the new user
+// 1. call and send my video stream
+// 2. display other user's video stream on my screen
+// ** the user already in the room will be making the call to the new user
 function newUserListener(peer, socket, myVideoStream) {
-  socket.on('user-connected', otherUserId => {
-    console.log("debug: user-connected", otherUserId);
+  socket.on('user-connected', (otherUserId) => {
+    console.log('debug: user-connected', otherUserId);
     connectToNewUser(peer, otherUserId, myVideoStream);
-  })
+  });
 }
 
 function connectToNewUser(peer, otherUserId, myVideoStream) {
   const call = peer.call(otherUserId, myVideoStream);
   const otherUserVideoElement = document.createElement('video');
 
-  call.on('stream', otherUserVideoStream => {
-    console.log('debug: incoming stream', otherUserVideoStream)
+  call.on('stream', (otherUserVideoStream) => {
+    console.log('debug: incoming stream', otherUserVideoStream);
     addVideoStream(otherUserVideoElement, otherUserVideoStream);
-  })
+  });
 
   call.on('close', () => {
     otherUserVideoElement.remove();
-  })
+  });
 
   addToPeers(otherUserId, call, otherUserVideoElement);
 }
 
 function joinRoom(peer, socket) {
-  peer.on('open', userId => {
+  peer.on('open', (userId) => {
     setMyUserId(userId);
     socket.emit('join-room', ROOM_ID, userId);
-  })
+  });
 }
 
 function setMyUserId(userId) {
@@ -102,40 +105,40 @@ function setMyUserId(userId) {
 }
 
 function sendMessageListener() {
-  let text = $("input");
-  $('html').keydown(function(e) {
+  let text = $('input');
+  $('html').keydown(function (e) {
     // when press enter send message
     if (e.which == 13 && text.val().length !== 0) {
-      console.log('debug: keydown')
+      console.log('debug: keydown');
       socket.emit('message', { text: text.val(), userId: myUserId });
-      text.val('')
+      text.val('');
     }
   });
 }
 function newMessageListener(socket) {
-  socket.on("createMessage", ({ text, userId }) => {
-    $("ul").append(`<li class="message"><b>${userId}</b><br/>${text}</li>`);
-    scrollToBottom()
-  })
+  socket.on('createMessage', ({ text, userId }) => {
+    $('ul').append(`<li class="message"><b>${userId}</b><br/>${text}</li>`);
+    scrollToBottom();
+  });
 }
 
 function userDisconnectListener(socket, peers) {
-  socket.on('user-disconnected', disconnectedUserId => {
-    console.log("debug: user-disconnected", disconnectedUserId);
+  socket.on('user-disconnected', (disconnectedUserId) => {
+    console.log('debug: user-disconnected', disconnectedUserId);
     if (peers[disconnectedUserId]) {
       peers[disconnectedUserId].call.close();
       peers[disconnectedUserId].videoElement.remove();
-      delete peers[disconnectedUserId]
+      delete peers[disconnectedUserId];
     }
-  })
+  });
 }
 
 function addToPeers(id, call, videoElement) {
-  peers[id] = { call, videoElement }
+  peers[id] = { call, videoElement };
 }
 
 function addVideoStream(videoElement, stream) {
-  console.log('debug: add video stream', stream)
+  console.log('debug: add video stream', stream);
   videoElement.srcObject = stream;
   // videoElement.muted = "true";
 
@@ -148,7 +151,7 @@ function addVideoStream(videoElement, stream) {
 
 function scrollToBottom() {
   var d = $('.main__chat_window');
-  d.scrollTop(d.prop("scrollHeight"));
+  d.scrollTop(d.prop('scrollHeight'));
 }
 
 function muteUnmute() {
@@ -166,7 +169,7 @@ function setMuteButton() {
   const html = `
     <i class="fas fa-microphone"></i>
     <span>Mute</span>
-  `
+  `;
   document.querySelector('.main__mute_button').innerHTML = html;
 }
 
@@ -174,19 +177,19 @@ function setUnmuteButton() {
   const html = `
     <i class="unmute fas fa-microphone-slash"></i>
     <span>Unmute</span>
-  `
+  `;
   document.querySelector('.main__mute_button').innerHTML = html;
 }
 
 function playStop() {
-  console.log('object')
+  console.log('object');
   let enabled = myStream.getVideoTracks()[0].enabled;
   if (enabled) {
     myStream.getVideoTracks()[0].enabled = false;
-    setPlayVideo()
+    setPlayVideo();
   } else {
     myStream.getVideoTracks()[0].enabled = true;
-    setStopVideo()
+    setStopVideo();
   }
 }
 
@@ -194,7 +197,7 @@ function setStopVideo() {
   const html = `
     <i class="fas fa-video"></i>
     <span>Stop Video</span>
-  `
+  `;
   document.querySelector('.main__video_button').innerHTML = html;
 }
 
@@ -202,7 +205,7 @@ function setPlayVideo() {
   const html = `
   <i class="stop fas fa-video-slash"></i>
     <span>Play Video</span>
-  `
+  `;
   document.querySelector('.main__video_button').innerHTML = html;
 }
 

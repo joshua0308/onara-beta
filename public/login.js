@@ -1,13 +1,13 @@
 const ui = new firebaseui.auth.AuthUI(firebase.auth());
 const uiConfig = {
   callbacks: {
-    signInSuccessWithAuthResult: function(authResult, redirectUrl) {
+    signInSuccessWithAuthResult: function (authResult, redirectUrl) {
       // User successfully signed in.
       // Return type determines whether we continue the redirect automatically
       // or whether we leave that to developer to handle.
       return true;
     },
-    uiShown: function() {
+    uiShown: function () {
       // The widget is rendered.
       // Hide the loader.
       document.getElementById('loader').style.display = 'none';
@@ -19,20 +19,13 @@ const uiConfig = {
   signInOptions: [
     {
       provider: firebase.auth.GoogleAuthProvider.PROVIDER_ID,
-      scopes: [
-        'https://www.googleapis.com/auth/userinfo.profile'
-      ]
+      scopes: ['https://www.googleapis.com/auth/userinfo.profile']
     },
     {
       provider: firebase.auth.FacebookAuthProvider.PROVIDER_ID,
-      scopes: [
-        'public_profile',
-        'email',
-        'user_likes',
-        'user_friends'
-      ]
+      scopes: ['public_profile', 'email', 'user_likes', 'user_friends']
     },
-    firebase.auth.EmailAuthProvider.PROVIDER_ID,
+    firebase.auth.EmailAuthProvider.PROVIDER_ID
   ],
   // Terms of service url.
   tosUrl: '/login',
@@ -46,9 +39,9 @@ ui.start('#firebaseui-auth-container', uiConfig);
 // if the user is already logged in, move to the game page
 firebase.auth().onAuthStateChanged((user) => {
   if (user) {
-    console.log("debug: logged in", user.displayName, user.email);
+    console.log('debug: logged in', user.displayName, user.email);
     window.location.replace('/game');
   } else {
-    console.log("debug: not logged in");
+    console.log('debug: not logged in');
   }
 });

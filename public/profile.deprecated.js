@@ -2,25 +2,25 @@ let currentUser;
 let userDocumentRef;
 const auth = firebase.auth();
 const db = firebase.firestore();
-const profileEditForm = document.getElementById("profile-edit-form");
+const profileEditForm = document.getElementById('profile-edit-form');
 const profileEditFormElements = profileEditForm.elements;
 const profileImage = document.getElementById('profile-image');
 const updateStatusText = document.getElementById('update-status');
 
 profileEditForm.addEventListener('input', () => {
   updateStatusText.innerText = '';
-})
+});
 
 firebase.auth().onAuthStateChanged((user) => {
   if (user) {
     currentUser = user;
-    
+
     if (currentUser.photoURL) {
       profileImage.src = user.photoURL;
     }
 
     userDocumentRef = db.collection('users').doc(currentUser.email);
-    userDocumentRef.get().then(doc => {
+    userDocumentRef.get().then((doc) => {
       const data = doc.data();
 
       // update all fields
@@ -29,11 +29,11 @@ firebase.auth().onAuthStateChanged((user) => {
       profileEditFormElements['bio'].value = data.bio;
     });
   } else {
-    window.location.replace("/login");
+    window.location.replace('/login');
   }
 });
 
-profileEditForm.addEventListener("submit", updateProfile);
+profileEditForm.addEventListener('submit', updateProfile);
 
 function updateProfile(e) {
   e.preventDefault(); // prevent from refreshing
@@ -52,19 +52,22 @@ function updateProfile(e) {
     }
   }
 
-  currentUser.updateProfile({
-    displayName: updated_user.name
-  }).then(() => console.log('debug: update user successful'))
-    .catch(() => console.log('debug: upate user failed'))
+  currentUser
+    .updateProfile({
+      displayName: updated_user.name
+    })
+    .then(() => console.log('debug: update user successful'))
+    .catch(() => console.log('debug: upate user failed'));
 
   if (userDocumentRef) {
-    userDocumentRef.set(updated_doc, { merge: true })
-      .then(function() {
-        console.log("Profile successfully updated");
+    userDocumentRef
+      .set(updated_doc, { merge: true })
+      .then(function () {
+        console.log('Profile successfully updated');
         updateStatusText.innerText = 'Profile updated!';
       })
-      .catch(function(error) {
-        console.error("Error adding document: ", error);
+      .catch(function (error) {
+        console.error('Error adding document: ', error);
       });
   }
 }

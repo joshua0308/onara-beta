@@ -14,7 +14,12 @@ class MyPlayer extends Phaser.GameObjects.Container {
     this.createPlayerName(this.playerInfo.displayName);
     this.init();
 
-    this.socket.emit('player-movement', { x, y, flipX: false, motion: this.motion })
+    this.socket.emit('player-movement', {
+      x,
+      y,
+      flipX: false,
+      motion: this.motion
+    });
   }
 
   init() {
@@ -52,12 +57,12 @@ class MyPlayer extends Phaser.GameObjects.Container {
     nameElement.setAttribute('id', 'player-sprite');
     nameElement.innerText = name;
     this.nameChild = this.scene.add.dom(0, 0, nameElement);
-    this.nameChild.setOrigin(0.5, -2.3)
+    this.nameChild.setOrigin(0.5, -2.3);
     this.add(this.nameChild);
   }
 
   removePlayerName() {
-    this.remove(this.nameChild, true)
+    this.remove(this.nameChild, true);
   }
 
   updatePlayerName(updatedName) {
@@ -89,9 +94,12 @@ class MyPlayer extends Phaser.GameObjects.Container {
       this.motion = 'idle';
     }
 
-    if ((isSpaceJustDown || isUpJustDown) && (onFloor || this.jumpCount < this.consecutiveJumps)) {
+    if (
+      (isSpaceJustDown || isUpJustDown) &&
+      (onFloor || this.jumpCount < this.consecutiveJumps)
+    ) {
       // eslint-disable-next-line no-console
-      console.log("debug: spacebar");
+      console.log('debug: spacebar');
       this.body.setVelocityY(-this.playerSpeed * 1.5);
       this.jumpCount += 1;
     }
@@ -112,23 +120,24 @@ class MyPlayer extends Phaser.GameObjects.Container {
     sprite.play(this.motion, true);
 
     // if the player is moving, emit position and motion to the server
-    const isMoving = this.oldPosition && (this.x !== this.oldPosition.x || this.y !== this.oldPosition.y);
+    const isMoving =
+      this.oldPosition &&
+      (this.x !== this.oldPosition.x || this.y !== this.oldPosition.y);
 
     if (isMoving) {
-      this.socket.emit('player-movement',
-        {
-          x: this.x,
-          y: this.y,
-          flipX: sprite.flipX,
-          motion: this.motion
-        })
+      this.socket.emit('player-movement', {
+        x: this.x,
+        y: this.y,
+        flipX: sprite.flipX,
+        motion: this.motion
+      });
     }
 
     this.oldPosition = {
       x: this.x,
       y: this.y,
-      flipX: sprite.flipX,
-    }
+      flipX: sprite.flipX
+    };
   }
 }
 

@@ -4,12 +4,19 @@
         "es2020": true,
         "node": true
     },
-    "extends": "eslint:recommended",
+    "plugins": [
+        "prettier"
+    ],
+    "extends": [
+        "eslint:recommended",
+        "plugin:prettier/recommended"
+    ],
     "parserOptions": {
         "ecmaVersion": 11,
         "sourceType": "module"
     },
     "rules": {
+        "prettier/prettier": "error",
         "no-undef": "off",
         "no-unused-vars": "off",
         "no-unreachable": "off",

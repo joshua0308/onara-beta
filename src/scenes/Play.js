@@ -1,5 +1,5 @@
-import MyPlayer from "../entities/MyPlayer.js";
-import OtherPlayer from "../entities/OtherPlayer.js";
+import MyPlayer from '../entities/MyPlayer.js';
+import OtherPlayer from '../entities/OtherPlayer.js';
 import userInterfaceManager from '../UserInterfaceManager.js';
 
 class Player {
@@ -46,23 +46,28 @@ class Play extends Phaser.Scene {
     this.game.playerInfo = {
       ...this.game.playerInfo,
       ...updatedPlayerInfo
-    }
+    };
 
     this.myPlayer = {
       ...this.myPlayer,
       ...updatedPlayerInfo
-    }
+    };
 
-    console.log("debug: this.myPlayer", this.myPlayer);
+    console.log('debug: this.myPlayer', this.myPlayer);
   }
   async create({ barId }) {
     this.scene.pause();
-    
+
     this.firebase = this.game.firebase;
     this.firebaseAuth = this.game.firebaseAuth;
     this.firebaseDb = this.game.firebaseDb;
-    this.userInterfaceManager = new userInterfaceManager(this, this.firebase, this.firebaseAuth, this.firebaseDb);
-    
+    this.userInterfaceManager = new userInterfaceManager(
+      this,
+      this.firebase,
+      this.firebaseAuth,
+      this.firebaseDb
+    );
+
     // barId = this.testDevEnv(barId);
     // console.log('debug: barId', barId);
 
@@ -79,15 +84,14 @@ class Play extends Phaser.Scene {
     this.userInterfaceManager.createOnlineList(barId);
     this.userInterfaceManager.createMenuButtons(this.myPlayer);
 
-
     // eslint-disable-next-line no-console
-    console.log("debug: this.myPlayer", this.myPlayer);
+    console.log('debug: this.myPlayer', this.myPlayer);
 
     if (this.getCurrentMap() !== 'town') {
       this.barId = barId;
       this.socket = io('/game');
     } else {
-      this.socket = { emit: () => { }, close: () => { } }
+      this.socket = { emit: () => {}, close: () => {} };
     }
 
     this.myPeer = null;
@@ -100,26 +104,35 @@ class Play extends Phaser.Scene {
     const layers = this.createLayers(map);
     this.playerZones = this.getPlayerZones(layers.playerZones);
 
-    this.myPlayerSprite = new MyPlayer(this, this.playerZones.start.x, this.playerZones.start.y, this.socket, this.myPlayer);
+    this.myPlayerSprite = new MyPlayer(
+      this,
+      this.playerZones.start.x,
+      this.playerZones.start.y,
+      this.socket,
+      this.myPlayer
+    );
     this.myPlayerSprite.addCollider(layers.platformsColliders);
 
     const doorZone = this.playerZones.door;
 
-    const door = this.physics.add.sprite(doorZone.x, doorZone.y, 'door')
+    const door = this.physics.add.sprite(doorZone.x, doorZone.y, 'door');
     door.setSize(15, 50).setAlpha(0).setOrigin(0, 0);
 
-    
     this.setupFollowupCameraOn(this.myPlayerSprite);
     this.createHouses(map);
     this.createBG(map);
-    
+
     this.physics.add.overlap(this.myPlayerSprite, door);
 
     if (this.getCurrentMap() !== 'town') {
       this.setupSocket();
     }
 
-    this.userInterfaceManager.addPlayerToOnlineList(this.myPlayer.displayName, 'my-unique-id', true);
+    this.userInterfaceManager.addPlayerToOnlineList(
+      this.myPlayer.displayName,
+      'my-unique-id',
+      true
+    );
 
     this.scene.resume();
   }
@@ -133,9 +146,12 @@ class Play extends Phaser.Scene {
       this.myPlayer.socketId = this.socket.id;
 
       // tell the server it's ready to listen
-      console.log("debug: socket on connect", this.myPlayer.socketId);
-      this.socket.emit('join-room', { playerInfo: this.myPlayer, barId: this.barId });
-    })
+      console.log('debug: socket on connect', this.myPlayer.socketId);
+      this.socket.emit('join-room', {
+        playerInfo: this.myPlayer,
+        barId: this.barId
+      });
+    });
 
     // I can't tell if this event handler is working properly
     window.onbeforeunload = () => {
@@ -144,75 +160,123 @@ class Play extends Phaser.Scene {
       }
 
       this.socket.close();
-    }
+    };
 
     this.socket.on('player-updated', (player) => {
       console.log('socket-on: player-updated');
-      this.userInterfaceManager.updateOnlineList(player.socketId, player.displayName);
-      const otherPlayer = this.otherPlayersGroup.getMatching('socketId', player.socketId);
+      this.userInterfaceManager.updateOnlineList(
+        player.socketId,
+        player.displayName
+      );
+      const otherPlayer = this.otherPlayersGroup.getMatching(
+        'socketId',
+        player.socketId
+      );
 
       if (otherPlayer.length) {
         otherPlayer[0].updatePlayerName(player.displayName);
       }
-    })
+    });
 
     // receive live players in the room
     this.socket.on('current-players', (players) => {
       console.log('socket-on: current players', players);
       this.players = players;
 
-      Object.keys(players).forEach(id => {
+      Object.keys(players).forEach((id) => {
         if (this.socket.id === id) return;
 
-        new OtherPlayer(this, this.players[id].x, this.players[id].y, this.socket, this.players[id], this.otherPlayersGroup, this.userInterfaceManager);
+        new OtherPlayer(
+          this,
+          this.players[id].x,
+          this.players[id].y,
+          this.socket,
+          this.players[id],
+          this.otherPlayersGroup,
+          this.userInterfaceManager
+        );
 
-        this.userInterfaceManager.addPlayerToOnlineList(this.players[id].displayName, id, false);
-      })
-    })
+        this.userInterfaceManager.addPlayerToOnlineList(
+          this.players[id].displayName,
+          id,
+          false
+        );
+      });
+    });
 
     // receive info about newly connected players
     this.socket.on('new-player', (player) => {
-      console.log('socket-on: new-player', player)
+      console.log('socket-on: new-player', player);
       this.players[player.socketId] = player;
-      new OtherPlayer(this, this.playerZones.x, this.playerZones.y, this.socket, this.players[player.socketId], this.otherPlayersGroup, this.userInterfaceManager);
-      this.userInterfaceManager.addPlayerToOnlineList(player.displayName, player.socketId, false);
-    })
+      new OtherPlayer(
+        this,
+        this.playerZones.x,
+        this.playerZones.y,
+        this.socket,
+        this.players[player.socketId],
+        this.otherPlayersGroup,
+        this.userInterfaceManager
+      );
+      this.userInterfaceManager.addPlayerToOnlineList(
+        player.displayName,
+        player.socketId,
+        false
+      );
+    });
 
     // receiver - when caller requests a call
     this.socket.on('call-received', ({ callerId }) => {
-      console.log('debug: call received', callerId, this.players[callerId].displayName)
+      console.log(
+        'debug: call received',
+        callerId,
+        this.players[callerId].displayName
+      );
       this.peerSocketId = callerId;
 
-      this.userInterfaceManager.createIncomingCallInterface(this.players, callerId, this.acceptButtonCallback, this.declineButtonCallback);
-    })
+      this.userInterfaceManager.createIncomingCallInterface(
+        this.players,
+        callerId,
+        this.acceptButtonCallback,
+        this.declineButtonCallback
+      );
+    });
 
     this.socket.on('alert', ({ message }) => {
       alert(message);
-    })
+    });
 
     this.socket.on('call-cancelled', () => {
       alert('Call was cancelled');
       this.userInterfaceManager.removeIncomingCallInterface();
-    })
+    });
 
     this.socket.on('peer-answer', ({ callerSignalData }) => {
-      console.log('debug: receive peer answer', callerSignalData, new Date().toISOString())
-      console.log('debug: set remote SDP', callerSignalData)
-      this.myPeer.signal(callerSignalData)
+      console.log(
+        'debug: receive peer answer',
+        callerSignalData,
+        new Date().toISOString()
+      );
+      console.log('debug: set remote SDP', callerSignalData);
+      this.myPeer.signal(callerSignalData);
 
       this.userInterfaceManager.removePlayerProfileInterface();
-      this.userInterfaceManager.createInCallInterface(this.myStream, this.toggleVideoButtonCallback, this.toggleAudioButtonCallback, this.endCallButtonCallback);
-    })
+      this.userInterfaceManager.createInCallInterface(
+        this.myStream,
+        this.toggleVideoButtonCallback,
+        this.toggleAudioButtonCallback,
+        this.endCallButtonCallback
+      );
+    });
 
     this.socket.on('peer-offer', ({ receiverSignalData, receiverSocketId }) => {
-      console.log('debug: receive peer offer', receiverSignalData)
+      console.log('debug: receive peer offer', receiverSignalData);
       if (this.myPeer) {
-        console.log('debug: set remote SDP', receiverSignalData)
-        this.myPeer.signal(receiverSignalData)
+        console.log('debug: set remote SDP', receiverSignalData);
+        this.myPeer.signal(receiverSignalData);
       } else {
         this.peerSocketId = receiverSocketId;
 
-        console.log('debug: init peer')
+        console.log('debug: init peer');
         this.myPeer = new SimplePeer({
           initiator: false,
           trickle: true,
@@ -228,38 +292,58 @@ class Play extends Phaser.Scene {
               }
             ]
           }
-        })
+        });
 
-        console.log('debug: set remote SDP', receiverSignalData)
-        this.myPeer.signal(receiverSignalData)
+        console.log('debug: set remote SDP', receiverSignalData);
+        this.myPeer.signal(receiverSignalData);
 
-        this.myPeer.on('signal', callerSignalData => {
-          console.log('debug: send peer answer', callerSignalData, new Date().toISOString())
-          this.socket.emit('peer-answer', { callerSignalData, receiverSocketId })
-        })
+        this.myPeer.on('signal', (callerSignalData) => {
+          console.log(
+            'debug: send peer answer',
+            callerSignalData,
+            new Date().toISOString()
+          );
+          this.socket.emit('peer-answer', {
+            callerSignalData,
+            receiverSocketId
+          });
+        });
 
-        this.myPeer.on('stream', receiverStream => {
-          console.log('debug: receive stream')
-          this.userInterfaceManager.addStreamToVideoElement(receiverStream, false);
-        })
+        this.myPeer.on('stream', (receiverStream) => {
+          console.log('debug: receive stream');
+          this.userInterfaceManager.addStreamToVideoElement(
+            receiverStream,
+            false
+          );
+        });
 
         this.myPeer.on('close', () => {
-          console.log('debug: close peer')
+          console.log('debug: close peer');
           this.stopStream();
           this.removePeerConnection();
-        })
+        });
 
         this.userInterfaceManager.removePlayerProfileInterface();
-        this.userInterfaceManager.createInCallInterface(this.myStream, this.toggleVideoButtonCallback, this.toggleAudioButtonCallback, this.endCallButtonCallback);
+        this.userInterfaceManager.createInCallInterface(
+          this.myStream,
+          this.toggleVideoButtonCallback,
+          this.toggleAudioButtonCallback,
+          this.endCallButtonCallback
+        );
 
-        navigator.mediaDevices.getUserMedia({ video: true, audio: true }).then(stream => {
-          this.myStream = stream;
-          this.userInterfaceManager.addStreamToVideoElement(this.myStream, true);
-          console.log('debug: add stream');
-          this.myPeer.addStream(this.myStream);
-        })
+        navigator.mediaDevices
+          .getUserMedia({ video: true, audio: true })
+          .then((stream) => {
+            this.myStream = stream;
+            this.userInterfaceManager.addStreamToVideoElement(
+              this.myStream,
+              true
+            );
+            console.log('debug: add stream');
+            this.myPeer.addStream(this.myStream);
+          });
       }
-    })
+    });
 
     // caller - when receiver accepts the call and initiates peer connection
     // this.socket.on('peer-offer-received', ({ receiverSignalData, receiverSocketId }) => {
@@ -315,10 +399,10 @@ class Play extends Phaser.Scene {
     // })
 
     this.socket.on('call-request-declined', ({ receiverId, message }) => {
-      console.log('debug: declined', receiverId)
+      console.log('debug: declined', receiverId);
       this.userInterfaceManager.removePlayerProfileInterface();
-      alert(message)
-    })
+      alert(message);
+    });
 
     this.socket.on('call-ended', ({ peerSocketId }) => {
       console.log('debug: call ended');
@@ -326,11 +410,11 @@ class Play extends Phaser.Scene {
       this.stopStream();
 
       this.removePeerConnection();
-    })
+    });
 
     // player movement
-    this.socket.on('player-moved', otherPlayerInfo => {
-      this.otherPlayersGroup.getChildren().forEach(otherPlayer => {
+    this.socket.on('player-moved', (otherPlayerInfo) => {
+      this.otherPlayersGroup.getChildren().forEach((otherPlayer) => {
         if (otherPlayerInfo.socketId === otherPlayer.socketId) {
           /**
            * CONTAINER
@@ -340,30 +424,30 @@ class Play extends Phaser.Scene {
           otherPlayerSprite.flipX = otherPlayerInfo.flipX;
           otherPlayerSprite.play(otherPlayerInfo.motion, true);
         }
-      })
-    })
+      });
+    });
 
-    this.socket.on('player-disconnected', otherPlayerSocketId => {
+    this.socket.on('player-disconnected', (otherPlayerSocketId) => {
       this.userInterfaceManager.removePlayerFromOnlineList(otherPlayerSocketId);
 
-      console.log('debug: player-disconnected', otherPlayerSocketId)
+      console.log('debug: player-disconnected', otherPlayerSocketId);
       delete this.players[otherPlayerSocketId];
 
       if (this.peerSocketId === otherPlayerSocketId) {
-        console.log('debug: chat peer disconnected')
+        console.log('debug: chat peer disconnected');
         this.socket.emit('end-call', { peerSocketId: this.peerSocketId });
         this.userInterfaceManager.removeInCallInterface();
         this.stopStream();
         this.removePeerConnection();
       }
 
-      this.otherPlayersGroup.getChildren().forEach(player => {
+      this.otherPlayersGroup.getChildren().forEach((player) => {
         if (otherPlayerSocketId === player.socketId) {
           player.removeAll(true); // remove all children and destroy
           player.body.destroy(); // destroy the container itself
         }
-      })
-    })
+      });
+    });
   }
 
   removePeerConnection() {
@@ -376,7 +460,7 @@ class Play extends Phaser.Scene {
       this.peerSocketId = undefined;
     }
 
-    console.log('debug: remove peer', this.myPeer)
+    console.log('debug: remove peer', this.myPeer);
   }
 
   createMap() {
@@ -397,41 +481,56 @@ class Play extends Phaser.Scene {
     // collide player with platform
     platformsColliders.setCollisionByProperty({ collides: true });
 
-    return { environment, platforms, platformsColliders, playerZones }
+    return { environment, platforms, platformsColliders, playerZones };
   }
 
   createBG(map) {
     const bgObject = map.getObjectLayer('distance_bg').objects[0];
 
     if (this.getCurrentMap() === 'bar') {
-      this.add.tileSprite(bgObject.x, bgObject.y, 1600, bgObject.height, 'bar-background')
+      this.add
+        .tileSprite(
+          bgObject.x,
+          bgObject.y,
+          1600,
+          bgObject.height,
+          'bar-background'
+        )
         .setOrigin(0, 1)
         .setDepth(-10);
     } else {
-        this.add.tileSprite(bgObject.x, bgObject.y, 1600, bgObject.height, 'sky')
+      this.add
+        .tileSprite(bgObject.x, bgObject.y, 1600, bgObject.height, 'sky')
         .setOrigin(0, 1)
         .setDepth(-10);
-      }
+    }
   }
 
   createHouses(map) {
     if (map.getObjectLayer('houses')) {
       const houseObjects = map.getObjectLayer('houses').objects;
-      houseObjects.forEach(houseObject => {
-        this.add.tileSprite(houseObject.x, houseObject.y, houseObject.width, houseObject.height, houseObject.name)
+      houseObjects.forEach((houseObject) => {
+        this.add
+          .tileSprite(
+            houseObject.x,
+            houseObject.y,
+            houseObject.width,
+            houseObject.height,
+            houseObject.name
+          )
           .setOrigin(0, 1)
           .setDepth(-5)
           .setScale(0.8);
-      })
+      });
     }
   }
 
   getPlayerZones(playerZonesLayer) {
     const playerZones = playerZonesLayer.objects;
     return {
-      start: playerZones.find(zone => zone.name === 'startZone'),
-      door: playerZones.find(zone => zone.name === 'doorZone')
-    }
+      start: playerZones.find((zone) => zone.name === 'startZone'),
+      door: playerZones.find((zone) => zone.name === 'doorZone')
+    };
   }
 
   setupFollowupCameraOn(player) {
@@ -443,7 +542,8 @@ class Play extends Phaser.Scene {
   }
 
   setPlayerInfoInteraction(container, element) {
-    container.setInteractive()
+    container
+      .setInteractive()
       .on(Phaser.Input.Events.GAMEOBJECT_POINTER_DOWN, () => {
         console.log('down');
         element.setVisible(!element.visible);
@@ -454,7 +554,7 @@ class Play extends Phaser.Scene {
    * CALLBACK FUNCTIONS
    */
   toggleVideoButtonCallback(toggleVideoButton, stream) {
-    console.log('debug: toggle video button')
+    console.log('debug: toggle video button');
 
     let enabled = stream.getVideoTracks()[0].enabled;
     if (enabled) {
@@ -464,11 +564,14 @@ class Play extends Phaser.Scene {
       stream.getVideoTracks()[0].enabled = true;
       toggleVideoButton.innerText = 'Hide video';
     }
-    console.log('debug: toggle video button - enabled', stream.getVideoTracks()[0].enabled)
+    console.log(
+      'debug: toggle video button - enabled',
+      stream.getVideoTracks()[0].enabled
+    );
   }
 
   toggleAudioButtonCallback(toggleAudioButton, stream) {
-    console.log('debug: toggle audio button')
+    console.log('debug: toggle audio button');
 
     let enabled = stream.getAudioTracks()[0].enabled;
     if (enabled) {
@@ -478,20 +581,23 @@ class Play extends Phaser.Scene {
       stream.getAudioTracks()[0].enabled = true;
       toggleAudioButton.innerText = 'Mute';
     }
-    console.log('debug: toggle audio button - enabled', stream.getAudioTracks()[0].enabled)
+    console.log(
+      'debug: toggle audio button - enabled',
+      stream.getAudioTracks()[0].enabled
+    );
   }
 
   setMediaConstraints(devices) {
-    const mediaConstraints = { video: false, audio: false }
-    devices.forEach(device => {
+    const mediaConstraints = { video: false, audio: false };
+    devices.forEach((device) => {
       if (device.kind === 'audioinput') {
         mediaConstraints.audio = true;
       } else if (device.kind === 'videoinput') {
         mediaConstraints.video = true;
       }
-    })
+    });
 
-    console.log("debug: mediaConstraints", mediaConstraints);
+    console.log('debug: mediaConstraints', mediaConstraints);
 
     return navigator.mediaDevices.getUserMedia(mediaConstraints);
   }
@@ -499,7 +605,7 @@ class Play extends Phaser.Scene {
   acceptButtonCallback(callerId) {
     console.log('debug: accepted call');
 
-    console.log('debug: init peer')
+    console.log('debug: init peer');
     this.myPeer = new SimplePeer({
       initiator: true,
       trickle: true,
@@ -515,33 +621,48 @@ class Play extends Phaser.Scene {
           }
         ]
       }
-    })
+    });
 
-    this.myPeer.on('signal', receiverSignalData => {
-      console.log('debug: send peer offer', receiverSignalData, new Date().toISOString())
-      this.socket.emit('peer-offer', { receiverSignalData, receiverSocketId: this.socket.id, callerSocketId: callerId })
-})
+    this.myPeer.on('signal', (receiverSignalData) => {
+      console.log(
+        'debug: send peer offer',
+        receiverSignalData,
+        new Date().toISOString()
+      );
+      this.socket.emit('peer-offer', {
+        receiverSignalData,
+        receiverSocketId: this.socket.id,
+        callerSocketId: callerId
+      });
+    });
 
-    this.myPeer.on('stream', callerStream => {
-      console.log('debug: receive stream')
+    this.myPeer.on('stream', (callerStream) => {
+      console.log('debug: receive stream');
       this.userInterfaceManager.addStreamToVideoElement(callerStream, false);
-    })
+    });
 
     this.myPeer.on('close', () => {
-      console.log('debug: close peer')
+      console.log('debug: close peer');
       this.stopStream();
       this.removePeerConnection();
-    })
+    });
 
     this.userInterfaceManager.removeIncomingCallInterface();
-    this.userInterfaceManager.createInCallInterface(this.myStream, this.toggleVideoButtonCallback, this.toggleAudioButtonCallback, this.endCallButtonCallback);
+    this.userInterfaceManager.createInCallInterface(
+      this.myStream,
+      this.toggleVideoButtonCallback,
+      this.toggleAudioButtonCallback,
+      this.endCallButtonCallback
+    );
 
-    navigator.mediaDevices.getUserMedia({ video: true, audio: true }).then(stream => {
-      this.myStream = stream;
-      this.userInterfaceManager.addStreamToVideoElement(this.myStream, true);
-      console.log('debug: add stream');
-      this.myPeer.addStream(this.myStream);
-    })
+    navigator.mediaDevices
+      .getUserMedia({ video: true, audio: true })
+      .then((stream) => {
+        this.myStream = stream;
+        this.userInterfaceManager.addStreamToVideoElement(this.myStream, true);
+        console.log('debug: add stream');
+        this.myPeer.addStream(this.myStream);
+      });
   }
   // receiver - accept call
   // acceptButtonCallback(callerId) {
@@ -594,22 +715,22 @@ class Play extends Phaser.Scene {
   // }
 
   stopStream() {
-    console.log('debug: stop stream')
+    console.log('debug: stop stream');
     if (this.myStream) {
-      const tracks = this.myStream.getTracks()
-      tracks.forEach(track => track.stop())
+      const tracks = this.myStream.getTracks();
+      tracks.forEach((track) => track.stop());
     }
   }
 
   declineButtonCallback(callerId) {
     console.log('debug: call declined', this);
-    this.socket.emit('call-declined', { callerId })
+    this.socket.emit('call-declined', { callerId });
 
     this.userInterfaceManager.removeIncomingCallInterface();
   }
 
   endCallButtonCallback(endCallButton) {
-    console.log('debug: end call')
+    console.log('debug: end call');
     this.userInterfaceManager.removeInCallInterface();
     this.stopStream();
     endCallButton.remove();

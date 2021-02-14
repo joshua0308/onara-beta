@@ -6,7 +6,12 @@ class UserInterfaceManager {
     this.firebaseDb = firebaseDb;
   }
 
-  createInCallInterface(stream, toggleVideoButtonCallback, toggleAudioButtonCallback, endCallButtonCallback) {
+  createInCallInterface(
+    stream,
+    toggleVideoButtonCallback,
+    toggleAudioButtonCallback,
+    endCallButtonCallback
+  ) {
     const inCallModalWrapper = document.getElementById('in-call-modal-wrapper');
     inCallModalWrapper.style.display = 'inline';
     inCallModalWrapper.isGameVisible = true;
@@ -15,15 +20,23 @@ class UserInterfaceManager {
     const videosWrapper = document.createElement('div');
     videosWrapper.setAttribute('id', 'videos-wrapper');
 
-    const inCallButtonsWrapper = this.createInCallButtons(stream, toggleVideoButtonCallback, toggleAudioButtonCallback, endCallButtonCallback);
+    const inCallButtonsWrapper = this.createInCallButtons(
+      stream,
+      toggleVideoButtonCallback,
+      toggleAudioButtonCallback,
+      endCallButtonCallback
+    );
 
     inCallModalWrapper.appendChild(videosWrapper);
     inCallModalWrapper.appendChild(inCallButtonsWrapper);
   }
 
   createOnlineList(barId) {
-    if (!barId) { barId = 'Town'; }
-    else { barId = `Bar (${barId})`; }
+    if (!barId) {
+      barId = 'Town';
+    } else {
+      barId = `Bar (${barId})`;
+    }
 
     const onlineListWrapper = document.getElementById('online-list-wrapper');
 
@@ -45,19 +58,23 @@ class UserInterfaceManager {
   }
 
   removeBarQuestionnaireInterface() {
-    const barQuestionnaireModalWrapper = document.getElementById('bar-questionnaire-modal-wrapper');
+    const barQuestionnaireModalWrapper = document.getElementById(
+      'bar-questionnaire-modal-wrapper'
+    );
     if (barQuestionnaireModalWrapper.style.display === 'none') return;
 
     barQuestionnaireModalWrapper.style.display = 'none';
 
     while (barQuestionnaireModalWrapper.firstChild) {
-      barQuestionnaireModalWrapper.removeChild(barQuestionnaireModalWrapper.lastChild);
+      barQuestionnaireModalWrapper.removeChild(
+        barQuestionnaireModalWrapper.lastChild
+      );
     }
   }
 
   createLevelOneFilter(id, text, color = 'primary') {
     const button = document.createElement('button');
-    button.classList.add('btn', `btn-outline-${color}`)
+    button.classList.add('btn', `btn-outline-${color}`);
     button.setAttribute('id', id);
     button.innerText = text;
     button.name = text;
@@ -76,38 +93,43 @@ class UserInterfaceManager {
       if (room.selected) {
         room.selected = false;
         this.selectedBar = undefined;
-        room.classList.remove('room-selected')
+        room.classList.remove('room-selected');
       } else {
         room.selected = true;
-        room.classList.add('room-selected')
+        room.classList.add('room-selected');
         this.selectedBar = roomName;
 
         const rooms = document.querySelectorAll('#room-container');
-        rooms.forEach(otherRoom => {
+        rooms.forEach((otherRoom) => {
           if (room !== otherRoom) {
-            otherRoom.classList.remove('room-selected')
+            otherRoom.classList.remove('room-selected');
             otherRoom.selected = false;
           }
-        })
+        });
       }
 
       // eslint-disable-next-line no-console
-      console.log("debug: this.selectedBar", this.selectedBar);
-    })
+      console.log('debug: this.selectedBar', this.selectedBar);
+    });
     return room;
   }
 
   createLevelTwoFilters(levelTwoFilters) {
-    const levelTwoFiltersButtons = Object.keys(levelTwoFilters).map(levelTwoFilter => this.createLevelOneFilter('level-one-option', levelTwoFilter, 'success'));
-
+    const levelTwoFiltersButtons = Object.keys(
+      levelTwoFilters
+    ).map((levelTwoFilter) =>
+      this.createLevelOneFilter('level-one-option', levelTwoFilter, 'success')
+    );
 
     // create all level three rooms
     const levelThreeRooms = [];
     Object.entries(levelTwoFilters).forEach(([level_two, level_three]) => {
-      levelThreeRooms.push(...level_three.map(room => this.createLevelThreeRoom(level_two, room)))
-    })
+      levelThreeRooms.push(
+        ...level_three.map((room) => this.createLevelThreeRoom(level_two, room))
+      );
+    });
 
-    levelTwoFiltersButtons.forEach(button => {
+    levelTwoFiltersButtons.forEach((button) => {
       button.addEventListener('click', () => {
         const isSelected = button.classList.contains('btn-success');
 
@@ -115,33 +137,41 @@ class UserInterfaceManager {
           button.selected = false;
           button.classList.remove('btn-success');
           button.classList.add('btn-outline-success');
-          levelThreeRooms.forEach(room => {
+          levelThreeRooms.forEach((room) => {
             if (room.levelTwoFilter === button.name) {
               room.style.display = 'none';
             }
-          })
+          });
         } else {
           button.selected = true;
-          button.classList.remove('btn-outline-success')
-          button.classList.add('btn-success')
-          levelThreeRooms.forEach(room => {
+          button.classList.remove('btn-outline-success');
+          button.classList.add('btn-success');
+          levelThreeRooms.forEach((room) => {
             if (room.levelTwoFilter === button.name) {
               room.style.display = 'inline-block';
             }
-          })
+          });
         }
-      })
-    })
+      });
+    });
 
-    const levelTwoFiltersWrapper = document.getElementById('level-two-option-wrapper');
+    const levelTwoFiltersWrapper = document.getElementById(
+      'level-two-option-wrapper'
+    );
     levelTwoFiltersWrapper.append(...levelTwoFiltersButtons);
-    const levelThreeRoomsWrapper = document.getElementById('level-three-option-wrapper');
+    const levelThreeRoomsWrapper = document.getElementById(
+      'level-three-option-wrapper'
+    );
     levelThreeRoomsWrapper.append(...levelThreeRooms);
   }
 
   removeLevelTwoFilters() {
-    const levelTwoFiltersWrapper = document.getElementById('level-two-option-wrapper');
-    const levelThreeFiltersWrapper = document.getElementById('level-three-option-wrapper');
+    const levelTwoFiltersWrapper = document.getElementById(
+      'level-two-option-wrapper'
+    );
+    const levelThreeFiltersWrapper = document.getElementById(
+      'level-three-option-wrapper'
+    );
 
     while (levelTwoFiltersWrapper.firstChild) {
       levelTwoFiltersWrapper.removeChild(levelTwoFiltersWrapper.lastChild);
@@ -153,7 +183,9 @@ class UserInterfaceManager {
   }
 
   createBarQuestionnaireInterface() {
-    const barQuestionnaireModalWrapper = document.getElementById('bar-questionnaire-modal-wrapper');
+    const barQuestionnaireModalWrapper = document.getElementById(
+      'bar-questionnaire-modal-wrapper'
+    );
 
     if (barQuestionnaireModalWrapper.style.display === 'flex') return;
 
@@ -175,7 +207,7 @@ class UserInterfaceManager {
       },
       health: {
         mental_awareness: ['yoga', 'meditation', 'talk to a therapist'],
-        physical_fitness: ['weight', 'strength', 'endurance'],
+        physical_fitness: ['weight', 'strength', 'endurance']
         // religion: ['buddhism', 'protestant', 'catholic']
       },
       fun: {
@@ -183,35 +215,37 @@ class UserInterfaceManager {
         activity: ['karaoke', 'cook', 'watch'],
         chat: ['sports', 'books', 'travel']
       }
-    }
+    };
 
-    const levelOneFilters = Object.keys(filters).map(levelOneFilter => this.createLevelOneFilter('level-one-option', levelOneFilter));
+    const levelOneFilters = Object.keys(filters).map((levelOneFilter) =>
+      this.createLevelOneFilter('level-one-option', levelOneFilter)
+    );
 
-    levelOneFilters.forEach(button => {
+    levelOneFilters.forEach((button) => {
       button.addEventListener('click', () => {
         const isSelected = button.classList.contains('btn-primary');
 
         if (isSelected) {
           this.removeLevelTwoFilters();
           button.selected = false;
-          button.classList.remove('btn-primary')
-          button.classList.add('btn-outline-primary')
+          button.classList.remove('btn-primary');
+          button.classList.add('btn-outline-primary');
         } else {
           this.removeLevelTwoFilters();
           this.createLevelTwoFilters(filters[button.name]);
           button.selected = true;
-          button.classList.remove('btn-outline-primary')
-          button.classList.add('btn-primary')
-          levelOneFilters.forEach(otherButton => {
+          button.classList.remove('btn-outline-primary');
+          button.classList.add('btn-primary');
+          levelOneFilters.forEach((otherButton) => {
             if (button !== otherButton) {
-              otherButton.classList.remove('btn-primary')
-              otherButton.classList.add('btn-outline-primary')
+              otherButton.classList.remove('btn-primary');
+              otherButton.classList.add('btn-outline-primary');
               otherButton.selected = false;
             }
-          })
+          });
         }
-      })
-    })
+      });
+    });
 
     const levelOneFiltersWrapper = document.createElement('div');
     levelOneFiltersWrapper.setAttribute('id', 'level-one-option-wrapper');
@@ -225,9 +259,9 @@ class UserInterfaceManager {
 
     const backToTownButton = document.createElement('div');
     backToTownButton.setAttribute('id', 'back-to-game-button');
-    backToTownButton.innerText = "Go back to town";
+    backToTownButton.innerText = 'Go back to town';
     backToTownButton.addEventListener('click', () => {
-      console.log(this.scene.getCurrentMap())
+      console.log(this.scene.getCurrentMap());
       if (this.scene.getCurrentMap() === 'bar') {
         this.scene.registry.set('map', 'town');
         this.scene.socket.close();
@@ -236,15 +270,15 @@ class UserInterfaceManager {
         this.scene.scene.restart({ barId: undefined });
       }
       this.removeBarQuestionnaireInterface();
-    })
+    });
 
     const joinBarButton = document.createElement('div');
     joinBarButton.setAttribute('id', 'join-bar-button');
-    joinBarButton.innerText = "Join bar";
+    joinBarButton.innerText = 'Join bar';
 
     joinBarButton.addEventListener('click', () => {
       if (!this.selectedBar) {
-        alert('Please select a bar to join 🙂')
+        alert('Please select a bar to join 🙂');
       } else {
         this.scene.socket.close();
         this.scene.registry.set('map', 'bar');
@@ -252,15 +286,15 @@ class UserInterfaceManager {
         this.removeBarQuestionnaireInterface();
         this.scene.scene.restart({ barId: this.selectedBar });
       }
-    })
+    });
 
     const actionButtonsWrapper = document.createElement('div');
     actionButtonsWrapper.setAttribute('id', 'action-buttons-wrapper');
 
     if (!(this.scene.getCurrentMap() === 'town')) {
-      actionButtonsWrapper.appendChild(backToTownButton)
+      actionButtonsWrapper.appendChild(backToTownButton);
     }
-    actionButtonsWrapper.appendChild(joinBarButton)
+    actionButtonsWrapper.appendChild(joinBarButton);
 
     const questionnaireWrapper = document.createElement('div');
     questionnaireWrapper.setAttribute('id', 'questionnaire-wrapper');
@@ -272,7 +306,6 @@ class UserInterfaceManager {
     questionnaireWrapper.appendChild(actionButtonsWrapper);
 
     barQuestionnaireModalWrapper.appendChild(questionnaireWrapper);
-
   }
 
   createMenuButtons(myPlayer) {
@@ -281,45 +314,55 @@ class UserInterfaceManager {
     if (menuButtonsWrapper.childNodes.length) return;
 
     const profileButton = document.createElement('button');
-    profileButton.classList.add("btn", "btn-light", "profile-button")
-    profileButton.innerText = "Profile";
+    profileButton.classList.add('btn', 'btn-light', 'profile-button');
+    profileButton.innerText = 'Profile';
     profileButton.addEventListener('click', () => {
       this.createProfileFormInterface(myPlayer);
-    })
+    });
 
     const logoutButton = document.createElement('button');
-    logoutButton.classList.add("btn", "btn-light", "profile-button")
-    logoutButton.innerText = "Logout";
+    logoutButton.classList.add('btn', 'btn-light', 'profile-button');
+    logoutButton.innerText = 'Logout';
     logoutButton.addEventListener('click', () => {
       this.firebaseAuth.signOut();
-    })
+    });
 
-    menuButtonsWrapper.appendChild(profileButton)
-    menuButtonsWrapper.appendChild(logoutButton)
+    menuButtonsWrapper.appendChild(profileButton);
+    menuButtonsWrapper.appendChild(logoutButton);
   }
 
   removePlayerProfileInterface() {
-    const playerProfileWrapper = document.getElementById('player-profile-wrapper');
+    const playerProfileWrapper = document.getElementById(
+      'player-profile-wrapper'
+    );
     playerProfileWrapper.style.width = '0px';
 
     setTimeout(() => {
       while (playerProfileWrapper.firstChild) {
         playerProfileWrapper.removeChild(playerProfileWrapper.lastChild);
       }
-    }, 500)
+    }, 500);
   }
 
   async createPlayerProfileInterface(player, socket) {
-    console.log("debug: createPlayerProfileInterface", player);
+    console.log('debug: createPlayerProfileInterface', player);
 
-    const playerProfileWrapper = document.getElementById('player-profile-wrapper');
-    console.log(playerProfileWrapper.style.width)
+    const playerProfileWrapper = document.getElementById(
+      'player-profile-wrapper'
+    );
+    console.log(playerProfileWrapper.style.width);
 
     // if selecting the same player but the profile is already opened, return
-    if (playerProfileWrapper.style.width !== '0px' && this.profilePlayerId === player.socketId) {
+    if (
+      playerProfileWrapper.style.width !== '0px' &&
+      this.profilePlayerId === player.socketId
+    ) {
       return;
-    } else if (playerProfileWrapper.style.width !== '0px' && this.profilePlayerId !== player.socketId) {
-      // if selecting a different profile 
+    } else if (
+      playerProfileWrapper.style.width !== '0px' &&
+      this.profilePlayerId !== player.socketId
+    ) {
+      // if selecting a different profile
       while (playerProfileWrapper.firstChild) {
         playerProfileWrapper.removeChild(playerProfileWrapper.lastChild);
       }
@@ -332,14 +375,15 @@ class UserInterfaceManager {
     const doc = await playerDocRef.get();
     const playerData = doc.data();
     // eslint-disable-next-line no-console
-    console.log("debug: playerData", playerData);
+    console.log('debug: playerData', playerData);
 
     const playerImage = document.createElement('img');
     playerImage.setAttribute('id', 'player-image');
-    playerImage.src = playerData.profilePicURL || "public/assets/placeholder-profile-pic.png";
+    playerImage.src =
+      playerData.profilePicURL || 'public/assets/placeholder-profile-pic.png';
 
     const playerName = document.createElement('div');
-    playerName.setAttribute('id', 'player-name')
+    playerName.setAttribute('id', 'player-name');
     playerName.innerText = playerData.displayName;
 
     const playerBio = document.createElement('div');
@@ -356,7 +400,7 @@ class UserInterfaceManager {
       }
 
       this.removePlayerProfileInterface();
-    })
+    });
 
     const buyADrinkButton = document.createElement('button');
     buyADrinkButton.setAttribute('id', 'accept-button');
@@ -366,9 +410,9 @@ class UserInterfaceManager {
       buyADrinkButton.innerText = 'Calling...';
       closeButton.innerText = 'Cancel call';
       buyADrinkButton.style.backgroundColor = '#c9a747';
-      socket.emit('request-call', { receiverId: player.socketId })
+      socket.emit('request-call', { receiverId: player.socketId });
       buyADrinkButton.removeEventListener('click', buyADrinkButtonCallback);
-    }
+    };
 
     buyADrinkButton.addEventListener('click', buyADrinkButtonCallback);
 
@@ -384,32 +428,39 @@ class UserInterfaceManager {
   updateOnlineList(playerSocketId, updatedName) {
     let listItem;
     if (document.getElementById(playerSocketId)) {
-      listItem = document.getElementById(playerSocketId)
+      listItem = document.getElementById(playerSocketId);
     } else {
-      listItem = document.getElementById('my-unique-id')
+      listItem = document.getElementById('my-unique-id');
     }
 
     listItem.innerText = updatedName;
   }
 
   async createProfileFormInterface(myPlayer) {
-    const myPlayerDocRef = this.firebaseDb.collection('players').doc(myPlayer.uid);
+    const myPlayerDocRef = this.firebaseDb
+      .collection('players')
+      .doc(myPlayer.uid);
 
     const doc = await myPlayerDocRef.get();
     const myPlayerData = doc.data();
 
-    console.log("debug: ", myPlayerData);
+    console.log('debug: ', myPlayerData);
 
     const profileFormWrapper = document.getElementById('profile-form-wrapper');
-    const profileEditForm = document.getElementById("profile-edit-form");
-    const profileImage = document.getElementById("profile-image");
+    const profileEditForm = document.getElementById('profile-edit-form');
+    const profileImage = document.getElementById('profile-image');
 
     profileEditForm.elements['name'].value = myPlayerData.displayName;
-    if (myPlayerData.profilePicURL) profileImage.src = myPlayerData.profilePicURL;
-    if (myPlayerData.position) profileEditForm.elements['position'].value = myPlayerData.position;
-    if (myPlayerData.education) profileEditForm.elements['education'].value = myPlayerData.education;
-    if (myPlayerData.city) profileEditForm.elements['city'].value = myPlayerData.city;
-    if (myPlayerData.country) profileEditForm.elements['country'].value = myPlayerData.country;
+    if (myPlayerData.profilePicURL)
+      profileImage.src = myPlayerData.profilePicURL;
+    if (myPlayerData.position)
+      profileEditForm.elements['position'].value = myPlayerData.position;
+    if (myPlayerData.education)
+      profileEditForm.elements['education'].value = myPlayerData.education;
+    if (myPlayerData.city)
+      profileEditForm.elements['city'].value = myPlayerData.city;
+    if (myPlayerData.country)
+      profileEditForm.elements['country'].value = myPlayerData.country;
 
     const saveButton = document.getElementById('save-profile-button');
     const closeButton = document.getElementById('close-profile-button');
@@ -429,16 +480,23 @@ class UserInterfaceManager {
         city: profileEditForm.elements['city'].value,
         country: profileEditForm.elements['country'].value,
         updatedAt: this.firebase.firestore.Timestamp.now()
-      }
+      };
 
-      this.firebaseDb.collection('players').doc(myPlayer.uid).set(formInputValues, { merge: true }).then(() => {
-        this.scene.updateMyPlayerInfo(formInputValues);
-        this.updateOnlineList(myPlayer.socketId, formInputValues.displayName);
-        this.scene.myPlayerSprite.updatePlayerName(formInputValues.displayName);
-        this.scene.socket.emit('update-player', this.scene.myPlayer);
-        document.getElementById('profile-update-status').style.visibility = 'visible';
-      });
-    }
+      this.firebaseDb
+        .collection('players')
+        .doc(myPlayer.uid)
+        .set(formInputValues, { merge: true })
+        .then(() => {
+          this.scene.updateMyPlayerInfo(formInputValues);
+          this.updateOnlineList(myPlayer.socketId, formInputValues.displayName);
+          this.scene.myPlayerSprite.updatePlayerName(
+            formInputValues.displayName
+          );
+          this.scene.socket.emit('update-player', this.scene.myPlayer);
+          document.getElementById('profile-update-status').style.visibility =
+            'visible';
+        });
+    };
 
     const closeButtonCallback = () => {
       console.log('close profile');
@@ -447,8 +505,9 @@ class UserInterfaceManager {
       saveButton.removeEventListener('click', saveButtonCallback);
       this.removeProfileFormInterface();
 
-      document.getElementById('profile-update-status').style.visibility = 'hidden';
-    }
+      document.getElementById('profile-update-status').style.visibility =
+        'hidden';
+    };
 
     saveButton.addEventListener('click', saveButtonCallback);
     closeButton.addEventListener('click', closeButtonCallback);
@@ -464,10 +523,17 @@ class UserInterfaceManager {
     profileForm.classList.remove('was-validated');
   }
 
-  async createIncomingCallInterface(players, callerId, acceptButtonCallback, declineButtonCallback) {
+  async createIncomingCallInterface(
+    players,
+    callerId,
+    acceptButtonCallback,
+    declineButtonCallback
+  ) {
     console.log('debug: incoming call from', players[callerId]);
 
-    const callerDocRef = this.firebaseDb.collection('players').doc(players[callerId].uid);
+    const callerDocRef = this.firebaseDb
+      .collection('players')
+      .doc(players[callerId].uid);
     const doc = await callerDocRef.get();
     const callerData = doc.data();
 
@@ -476,7 +542,8 @@ class UserInterfaceManager {
 
     const callerImage = document.createElement('img');
     callerImage.setAttribute('id', 'caller-image');
-    callerImage.src = callerData.profilePicURL || "public/assets/placeholder-profile-pic.png";
+    callerImage.src =
+      callerData.profilePicURL || 'public/assets/placeholder-profile-pic.png';
 
     const callerInfo = document.createElement('div');
     callerInfo.setAttribute('id', 'caller-info');
@@ -485,12 +552,16 @@ class UserInterfaceManager {
     const acceptButton = document.createElement('button');
     acceptButton.setAttribute('id', 'accept-button');
     acceptButton.innerText = 'Accept';
-    acceptButton.addEventListener('click', () => acceptButtonCallback(callerId));
-    
+    acceptButton.addEventListener('click', () =>
+      acceptButtonCallback(callerId)
+    );
+
     const declineButton = document.createElement('button');
     declineButton.setAttribute('id', 'decline-button');
     declineButton.innerText = 'Decline';
-    declineButton.addEventListener('click', () => declineButtonCallback(callerId));
+    declineButton.addEventListener('click', () =>
+      declineButtonCallback(callerId)
+    );
 
     const buttonWrapper = document.createElement('div');
     buttonWrapper.setAttribute('id', 'caller-buttons-wrapper');
@@ -512,40 +583,55 @@ class UserInterfaceManager {
     callerCardWrapper.appendChild(callerCard);
   }
 
-  createInCallButtons(stream, toggleVideoButtonCallback, toggleAudioButtonCallback, endCallButtonCallback) {
+  createInCallButtons(
+    stream,
+    toggleVideoButtonCallback,
+    toggleAudioButtonCallback,
+    endCallButtonCallback
+  ) {
     const toggleVideoButton = document.createElement('button');
     toggleVideoButton.setAttribute('id', 'toggle-video');
     toggleVideoButton.innerText = 'Hide video';
-    toggleVideoButton.addEventListener('click', () => toggleVideoButtonCallback(toggleVideoButton, stream))
-    
+    toggleVideoButton.addEventListener('click', () =>
+      toggleVideoButtonCallback(toggleVideoButton, stream)
+    );
+
     const toggleAudioButton = document.createElement('button');
     toggleAudioButton.setAttribute('id', 'toggle-audio');
     toggleAudioButton.innerText = 'Mute';
-    toggleAudioButton.addEventListener('click', () => toggleAudioButtonCallback(toggleAudioButton, stream))
+    toggleAudioButton.addEventListener('click', () =>
+      toggleAudioButtonCallback(toggleAudioButton, stream)
+    );
 
     const toggleBackgroundButton = document.createElement('button');
     toggleBackgroundButton.setAttribute('id', 'toggle-background');
     toggleBackgroundButton.innerText = 'Hide game';
     toggleBackgroundButton.addEventListener('click', () => {
-      const inCallModalWrapper = document.getElementById('in-call-modal-wrapper');
+      const inCallModalWrapper = document.getElementById(
+        'in-call-modal-wrapper'
+      );
       if (inCallModalWrapper.isGameVisible) {
         inCallModalWrapper.style.backgroundColor = '#000000';
         inCallModalWrapper.isGameVisible = false;
-        toggleBackgroundButton.innerText = 'Show game'
+        toggleBackgroundButton.innerText = 'Show game';
       } else {
         inCallModalWrapper.style.backgroundColor = 'rgba(74, 67, 67, 0.4)';
         inCallModalWrapper.isGameVisible = true;
-        toggleBackgroundButton.innerText = 'Hide game'
+        toggleBackgroundButton.innerText = 'Hide game';
       }
-    })
+    });
 
     const endCallButton = document.createElement('button');
     endCallButton.classList.add('button');
     endCallButton.setAttribute('id', 'end-call-button');
     endCallButton.innerText = 'Leave chat';
-    endCallButton.addEventListener('click', () => endCallButtonCallback(endCallButton))
+    endCallButton.addEventListener('click', () =>
+      endCallButtonCallback(endCallButton)
+    );
 
-    const inCallButtonsWrapper = document.createElement('in-call-buttons-wrapper');
+    const inCallButtonsWrapper = document.createElement(
+      'in-call-buttons-wrapper'
+    );
     inCallButtonsWrapper.setAttribute('id', 'in-call-buttons-wrapper');
 
     inCallButtonsWrapper.appendChild(toggleVideoButton);
@@ -601,10 +687,9 @@ class UserInterfaceManager {
     playerListItem.innerText = playerName;
     playerListItem.setAttribute('id', playerSocketId);
 
-
     if (isCurrentPlayer) {
       playerListItem.style.fontWeight = '600';
-      onlineList.insertBefore(playerListItem, onlineList.firstChild)
+      onlineList.insertBefore(playerListItem, onlineList.firstChild);
     } else {
       onlineList.appendChild(playerListItem);
     }

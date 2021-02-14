@@ -3,7 +3,7 @@ function logout() {
 }
 
 function profile() {
-  window.location.replace("/profile");
+  window.location.replace('/profile');
 }
 
 let playerInfo;

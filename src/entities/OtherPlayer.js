@@ -1,5 +1,13 @@
 class OtherPlayer extends Phaser.GameObjects.Container {
-  constructor(scene, x, y, socket, playerInfo, otherPlayersGroup, userInterfaceManager) {
+  constructor(
+    scene,
+    x,
+    y,
+    socket,
+    playerInfo,
+    otherPlayersGroup,
+    userInterfaceManager
+  ) {
     super(scene, x, y);
 
     this.uid = playerInfo.uid;
@@ -11,12 +19,16 @@ class OtherPlayer extends Phaser.GameObjects.Container {
     this.createSprite();
     this.createPlayerName(playerInfo.displayName);
 
-
-    this.setInteractive()
-      .on(Phaser.Input.Events.GAMEOBJECT_POINTER_DOWN, () => {
+    this.setInteractive().on(
+      Phaser.Input.Events.GAMEOBJECT_POINTER_DOWN,
+      () => {
         console.log('down');
-        this.userInterfaceManager.createPlayerProfileInterface(playerInfo, socket);
-      });
+        this.userInterfaceManager.createPlayerProfileInterface(
+          playerInfo,
+          socket
+        );
+      }
+    );
 
     otherPlayersGroup.add(this);
   }
@@ -41,7 +53,7 @@ class OtherPlayer extends Phaser.GameObjects.Container {
     nameElement.setAttribute('id', 'player-sprite');
     nameElement.innerText = name;
     this.nameChild = this.scene.add.dom(0, 0, nameElement);
-    this.nameChild.setOrigin(0.5, -2.3)
+    this.nameChild.setOrigin(0.5, -2.3);
     this.add(this.nameChild);
   }
 
@@ -58,9 +70,9 @@ class OtherPlayer extends Phaser.GameObjects.Container {
     const buyDrinkButtonElement = document.createElement('button');
     buyDrinkButtonElement.innerText = 'buy a drink!';
     buyDrinkButtonElement.addEventListener('click', () => {
-      console.log('button clicked')
-      this.socket.emit('request-call', { receiverId: this.socketId })
-    })
+      console.log('button clicked');
+      this.socket.emit('request-call', { receiverId: this.socketId });
+    });
 
     const buyDrinkButton = this.scene.add.dom(0, -40, buyDrinkButtonElement);
     buyDrinkButton.setVisible(false);
