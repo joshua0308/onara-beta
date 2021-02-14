@@ -1,6 +1,6 @@
 const path = require('path');
-const CopyPlugin = require('copy-webpack-plugin');
-const webpack = require('webpack');
+// const CopyPlugin = require('copy-webpack-plugin');
+// const webpack = require('webpack');
 
 module.exports = {
   mode: 'development',
@@ -9,19 +9,8 @@ module.exports = {
   },
   devtool: 'eval-source-map',
   output: {
-    filename: '[name].js',
-    path: path.resolve(__dirname, 'build')
-  },
-  optimization: {
-    splitChunks: {
-      cacheGroups: {
-        commons: {
-          test: /[\\/]node_modules[\\/]/,
-          name: 'vendor',
-          chunks: 'all'
-        }
-      }
-    }
+    filename: 'bundle.js',
+    path: path.resolve(__dirname, 'dist')
   },
   module: {
     rules: [
@@ -33,24 +22,26 @@ module.exports = {
         }
       }
     ]
-  },
-  devServer: {
-    contentBase: path.resolve(__dirname, 'build'),
-    compress: true,
-    port: 8080
-  },
-  plugins: [
-    new webpack.DefinePlugin({
-      CANVAS_RENDERER: JSON.stringify(true),
-      WEBGL_RENDERER: JSON.stringify(true)
-    }),
-    new CopyPlugin({
-      patterns: [
-        {
-          from: path.resolve(__dirname, 'public/**/*'),
-          to: path.resolve(__dirname, 'build')
-        }
-      ]
-    })
-  ]
+  }
+  // optimization: {
+  //   splitChunks: {
+  //     cacheGroups: {
+  //       commons: {
+  //         test: /[\\/]node_modules[\\/]/,
+  //         name: 'vendor',
+  //         chunks: 'all'
+  //       }
+  //     }
+  //   }
+  // },
+  // plugins: [
+  //   new CopyPlugin({
+  //     patterns: [
+  //       {
+  //         from: path.resolve(__dirname, 'public/**/*'),
+  //         to: path.resolve(__dirname, 'dist')
+  //       }
+  //     ]
+  //   })
+  // ]
 };

@@ -12,6 +12,9 @@ const players = {};
 
 const gameIO = io.of('/game');
 
+const BUNDLE_PATH =
+  process.env.NODE_ENV === 'production' ? 'dist/bundle.js' : 'src/index.js';
+
 const PLAYER_STATUS = {
   IN_CALL: 'in-call',
   AVAILABLE: 'available',
@@ -205,27 +208,26 @@ app.get('/ping', (req, res) => {
 });
 
 app.get('/game', (req, res) => {
-  res.render('game');
+  res.render('game', { BUNDLE_PATH });
 });
 
 app.get('/login', (req, res) => {
   res.render('login');
 });
 
-// deprecated
-// app.get('/profile', (req, res) => {
-//   res.render('profile');
-// })
-
 app.get('/', (req, res) => {
   res.redirect('/login');
 });
 
 app.use('/peerjs', peerServer);
-app.use('/src', express.static(__dirname + '/src'));
 app.use('/assets', express.static(__dirname + '/assets'));
 app.use('/public', express.static(__dirname + '/public'));
-app.use('/build', express.static(__dirname + '/build'));
+
+if (process.env.NODE_ENV === 'development') {
+  app.use('/src', express.static(__dirname + '/src'));
+} else {
+  app.use('/dist', express.static(__dirname + '/dist'));
+}
 
 // need to use http to listen in order for socket.io to work on the client side
 server.listen(PORT, () => console.log(`listening on port ${PORT}...`));
