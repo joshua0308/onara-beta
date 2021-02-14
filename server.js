@@ -223,8 +223,9 @@ app.get('/', (req, res) => {
 
 app.use('/peerjs', peerServer);
 app.use('/src', express.static(__dirname + '/src'));
-app.use('/assets', express.static(__dirname + '/public/assets'));
+app.use('/assets', express.static(__dirname + '/assets'));
 app.use('/public', express.static(__dirname + '/public'));
+app.use('/build', express.static(__dirname + '/build'));
 
 // need to use http to listen in order for socket.io to work on the client side
 server.listen(PORT, () => console.log(`listening on port ${PORT}...`));
