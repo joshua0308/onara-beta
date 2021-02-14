@@ -5,11 +5,12 @@ const path = require('path');
 module.exports = {
   mode: 'development',
   entry: {
-    app: './src/index.js'
+    bundle: './src/index.js',
+    playground: './src/playground.js'
   },
   devtool: 'eval-source-map',
   output: {
-    filename: 'bundle.js',
+    filename: '[name].js',
     path: path.resolve(__dirname, 'dist')
   },
   module: {

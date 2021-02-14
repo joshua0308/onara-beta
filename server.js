@@ -7,13 +7,22 @@ const { ExpressPeerServer } = require('peer');
 const peerServer = ExpressPeerServer(server);
 
 const PORT = process.env.PORT || 3000;
-
 const players = {};
-
 const gameIO = io.of('/game');
 
-const BUNDLE_PATH =
-  process.env.NODE_ENV === 'production' ? 'dist/bundle.js' : 'src/index.js';
+let BUNDLE_PATH;
+let PLAYGROUND_PATH;
+let MAIN_DIR;
+
+if (process.env.NODE_ENV === 'production') {
+  PLAYGROUND_PATH = 'dist/playground.js';
+  BUNDLE_PATH = 'dist/bundle.js';
+  MAIN_DIR = '/dist';
+} else {
+  PLAYGROUND_PATH = 'src/playground.js';
+  BUNDLE_PATH = 'src/index.js';
+  MAIN_DIR = '/src';
+}
 
 const PLAYER_STATUS = {
   IN_CALL: 'in-call',
@@ -215,6 +224,10 @@ app.get('/login', (req, res) => {
   res.render('login');
 });
 
+app.get('/playground', (req, res) => {
+  res.render('playground', { PLAYGROUND_PATH });
+});
+
 app.get('/', (req, res) => {
   res.redirect('/login');
 });
@@ -222,12 +235,7 @@ app.get('/', (req, res) => {
 app.use('/peerjs', peerServer);
 app.use('/assets', express.static(__dirname + '/assets'));
 app.use('/public', express.static(__dirname + '/public'));
-
-if (process.env.NODE_ENV === 'development') {
-  app.use('/src', express.static(__dirname + '/src'));
-} else {
-  app.use('/dist', express.static(__dirname + '/dist'));
-}
+app.use(MAIN_DIR, express.static(__dirname + MAIN_DIR));
 
 // need to use http to listen in order for socket.io to work on the client side
 server.listen(PORT, () => console.log(`listening on port ${PORT}...`));
