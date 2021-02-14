@@ -12,10 +12,9 @@ class Player {
 }
 
 class Play extends Phaser.Scene {
-  players = {};
-
   constructor(config) {
     super('PlayScene');
+    this.player = {};
     this.config = config;
 
     this.acceptButtonCallback = this.acceptButtonCallback.bind(this);
@@ -40,7 +39,7 @@ class Play extends Phaser.Scene {
     return 'learn';
 
     // open bar questionnaire
-    this.userInterfaceManager.createBarQuestionnaireInterface();
+    // this.userInterfaceManager.createBarQuestionnaireInterface();
   }
 
   updateMyPlayerInfo(updatedPlayerInfo) {

@@ -50,7 +50,7 @@ function updateProfile(e) {
     } else if (doc_properties.includes(key)) {
       updated_doc[key] = value;
     }
-  };
+  }
 
   currentUser.updateProfile({
     displayName: updated_user.name

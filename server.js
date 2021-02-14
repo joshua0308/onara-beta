@@ -107,22 +107,22 @@ gameIO.on('connection', socket => {
       return socket.to(receiverId).emit('call-received', { callerId: socket.id })
     // }
 
-    if (players[receiverId].status === PLAYER_STATUS.INCOMING_CALL) {
-      return socket.emit('call-request-declined', { receiverId, message: `${players[receiverId].displayName} just got a drink from someone else. Let's wait to see if ${players[receiverId].displayName} accepts 🤞` })
-    }
+    // if (players[receiverId].status === PLAYER_STATUS.INCOMING_CALL) {
+    //   return socket.emit('call-request-declined', { receiverId, message: `${players[receiverId].displayName} just got a drink from someone else. Let's wait to see if ${players[receiverId].displayName} accepts 🤞` })
+    // }
 
-    if (players[receiverId].status === PLAYER_STATUS.OUTGOING_CALL) {
-      return socket.emit('call-request-declined', { receiverId, message: `${players[receiverId].displayName} just got a drink for someone else. Let's wait to see if the other person accepts 🤞` })
-    }
+    // if (players[receiverId].status === PLAYER_STATUS.OUTGOING_CALL) {
+    //   return socket.emit('call-request-declined', { receiverId, message: `${players[receiverId].displayName} just got a drink for someone else. Let's wait to see if the other person accepts 🤞` })
+    // }
 
-    if (players[receiverId].status === PLAYER_STATUS.IN_CALL) {
-      return socket.emit('call-request-declined', { receiverId, message: `${players[receiverId].displayName} is already having a drink with someone else 😢` })
-    }
+    // if (players[receiverId].status === PLAYER_STATUS.IN_CALL) {
+    //   return socket.emit('call-request-declined', { receiverId, message: `${players[receiverId].displayName} is already having a drink with someone else 😢` })
+    // }
 
-    if (players[socket.id].status === PLAYER_STATUS.OUTGOING_CALL
-      || players[socket.id].status === PLAYER_STATUS.IN_CALL) {
-      return socket.emit('call-request-declined', { receiverId, message: 'Hey there! You cannot buy more than one drink at once 😬' })
-    }
+    // if (players[socket.id].status === PLAYER_STATUS.OUTGOING_CALL
+    //   || players[socket.id].status === PLAYER_STATUS.IN_CALL) {
+    //   return socket.emit('call-request-declined', { receiverId, message: 'Hey there! You cannot buy more than one drink at once 😬' })
+    // }
   })
 
   socket.on('cancel-call', ({ receiverId }) => {
