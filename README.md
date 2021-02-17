@@ -31,6 +31,11 @@
 ### Crashes
 - `TypeError: Cannot read property 'status' of undefined`
 
+### Route 53 & Heroku
+- https://devcenter.heroku.com/articles/route-53
+- https://devcenter.heroku.com/articles/ssl-endpoint
+
+
 ### WebRTC
 - [Codelabs webRTC](https://codelabs.developers.google.com/codelabs/webrtc-web#0)
 - [Get started with WebRTC](https://www.html5rocks.com/en/tutorials/webrtc/basics/)
@@ -60,6 +65,7 @@ https://github.com/samme/phaser3-faq/wiki#how-do-i-scaleresize-the-game-canvas
 - if you're camera/audio is disabled, you will get streams from users who were already in the room, but will not receive streams from new users
 
 ### Resize phaser when window size is changed
+- https://phaser.discourse.group/t/game-scaling-resizing-example-v3/1555
 - scale manager
   - https://labs.phaser.io/index.html?dir=scalemanager/&q=
   - https://labs.phaser.io/edit.html?src=src/scalemanager/manually%20resize.js
