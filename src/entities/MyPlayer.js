@@ -1,5 +1,6 @@
 import collidable from '../mixins/collidable.js';
-import initAnimations from './playerAnims.js';
+// import initAnimations from './playerAnims.js';
+import initNewAnimations from './newPlayerAnims.js';
 
 class MyPlayer extends Phaser.GameObjects.Container {
   constructor(scene, x, y, socket, playerInfo) {
@@ -32,21 +33,25 @@ class MyPlayer extends Phaser.GameObjects.Container {
     this.body.setGravityY(this.gravity);
     this.body.setCollideWorldBounds(true);
 
-    initAnimations(this.scene.anims);
+    // initAnimations(this.scene.anims);
+    initNewAnimations(this.scene.anims);
     this.motion = 'idle';
     this.scene.events.on(Phaser.Scenes.Events.UPDATE, this.update, this);
   }
 
   setupContainer() {
-    this.setSize(32, 38);
-    this.setScale(4);
+    this.setSize(100, 230);
+    // this.setScale(1);
 
     // add existing context - this will add image and set gravity
     this.scene.add.existing(this);
     this.scene.physics.add.existing(this);
   }
   createSprite() {
-    const player = this.scene.add.sprite(0, 0, 'player', 0);
+    const player = this.scene.add.sprite(0, 0, 'boy-idle', 0);
+    player.setScale(0.4);
+    // eslint-disable-next-line no-console
+    console.log('debug: player', player);
     player.name = 'sprite';
     this.add(player);
   }
@@ -87,34 +92,43 @@ class MyPlayer extends Phaser.GameObjects.Container {
       this.body.setVelocityX(this.playerSpeed);
       sprite.setFlipX(false);
       this.motion = 'run';
-    } else if (!onFloor) {
+    } else if (this.startJumpMotion || this.motion === 'jump') {
       this.motion = 'jump';
     } else {
       this.body.setVelocityX(0);
       this.motion = 'idle';
     }
 
-    if (
-      (isSpaceJustDown || isUpJustDown) &&
-      (onFloor || this.jumpCount < this.consecutiveJumps)
-    ) {
-      // eslint-disable-next-line no-console
-      console.log('debug: spacebar');
-      this.body.setVelocityY(-this.playerSpeed * 1.3);
-      this.jumpCount += 1;
-    }
-
     if (onFloor) {
       this.jumpCount = 0;
     }
 
+    if (
+      (isSpaceJustDown || isUpJustDown) &&
+      (onFloor || this.jumpCount < this.consecutiveJumps)
+    ) {
+      setTimeout(() => {
+        // need to bend the knees before jumping
+        // as soon as sprite is off the ground
+        // set the startJumpMotion property to false
+        this.body.setVelocityY(-this.playerSpeed * 1.3);
+        this.startJumpMotion = false;
+      }, 310);
+      this.jumpCount += 1;
+      this.startJumpMotion = true;
+    }
+
     // set animation based on movement
-    if (onFloor && this.body.velocity.x !== 0) {
+    if (this.startJumpMotion || !onFloor) {
+      this.motion = 'jump';
+      if (this.startJumpMotion) {
+        // don't move horizontally while getting ready to jump
+        this.body.setVelocityX(0);
+      }
+    } else if (onFloor && this.body.velocity.x !== 0) {
       this.motion = 'run';
     } else if (onFloor && this.body.velocity.x === 0) {
       this.motion = 'idle';
-    } else if (!onFloor) {
-      this.motion = 'jump';
     }
 
     sprite.play(this.motion, true);

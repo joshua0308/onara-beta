@@ -6,15 +6,12 @@ class Preload extends Phaser.Scene {
   }
 
   preload() {
-    this.load.tilemapTiledJSON('map-town', 'assets/crystal_world_map.json');
-    this.load.tilemapTiledJSON('map-bar', 'assets/bar_map.json');
-    this.load.image('tiles-1', 'assets/main_lev_build_1.png');
-
     this.load.tilemapTiledJSON('bar-map', 'assets/updated-bar-map.json');
     this.load.tilemapTiledJSON('town-map', 'assets/updated-town-map.json');
     /**
      * BACKGROUND AND ASSETS
      */
+    this.load.image('tiles-1', 'assets/main_lev_build_1.png');
     this.load.image('final-background-bar', 'assets/final-background-bar.png');
     this.load.image(
       'final-background-town',
@@ -25,6 +22,42 @@ class Preload extends Phaser.Scene {
       frameWidth: 32,
       frameHeight: 38,
       spacing: 32
+    });
+
+    this.load.spritesheet('boy-idle', 'assets/new-player/boy-idle.png', {
+      frameWidth: 382,
+      frameHeight: 1080,
+      spacing: 211
+    });
+
+    this.load.spritesheet('boy-walk', 'assets/new-player/boy-walk.png', {
+      frameWidth: 382,
+      frameHeight: 1080,
+      spacing: 211
+    });
+
+    this.load.spritesheet('boy-jump', 'assets/new-player/boy-jump.png', {
+      frameWidth: 382,
+      frameHeight: 1080,
+      spacing: 211
+    });
+
+    this.load.spritesheet('girl-idle', 'assets/new-player/girl-idle.png', {
+      frameWidth: 382,
+      frameHeight: 1080,
+      spacing: 211
+    });
+
+    this.load.spritesheet('girl-walk', 'assets/new-player/girl-walk.png', {
+      frameWidth: 382,
+      frameHeight: 1080,
+      spacing: 211
+    });
+
+    this.load.spritesheet('girl-jump', 'assets/new-player/girl-jump.png', {
+      frameWidth: 382,
+      frameHeight: 1080,
+      spacing: 211
     });
 
     this.load.once('complete', () => {
