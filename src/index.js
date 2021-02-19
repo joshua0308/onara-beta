@@ -23,7 +23,7 @@ const config = {
     // interaction of your objects
     default: 'arcade', // arcade phsyics plugin manages physics simulation like gravity, velocity, etc
     arcade: {
-      debug: true
+      // debug: true
     }
   },
   // scene: [DemoScene]

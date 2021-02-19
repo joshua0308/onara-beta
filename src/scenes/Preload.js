@@ -49,9 +49,9 @@ class Preload extends Phaser.Scene {
     });
 
     this.load.spritesheet('girl-walk', 'assets/new-player/girl-walk.png', {
-      frameWidth: 382,
+      frameWidth: 593,
       frameHeight: 1080,
-      spacing: 211
+      spacing: 0
     });
 
     this.load.spritesheet('girl-jump', 'assets/new-player/girl-jump.png', {

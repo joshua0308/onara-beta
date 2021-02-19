@@ -5,6 +5,7 @@ import initNewAnimations from './newPlayerAnims.js';
 class MyPlayer extends Phaser.GameObjects.Container {
   constructor(scene, x, y, socket, playerInfo) {
     super(scene, x, y);
+    this.characterType = 'girl';
 
     this.playerInfo = playerInfo;
     this.socket = socket;
@@ -40,15 +41,14 @@ class MyPlayer extends Phaser.GameObjects.Container {
   }
 
   setupContainer() {
-    this.setSize(100, 230);
-    // this.setScale(1);
+    this.setSize(70, 230);
 
     // add existing context - this will add image and set gravity
     this.scene.add.existing(this);
     this.scene.physics.add.existing(this);
   }
   createSprite() {
-    const player = this.scene.add.sprite(0, 0, 'boy-idle', 0);
+    const player = this.scene.add.sprite(0, 0, `${this.characterType}-idle`, 0);
     player.setScale(0.4);
     // eslint-disable-next-line no-console
     console.log('debug: player', player);
@@ -61,8 +61,9 @@ class MyPlayer extends Phaser.GameObjects.Container {
     const nameElement = document.createElement('div');
     nameElement.setAttribute('id', 'player-sprite');
     nameElement.innerText = name;
+    nameElement.style.fontSize = '20px';
     this.nameChild = this.scene.add.dom(0, 0, nameElement);
-    this.nameChild.setOrigin(0.5, -2.3);
+    this.nameChild.setOrigin(0.5, 5);
     this.add(this.nameChild);
   }
 
@@ -87,11 +88,11 @@ class MyPlayer extends Phaser.GameObjects.Container {
     if (left.isDown) {
       this.body.setVelocityX(-this.playerSpeed);
       sprite.setFlipX(true);
-      this.motion = 'run';
+      this.motion = 'walk';
     } else if (right.isDown) {
       this.body.setVelocityX(this.playerSpeed);
       sprite.setFlipX(false);
-      this.motion = 'run';
+      this.motion = 'walk';
     } else if (this.startJumpMotion || this.motion === 'jump') {
       this.motion = 'jump';
     } else {
@@ -126,12 +127,12 @@ class MyPlayer extends Phaser.GameObjects.Container {
         this.body.setVelocityX(0);
       }
     } else if (onFloor && this.body.velocity.x !== 0) {
-      this.motion = 'run';
+      this.motion = 'walk';
     } else if (onFloor && this.body.velocity.x === 0) {
       this.motion = 'idle';
     }
 
-    sprite.play(this.motion, true);
+    sprite.play(`${this.characterType}-${this.motion}`, true);
 
     // if the player is moving, emit position and motion to the server
     const isMoving =
