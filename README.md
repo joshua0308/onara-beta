@@ -65,6 +65,7 @@ https://github.com/samme/phaser3-faq/wiki#how-do-i-scaleresize-the-game-canvas
 - if you're camera/audio is disabled, you will get streams from users who were already in the room, but will not receive streams from new users
 
 ### Resize phaser when window size is changed
+- [Dev log (scale manager)](https://phaser.io/phaser3/devlog/136)
 - https://phaser.discourse.group/t/game-scaling-resizing-example-v3/1555
 - scale manager
   - https://labs.phaser.io/index.html?dir=scalemanager/&q=

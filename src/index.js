@@ -2,38 +2,21 @@ import PlayScene from './scenes/Play.js';
 import PreloadScene from './scenes/Preload.js';
 import DemoScene from './scenes/Demo.js';
 
-// const MAP_WIDTH = 1600;
-// const MAP_HEIGHT = 640;
-
-const WIDTH = document.body.offsetWidth;
-const HEIGHT = document.body.offsetHeight;
-
-// shared config will be available to all scenes
-const SHARED_CONFIG = {
-  width: WIDTH, // width of the canvas
-  height: HEIGHT // height of the canvas
-  // mapOffset: MAP_WIDTH > WIDTH ? MAP_WIDTH - WIDTH : 0,
-  // zoomFactor: 1
-};
-
 const Scenes = [PreloadScene, PlayScene];
-const createScene = (Scene) => new Scene(SHARED_CONFIG);
+const createScene = (Scene) => new Scene();
 const initScenes = () => Scenes.map(createScene);
 
 const config = {
-  ...SHARED_CONFIG,
   type: Phaser.AUTO, // webGL is default
   parent: 'game-wrapper',
   dom: {
-    createContainer: true // scale manager gets messed up when window is resized.
+    createContainer: true
   },
   scale: {
-    mode: Phaser.Scale.ENVELOP,
-    // mode: Phaser.Scale.FIT,
-    // mode: Phaser.Scale.RESIZE,
-    // mode: Phaser.Scale.HEIGHT_CONTROLS_WIDTH,
-    // mode: Phaser.Scale.WIDTH_CONTROLS_HEIGHT,
-    autoCenter: Phaser.Scale.CENTER_BOTH
+    mode: Phaser.Scale.RESIZE, // this works when you shrink the window, but doesn't work when you enlarge the window
+    parent: 'game-wrapper',
+    width: '100%',
+    height: '100%'
   },
   pixelArt: true,
   physics: {

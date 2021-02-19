@@ -9,15 +9,18 @@ class Preload extends Phaser.Scene {
     this.load.tilemapTiledJSON('map-town', 'assets/crystal_world_map.json');
     this.load.tilemapTiledJSON('map-bar', 'assets/bar_map.json');
     this.load.image('tiles-1', 'assets/main_lev_build_1.png');
-    this.load.image('tiles-2', 'assets/tilemap_packed.png');
 
+    this.load.tilemapTiledJSON('bar-map', 'assets/updated-bar-map.json');
+    this.load.tilemapTiledJSON('town-map', 'assets/updated-town-map.json');
     /**
      * BACKGROUND AND ASSETS
      */
-    this.load.image('sky', 'assets/sky.png');
-    this.load.image('bar-background', 'assets/bar-background.png');
-    this.load.image('house-green', 'assets/house-green.png');
-    this.load.image('house-red', 'assets/house-red.png');
+    this.load.image('final-background-bar', 'assets/final-background-bar.png');
+    this.load.image(
+      'final-background-town',
+      'assets/final-background-town.png'
+    );
+
     this.load.spritesheet('player', 'assets/player/move_sprite_1.png', {
       frameWidth: 32,
       frameHeight: 38,

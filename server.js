@@ -3,8 +3,6 @@ const express = require('express');
 const app = express();
 const server = require('http').Server(app);
 const io = require('socket.io')(server);
-const { ExpressPeerServer } = require('peer');
-const peerServer = ExpressPeerServer(server);
 
 const PORT = process.env.PORT || 3000;
 const players = {};
@@ -232,7 +230,6 @@ app.get('/', (req, res) => {
   res.redirect('/login');
 });
 
-app.use('/peerjs', peerServer);
 app.use('/assets', express.static(__dirname + '/assets'));
 app.use('/public', express.static(__dirname + '/public'));
 app.use(MAIN_DIR, express.static(__dirname + MAIN_DIR));

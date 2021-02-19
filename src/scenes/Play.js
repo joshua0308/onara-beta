@@ -2,15 +2,6 @@ import MyPlayer from '../entities/MyPlayer.js';
 import OtherPlayer from '../entities/OtherPlayer.js';
 import userInterfaceManager from '../UserInterfaceManager.js';
 
-class Player {
-  constructor() {
-    this.displayName;
-    this.barId;
-    this.socketId;
-    this.uid;
-  }
-}
-
 class Play extends Phaser.Scene {
   constructor(config) {
     super('PlayScene');
@@ -23,23 +14,11 @@ class Play extends Phaser.Scene {
     this.updateMyPlayerInfo = this.updateMyPlayerInfo.bind(this);
   }
 
-  update() {
-    if (!this.myPlayerSprite) return;
+  checkOverlap(spriteA, spriteB) {
+    const boundsA = spriteA.getBounds();
+    const boundsB = spriteB.getBounds();
 
-    if (!this.myPlayerSprite.body.touching.none) {
-      this.userInterfaceManager.createBarQuestionnaireInterface();
-    } else {
-      this.userInterfaceManager.removeBarQuestionnaireInterface();
-    }
-  }
-
-  testDevEnv() {
-    // enter bar scene
-    this.registry.set('map', 'bar');
-    return 'learn';
-
-    // open bar questionnaire
-    // this.userInterfaceManager.createBarQuestionnaireInterface();
+    return Phaser.Geom.Intersects.GetRectangleIntersection(boundsA, boundsB);
   }
 
   updateMyPlayerInfo(updatedPlayerInfo) {
@@ -52,11 +31,50 @@ class Play extends Phaser.Scene {
       ...this.myPlayer,
       ...updatedPlayerInfo
     };
-
-    console.log('debug: this.myPlayer', this.myPlayer);
   }
+
+  update() {
+    if (!this.myPlayerSprite) return;
+
+    if (!this.myPlayerSprite.body.touching.none) {
+      // eslint-disable-next-line no-console
+      // console.log('debug: touching', this.myPlayerSprite.body.touching.none);
+      this.userInterfaceManager.createBarQuestionnaireInterface();
+    } else {
+      // eslint-disable-next-line no-console
+      // console.log(
+      //   'debug: not touching',
+      //   this.myPlayerSprite.body.touching.none
+      // );
+      this.userInterfaceManager.removeBarQuestionnaireInterface();
+    }
+  }
+
+  testDevEnv() {
+    // enter bar scene
+    this.registry.set('map', 'town');
+    // this.registry.set('map', 'bar');
+    return 'learn';
+
+    // open bar questionnaire
+    // this.userInterfaceManager.createBarQuestionnaireInterface();
+  }
+
   async create({ barId }) {
-    this.scene.pause();
+    this.scale.on('resize', resize, this);
+
+    function resize(gameSize, baseSize, displaySize, resolution) {
+      // eslint-disable-next-line no-console
+      console.log('debug: gameSize', gameSize);
+      // eslint-disable-next-line no-console
+      console.log(
+        'debug: this.map.width, this.map.height',
+        this.map.width,
+        this.map.height
+      );
+    }
+
+    // barId = this.testDevEnv(barId);
 
     this.firebase = this.game.firebase;
     this.firebaseAuth = this.game.firebaseAuth;
@@ -68,7 +86,6 @@ class Play extends Phaser.Scene {
       this.firebaseDb
     );
 
-    // barId = this.testDevEnv(barId);
     // console.log('debug: barId', barId);
 
     this.myPlayer = {
@@ -84,13 +101,13 @@ class Play extends Phaser.Scene {
     this.userInterfaceManager.createOnlineList(barId);
     this.userInterfaceManager.createMenuButtons(this.myPlayer);
 
-    // eslint-disable-next-line no-console
-    console.log('debug: this.myPlayer', this.myPlayer);
-
     if (this.getCurrentMap() !== 'town') {
       this.barId = barId;
       this.socket = io('/game');
     } else {
+      // eslint-disable-next-line no-console
+      // console.log('debug: this.scale', this.scale);
+      // this.scale.setGameSize(500, 500);
       this.socket = { emit: () => {}, close: () => {} };
     }
 
@@ -100,8 +117,9 @@ class Play extends Phaser.Scene {
     this.otherPlayersGroup = this.physics.add.group();
     this.callButtonPressedDown = false;
 
-    const map = this.createMap();
-    const layers = this.createLayers(map);
+    this.map = this.createMap();
+    // this.map.resize(1, 1);
+    const layers = this.createLayers(this.map);
     this.playerZones = this.getPlayerZones(layers.playerZones);
 
     this.myPlayerSprite = new MyPlayer(
@@ -115,14 +133,15 @@ class Play extends Phaser.Scene {
 
     const doorZone = this.playerZones.door;
 
-    const door = this.physics.add.sprite(doorZone.x, doorZone.y, 'door');
-    door.setSize(15, 50).setAlpha(0).setOrigin(0, 0);
+    // eslint-disable-next-line no-console
+    console.log('debug: doorZone', doorZone);
+    this.door = this.physics.add.sprite(doorZone.x, doorZone.y, 'door');
+    this.door.setSize(15, 100).setAlpha(0).setOrigin(0, 0);
+    // eslint-disable-next-line no-console
+    console.log('debug: door', this.door);
+    this.physics.add.overlap(this.myPlayerSprite, this.door);
 
     this.setupFollowupCameraOn(this.myPlayerSprite);
-    this.createHouses(map);
-    this.createBG(map);
-
-    this.physics.add.overlap(this.myPlayerSprite, door);
 
     if (this.getCurrentMap() !== 'town') {
       this.setupSocket();
@@ -133,8 +152,6 @@ class Play extends Phaser.Scene {
       'my-unique-id',
       true
     );
-
-    this.scene.resume();
   }
 
   getCurrentMap() {
@@ -345,59 +362,6 @@ class Play extends Phaser.Scene {
       }
     });
 
-    // caller - when receiver accepts the call and initiates peer connection
-    // this.socket.on('peer-offer-received', ({ receiverSignalData, receiverSocketId }) => {
-    //   console.log('debug: received peer offer', receiverSignalData, new Date().toISOString())
-    //   this.userInterfaceManager.removePlayerProfileInterface();
-    //   this.peerSocketId = receiverSocketId;
-
-    //   navigator.mediaDevices.enumerateDevices()
-    //     .then(this.setMediaConstraints)
-    //     .then(stream => {
-    //       this.myStream = stream;
-    //       this.userInterfaceManager.createInCallInterface(this.myStream, this.toggleVideoButtonCallback, this.toggleAudioButtonCallback, this.endCallButtonCallback);
-    //       this.userInterfaceManager.addStreamToVideoElement(this.myStream, true);
-
-    //       const callerPeer = new SimplePeer({
-    //         initiator: false,
-    //         trickle: true,
-    //         stream: this.myStream,
-    //         reconnectTimer: 3000,
-    //         config: {
-    //           iceServers: [
-    //             { urls: 'stun:stun.l.google.com:19302' },
-    //             { urls: 'stun:global.stun.twilio.com:3478?transport=udp' },
-    //             {
-    //               urls: 'turn:numb.viagenie.ca',
-    //               username: 'joshua940308@gmail.com',
-    //               credential: 'ju2B4vN9mze6Ld6Q'
-    //             }
-    //           ]
-    //         }
-    //       })
-
-    //       this.myPeer = callerPeer;
-
-    //       this.myPeer.on('signal', callerSignalData => {
-    //         console.log('debug: send peer answer', callerSignalData, new Date().toISOString())
-    //         this.socket.emit('send-peer-answer', { callerSignalData, receiverSocketId })
-    //       })
-
-    //       this.myPeer.on('stream', receiverStream => {
-    //         console.log('debug: remote stream received')
-    //         this.userInterfaceManager.addStreamToVideoElement(receiverStream, false);
-    //       })
-
-    //       this.myPeer.signal(receiverSignalData);
-    //     })
-    // })
-
-    // receiver - receiver initiated the peer connection. caller is now answering with its signal data.
-    // this.socket.on('peer-answer-received', ({ callerSignalData }) => {
-    //   console.log('debug: received peer answer', callerSignalData, new Date().toISOString())
-    //   this.myPeer.signal(callerSignalData)
-    // })
-
     this.socket.on('call-request-declined', ({ receiverId, message }) => {
       console.log('debug: declined', receiverId);
       this.userInterfaceManager.removePlayerProfileInterface();
@@ -464,65 +428,28 @@ class Play extends Phaser.Scene {
   }
 
   createMap() {
-    const map = this.make.tilemap({ key: `map-${this.getCurrentMap()}` }); // map-town or map-bar
+    const mapKey = `${this.getCurrentMap()}-map`;
+    const backgroundName = `final-background-${this.getCurrentMap()}`;
+    const map = this.make.tilemap({ key: mapKey });
     map.addTilesetImage('main_lev_build_1', 'tiles-1');
-    map.addTilesetImage('tilemap_packed', 'tiles-2');
+    map.addTilesetImage(backgroundName, backgroundName);
     return map;
   }
 
   createLayers(map) {
+    const backgroundName = `final-background-${this.getCurrentMap()}`;
     const tileset = map.getTileset('main_lev_build_1');
-    const tileset2 = map.getTileset('tilemap_packed');
+    const backgroundTileset = map.getTileset(backgroundName);
+
     const platformsColliders = map.createLayer('platforms_colliders', tileset);
-    const environment = map.createLayer('environment', tileset);
-    const platforms = map.createLayer('platforms', tileset2);
+    map.createLayer('background', backgroundTileset);
+
     const playerZones = map.getObjectLayer('player_zones');
 
     // collide player with platform
     platformsColliders.setCollisionByProperty({ collides: true });
 
-    return { environment, platforms, platformsColliders, playerZones };
-  }
-
-  createBG(map) {
-    const bgObject = map.getObjectLayer('distance_bg').objects[0];
-
-    if (this.getCurrentMap() === 'bar') {
-      this.add
-        .tileSprite(
-          bgObject.x,
-          bgObject.y,
-          1600,
-          bgObject.height,
-          'bar-background'
-        )
-        .setOrigin(0, 1)
-        .setDepth(-10);
-    } else {
-      this.add
-        .tileSprite(bgObject.x, bgObject.y, 1600, bgObject.height, 'sky')
-        .setOrigin(0, 1)
-        .setDepth(-10);
-    }
-  }
-
-  createHouses(map) {
-    if (map.getObjectLayer('houses')) {
-      const houseObjects = map.getObjectLayer('houses').objects;
-      houseObjects.forEach((houseObject) => {
-        this.add
-          .tileSprite(
-            houseObject.x,
-            houseObject.y,
-            houseObject.width,
-            houseObject.height,
-            houseObject.name
-          )
-          .setOrigin(0, 1)
-          .setDepth(-5)
-          .setScale(0.8);
-      });
-    }
+    return { platformsColliders, playerZones };
   }
 
   getPlayerZones(playerZonesLayer) {
@@ -534,10 +461,14 @@ class Play extends Phaser.Scene {
   }
 
   setupFollowupCameraOn(player) {
-    this.physics.world.setBounds(0, 0, 1600, 640);
+    const mapSize = {
+      width: this.map.widthInPixels,
+      height: this.map.heightInPixels
+    };
 
-    // TODO: need to adjust camera when window is resized
-    this.cameras.main.setBounds(0, 0, 1600, 640).setZoom(3);
+    this.physics.world.setBounds(0, 0, mapSize.width, mapSize.height);
+    this.cameras.main.setBounds(0, 0, mapSize.width, mapSize.height).setZoom(1);
+
     this.cameras.main.startFollow(player);
   }
 
@@ -664,55 +595,6 @@ class Play extends Phaser.Scene {
         this.myPeer.addStream(this.myStream);
       });
   }
-  // receiver - accept call
-  // acceptButtonCallback(callerId) {
-  //   console.log('debug: accepted call');
-  //   // Arrow functions establish "this" when it is defined
-  //   // Traditional functions establish "this" at runtime
-  //   // That is why in some cases functions do things like myFcn.call(obj)
-  //   // this attaches obj as the this context when myFcn is called
-  //   this.userInterfaceManager.removeIncomingCallInterface();
-
-  //   navigator.mediaDevices.enumerateDevices()
-  //     .then(this.setMediaConstraints)
-  //     .then(stream => {
-  //       this.myStream = stream;
-
-  //       this.userInterfaceManager.createInCallInterface(this.myStream, this.toggleVideoButtonCallback, this.toggleAudioButtonCallback, this.endCallButtonCallback);
-  //       this.userInterfaceManager.addStreamToVideoElement(this.myStream, true);
-
-  //       const receiverPeer = new SimplePeer({
-  //         initiator: true,
-  //         trickle: true,
-  //         stream: this.myStream,
-  //         reconnectTimer: 3000,
-  //         config: {
-  //           iceServers: [
-  //             { urls: 'stun:stun.l.google.com:19302' },
-  //             { urls: 'stun:global.stun.twilio.com:3478?transport=udp' },
-  //             {
-  //               urls: 'turn:numb.viagenie.ca',
-  //               username: 'joshua940308@gmail.com',
-  //               credential: 'ju2B4vN9mze6Ld6Q'
-  //             }
-  //           ]
-  //         }
-  //       })
-
-  //       this.myPeer = receiverPeer;
-
-  //       this.myPeer.on('signal', receiverSignalData => {
-  //         console.log('debug: send peer offer', receiverSignalData, new Date().toISOString())
-  //         this.socket.emit('peer-offer', { receiverSignalData, receiverSocketId: this.socket.id, callerSocketId: callerId })
-  //         // this.socket.emit('send-peer-offer', { receiverSignalData, receiverSocketId: this.socket.id, callerSocketId: callerId })
-  //       })
-
-  //       this.myPeer.on('stream', callerStream => {
-  //         console.log('debug: remote stream received')
-  //         this.userInterfaceManager.addStreamToVideoElement(callerStream, false);
-  //       })
-  //     })
-  // }
 
   stopStream() {
     console.log('debug: stop stream');

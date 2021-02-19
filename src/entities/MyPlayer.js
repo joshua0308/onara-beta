@@ -23,8 +23,8 @@ class MyPlayer extends Phaser.GameObjects.Container {
   }
 
   init() {
-    this.gravity = 500;
-    this.playerSpeed = 200;
+    this.gravity = 600;
+    this.playerSpeed = 400;
     this.jumpCount = 0;
     this.consecutiveJumps = 1;
     this.cursors = this.scene.input.keyboard.createCursorKeys();
@@ -39,7 +39,7 @@ class MyPlayer extends Phaser.GameObjects.Container {
 
   setupContainer() {
     this.setSize(32, 38);
-    this.setScale(1.2);
+    this.setScale(4);
 
     // add existing context - this will add image and set gravity
     this.scene.add.existing(this);
@@ -100,7 +100,7 @@ class MyPlayer extends Phaser.GameObjects.Container {
     ) {
       // eslint-disable-next-line no-console
       console.log('debug: spacebar');
-      this.body.setVelocityY(-this.playerSpeed * 1.5);
+      this.body.setVelocityY(-this.playerSpeed * 1.3);
       this.jumpCount += 1;
     }
 
