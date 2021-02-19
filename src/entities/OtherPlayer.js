@@ -35,7 +35,7 @@ class OtherPlayer extends Phaser.GameObjects.Container {
 
   setupContainer() {
     this.setSize(32, 38);
-    this.setScale(1.2);
+    this.setScale(4);
     this.setInteractive();
 
     this.scene.add.existing(this);
