@@ -649,6 +649,8 @@ class UserInterfaceManager {
   }
 
   removeIncomingCallInterface() {
+    const callerCardWrapper = document.getElementById('caller-card-wrapper');
+
     if (callerCardWrapper) {
       callerCardWrapper.style.display = 'none';
     }

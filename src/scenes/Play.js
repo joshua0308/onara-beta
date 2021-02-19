@@ -37,15 +37,8 @@ class Play extends Phaser.Scene {
     if (!this.myPlayerSprite) return;
 
     if (!this.myPlayerSprite.body.touching.none) {
-      // eslint-disable-next-line no-console
-      // console.log('debug: touching', this.myPlayerSprite.body.touching.none);
       this.userInterfaceManager.createBarQuestionnaireInterface();
     } else {
-      // eslint-disable-next-line no-console
-      // console.log(
-      //   'debug: not touching',
-      //   this.myPlayerSprite.body.touching.none
-      // );
       this.userInterfaceManager.removeBarQuestionnaireInterface();
     }
   }
@@ -61,17 +54,17 @@ class Play extends Phaser.Scene {
   }
 
   async create({ barId }) {
-    this.scale.on('resize', resize, this);
+    // this.scale.on('resize', resize, this);
 
     function resize(gameSize, baseSize, displaySize, resolution) {
-      // eslint-disable-next-line no-console
-      console.log('debug: gameSize', gameSize);
-      // eslint-disable-next-line no-console
-      console.log(
-        'debug: this.map.width, this.map.height',
-        this.map.width,
-        this.map.height
-      );
+      // // eslint-disable-next-line no-console
+      // console.log('debug: gameSize', gameSize);
+      // // eslint-disable-next-line no-console
+      // console.log(
+      //   'debug: this.map.width, this.map.height',
+      //   this.map.width,
+      //   this.map.height
+      // );
     }
 
     // barId = this.testDevEnv(barId);
@@ -105,9 +98,6 @@ class Play extends Phaser.Scene {
       this.barId = barId;
       this.socket = io('/game');
     } else {
-      // eslint-disable-next-line no-console
-      // console.log('debug: this.scale', this.scale);
-      // this.scale.setGameSize(500, 500);
       this.socket = { emit: () => {}, close: () => {} };
     }
 
@@ -118,7 +108,6 @@ class Play extends Phaser.Scene {
     this.callButtonPressedDown = false;
 
     this.map = this.createMap();
-    // this.map.resize(1, 1);
     const layers = this.createLayers(this.map);
     this.playerZones = this.getPlayerZones(layers.playerZones);
 
@@ -133,12 +122,8 @@ class Play extends Phaser.Scene {
 
     const doorZone = this.playerZones.door;
 
-    // eslint-disable-next-line no-console
-    console.log('debug: doorZone', doorZone);
     this.door = this.physics.add.sprite(doorZone.x, doorZone.y, 'door');
     this.door.setSize(50, 100).setAlpha(0).setOrigin(0, 0);
-    // eslint-disable-next-line no-console
-    console.log('debug: door', this.door);
     this.physics.add.overlap(this.myPlayerSprite, this.door);
 
     this.setupFollowupCameraOn(this.myPlayerSprite);
