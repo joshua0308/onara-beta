@@ -327,8 +327,14 @@ class UserInterfaceManager {
       this.firebaseAuth.signOut();
     });
 
+    const toggleCharacterButton = document.createElement('button');
+    toggleCharacterButton.classList.add('btn', 'btn-light', 'profile-button');
+    toggleCharacterButton.setAttribute('id', 'toggle-character-button');
+    toggleCharacterButton.innerText = 'Toggle character';
+
     menuButtonsWrapper.appendChild(profileButton);
     menuButtonsWrapper.appendChild(logoutButton);
+    menuButtonsWrapper.appendChild(toggleCharacterButton);
   }
 
   removePlayerProfileInterface() {
@@ -643,7 +649,6 @@ class UserInterfaceManager {
   }
 
   removeIncomingCallInterface() {
-    const callerCardWrapper = document.getElementById('caller-card-wrapper');
     if (callerCardWrapper) {
       callerCardWrapper.style.display = 'none';
     }

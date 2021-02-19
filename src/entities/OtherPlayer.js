@@ -9,6 +9,7 @@ class OtherPlayer extends Phaser.GameObjects.Container {
     userInterfaceManager
   ) {
     super(scene, x, y);
+    this.characterType = 'girl';
 
     this.uid = playerInfo.uid;
     this.socket = socket;
@@ -34,8 +35,7 @@ class OtherPlayer extends Phaser.GameObjects.Container {
   }
 
   setupContainer() {
-    this.setSize(32, 38);
-    this.setScale(4);
+    this.setSize(70, 230);
     this.setInteractive();
 
     this.scene.add.existing(this);
@@ -43,8 +43,9 @@ class OtherPlayer extends Phaser.GameObjects.Container {
   }
 
   createSprite() {
-    const player = this.scene.add.sprite(0, 0, 'player', 0);
+    const player = this.scene.add.sprite(0, 0, `${this.characterType}-idle`, 0);
     player.name = 'sprite';
+    player.setScale(0.4);
     this.add(player);
   }
 
@@ -52,8 +53,9 @@ class OtherPlayer extends Phaser.GameObjects.Container {
     const nameElement = document.createElement('div');
     nameElement.setAttribute('id', 'player-sprite');
     nameElement.innerText = name;
+    nameElement.style.fontSize = '20px';
     this.nameChild = this.scene.add.dom(0, 0, nameElement);
-    this.nameChild.setOrigin(0.5, -2.3);
+    this.nameChild.setOrigin(0.5, 5);
     this.add(this.nameChild);
   }
 

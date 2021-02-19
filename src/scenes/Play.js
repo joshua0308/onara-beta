@@ -136,7 +136,7 @@ class Play extends Phaser.Scene {
     // eslint-disable-next-line no-console
     console.log('debug: doorZone', doorZone);
     this.door = this.physics.add.sprite(doorZone.x, doorZone.y, 'door');
-    this.door.setSize(15, 100).setAlpha(0).setOrigin(0, 0);
+    this.door.setSize(50, 100).setAlpha(0).setOrigin(0, 0);
     // eslint-disable-next-line no-console
     console.log('debug: door', this.door);
     this.physics.add.overlap(this.myPlayerSprite, this.door);
@@ -386,7 +386,10 @@ class Play extends Phaser.Scene {
           const otherPlayerSprite = otherPlayer.getByName('sprite');
           otherPlayer.setPosition(otherPlayerInfo.x, otherPlayerInfo.y);
           otherPlayerSprite.flipX = otherPlayerInfo.flipX;
-          otherPlayerSprite.play(otherPlayerInfo.motion, true);
+          otherPlayerSprite.play(
+            `${otherPlayer.characterType}-${otherPlayerInfo.motion}`,
+            true
+          );
         }
       });
     });

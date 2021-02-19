@@ -6,6 +6,14 @@ class MyPlayer extends Phaser.GameObjects.Container {
   constructor(scene, x, y, socket, playerInfo) {
     super(scene, x, y);
     this.characterType = 'girl';
+    const toggleButton = document.getElementById('toggle-character-button');
+    toggleButton.addEventListener('click', () => {
+      if (this.characterType === 'girl') {
+        this.characterType = 'boy';
+      } else {
+        this.characterType = 'girl';
+      }
+    });
 
     this.playerInfo = playerInfo;
     this.socket = socket;
