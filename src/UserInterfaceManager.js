@@ -18,14 +18,10 @@ class UserInterfaceManager {
     inCallModalWrapper.isGameVisible = true;
     inCallModalWrapper.style.backgroundColor = 'rgba(74, 67, 67, 0.4)';
 
-    const VideosWrapper = () => <div id="videos-wrapper"></div>;
-
-    const InCallButtonsWrapper = () => this.createInCallButtons(stream);
-
     inCallModalWrapper.appendChild(
       <>
-        <VideosWrapper />
-        <InCallButtonsWrapper />
+        <div id="videos-wrapper"></div>
+        {this.createInCallButtons(stream)}
       </>
     );
   }
@@ -71,24 +67,18 @@ class UserInterfaceManager {
     }
   }
 
-  createLevelOneFilter(id, text, color = 'primary') {
-    const button = document.createElement('button');
-    button.classList.add('btn', `btn-outline-${color}`);
-    button.setAttribute('id', id);
-    button.innerText = text;
-    button.name = text;
-    return button;
+  createLevelOne(id, text, color = 'primary') {
+    const colorClass = `btn-outline-${color}`;
+    return (
+      <button id={id} className={'btn ' + colorClass} name={text}>
+        {text}
+      </button>
+    );
   }
 
   createLevelThreeRoom(levelTwoFilter, roomName) {
-    const room = document.createElement('button');
-    room.setAttribute('id', 'room-container');
-    room.classList.add('btn', 'btn-warning');
-    room.levelTwoFilter = levelTwoFilter;
-    room.style.display = 'none';
-    room.selected = false;
-    room.innerText = `${roomName}\nPlayers online: X`;
-    room.addEventListener('click', () => {
+    const handleRoomClick = (e) => {
+      const room = e.target;
       if (room.selected) {
         room.selected = false;
         this.selectedBar = undefined;
@@ -107,17 +97,31 @@ class UserInterfaceManager {
         });
       }
 
-      // eslint-disable-next-line no-console
       console.log('debug: this.selectedBar', this.selectedBar);
-    });
+    };
+
+    const room = (
+      <button
+        id="room-container"
+        className="btn btn-warning"
+        onClick={handleRoomClick}
+      >
+        {roomName}
+      </button>
+    );
+
+    room.levelTwoFilter = levelTwoFilter;
+    room.style.display = 'none';
+    room.selected = false;
+
     return room;
   }
 
-  createLevelTwoFilters(levelTwoFilters) {
+  createLevelTwo(levelTwoFilters) {
     const levelTwoFiltersButtons = Object.keys(
       levelTwoFilters
     ).map((levelTwoFilter) =>
-      this.createLevelOneFilter('level-one-option', levelTwoFilter, 'success')
+      this.createLevelOne('level-one-option', levelTwoFilter, 'success')
     );
 
     // create all level three rooms
@@ -187,12 +191,7 @@ class UserInterfaceManager {
     );
 
     if (barQuestionnaireModalWrapper.style.display === 'flex') return;
-
     barQuestionnaireModalWrapper.style.display = 'flex';
-
-    const questionnaireQuestion = document.createElement('div');
-    questionnaireQuestion.setAttribute('id', 'questionnaire-question');
-    questionnaireQuestion.innerText = 'What are you here for?';
 
     const filters = {
       learn: {
@@ -207,7 +206,6 @@ class UserInterfaceManager {
       health: {
         mental_awareness: ['yoga', 'meditation', 'talk to a therapist'],
         physical_fitness: ['weight', 'strength', 'endurance']
-        // religion: ['buddhism', 'protestant', 'catholic']
       },
       fun: {
         dating: ['serious', 'fun'],
@@ -217,7 +215,7 @@ class UserInterfaceManager {
     };
 
     const levelOneFilters = Object.keys(filters).map((levelOneFilter) =>
-      this.createLevelOneFilter('level-one-option', levelOneFilter)
+      this.createLevelOne('level-one-option', levelOneFilter)
     );
 
     levelOneFilters.forEach((button) => {
@@ -231,7 +229,7 @@ class UserInterfaceManager {
           button.classList.add('btn-outline-primary');
         } else {
           this.removeLevelTwoFilters();
-          this.createLevelTwoFilters(filters[button.name]);
+          this.createLevelTwo(filters[button.name]);
           button.selected = true;
           button.classList.remove('btn-outline-primary');
           button.classList.add('btn-primary');
@@ -246,20 +244,7 @@ class UserInterfaceManager {
       });
     });
 
-    const levelOneFiltersWrapper = document.createElement('div');
-    levelOneFiltersWrapper.setAttribute('id', 'level-one-option-wrapper');
-    levelOneFiltersWrapper.append(...levelOneFilters);
-
-    const levelTwoFiltersWrapper = document.createElement('div');
-    levelTwoFiltersWrapper.setAttribute('id', 'level-two-option-wrapper');
-
-    const levelThreeRoomWrapper = document.createElement('div');
-    levelThreeRoomWrapper.setAttribute('id', 'level-three-option-wrapper');
-
-    const backToTownButton = document.createElement('div');
-    backToTownButton.setAttribute('id', 'back-to-game-button');
-    backToTownButton.innerText = 'Go back to town';
-    backToTownButton.addEventListener('click', () => {
+    const handleBackToTownButton = () => {
       console.log(this.scene.getCurrentMap());
       if (this.scene.getCurrentMap() === 'bar') {
         this.scene.registry.set('map', 'town');
@@ -269,13 +254,15 @@ class UserInterfaceManager {
         this.scene.scene.restart({ barId: undefined });
       }
       this.removeBarQuestionnaireInterface();
-    });
+    };
 
-    const joinBarButton = document.createElement('div');
-    joinBarButton.setAttribute('id', 'join-bar-button');
-    joinBarButton.innerText = 'Join bar';
+    const backToTownButton = (
+      <div id="back-to-game-button" onClick={handleBackToTownButton}>
+        Go back to town
+      </div>
+    );
 
-    joinBarButton.addEventListener('click', () => {
+    const handleJoinBarButton = () => {
       if (!this.selectedBar) {
         alert('Please select a bar to join 🙂');
       } else {
@@ -285,24 +272,22 @@ class UserInterfaceManager {
         this.removeBarQuestionnaireInterface();
         this.scene.scene.restart({ barId: this.selectedBar });
       }
-    });
+    };
 
-    const actionButtonsWrapper = document.createElement('div');
-    actionButtonsWrapper.setAttribute('id', 'action-buttons-wrapper');
-
-    if (!(this.scene.getCurrentMap() === 'town')) {
-      actionButtonsWrapper.appendChild(backToTownButton);
-    }
-    actionButtonsWrapper.appendChild(joinBarButton);
-
-    const questionnaireWrapper = document.createElement('div');
-    questionnaireWrapper.setAttribute('id', 'questionnaire-wrapper');
-
-    questionnaireWrapper.appendChild(questionnaireQuestion);
-    questionnaireWrapper.appendChild(levelOneFiltersWrapper);
-    questionnaireWrapper.appendChild(levelTwoFiltersWrapper);
-    questionnaireWrapper.appendChild(levelThreeRoomWrapper);
-    questionnaireWrapper.appendChild(actionButtonsWrapper);
+    const questionnaireWrapper = (
+      <div id="questionnaire-wrapper">
+        <div id="questionnaire-question">What are you here for?</div>
+        <div id="level-one-option-wrapper">{levelOneFilters}</div>
+        <div id="level-two-option-wrapper"></div>
+        <div id="level-three-option-wrapper"></div>
+        <div id="action-buttons-wrapper">
+          <div id="join-bar-button" onClick={handleJoinBarButton}>
+            Join bar
+          </div>
+          {!(this.scene.getCurrentMap() === 'town') && backToTownButton}
+        </div>
+      </div>
+    );
 
     barQuestionnaireModalWrapper.appendChild(questionnaireWrapper);
   }
@@ -379,53 +364,53 @@ class UserInterfaceManager {
 
     const doc = await playerDocRef.get();
     const playerData = doc.data();
-    // eslint-disable-next-line no-console
-    console.log('debug: playerData', playerData);
 
-    const playerImage = document.createElement('img');
-    playerImage.setAttribute('id', 'player-image');
-    playerImage.src =
-      playerData.profilePicURL || 'public/assets/placeholder-profile-pic.png';
+    const handleBuyADrinkButton = () => {
+      const buyADrinkButton = document.getElementById('buy-drink-button');
+      const closeButton = document.getElementById('close-profile-button');
 
-    const playerName = document.createElement('div');
-    playerName.setAttribute('id', 'player-name');
-    playerName.innerText = playerData.displayName;
+      buyADrinkButton.innerText = 'Calling...';
+      closeButton.innerText = 'Cancel call';
+      buyADrinkButton.style.backgroundColor = '#c9a747';
+      this.socket.emit('request-call', { receiverId: player.socketId });
+      buyADrinkButton.removeEventListener('click', handleBuyADrinkButton);
+    };
 
-    const playerBio = document.createElement('div');
-    playerBio.setAttribute('id', 'player-bio');
-    playerBio.innerText = `Position: ${playerData.position}\nEducation: ${playerData.education}\nLocation: ${playerData.city}`;
-
-    const closeButton = document.createElement('button');
-    closeButton.setAttribute('id', 'decline-button');
-    closeButton.innerText = 'Close';
-    closeButton.addEventListener('click', () => {
+    const handleCloseButton = () => {
+      const closeButton = document.getElementById('close-profile-button');
       if (closeButton.innerText === 'Cancel call') {
         socket.emit('cancel-call', { receiverId: player.socketId });
         this.profilePlayerId = null;
       }
 
       this.removePlayerProfileInterface();
-    });
-
-    const buyADrinkButton = document.createElement('button');
-    buyADrinkButton.setAttribute('id', 'accept-button');
-    buyADrinkButton.innerText = 'Buy a drink!';
-
-    const buyADrinkButtonCallback = () => {
-      buyADrinkButton.innerText = 'Calling...';
-      closeButton.innerText = 'Cancel call';
-      buyADrinkButton.style.backgroundColor = '#c9a747';
-      socket.emit('request-call', { receiverId: player.socketId });
-      buyADrinkButton.removeEventListener('click', buyADrinkButtonCallback);
     };
 
-    buyADrinkButton.addEventListener('click', buyADrinkButtonCallback);
-
-    playerProfileWrapper.appendChild(playerImage);
-    playerProfileWrapper.appendChild(playerName);
-    playerProfileWrapper.appendChild(playerBio);
-    playerProfileWrapper.appendChild(buyADrinkButton);
-    playerProfileWrapper.appendChild(closeButton);
+    playerProfileWrapper.appendChild(
+      <>
+        <img
+          id="player-image"
+          src={
+            playerData.profilePicURL ||
+            'public/assets/placeholder-profile-pic.png'
+          }
+        />
+        <div id="player-name">{playerData.displayName}</div>
+        <div id="player-bio">
+          Position: ${playerData.position}
+          <br />
+          Education: ${playerData.education}
+          <br />
+          Location: ${playerData.city}
+        </div>
+        <button id="buy-drink-button" onClick={handleBuyADrinkButton}>
+          Buy a drink!
+        </button>
+        <button id="close-profile-button" onClick={handleCloseButton}>
+          Close
+        </button>
+      </>
+    );
 
     playerProfileWrapper.style.width = '250px';
   }
@@ -448,8 +433,6 @@ class UserInterfaceManager {
 
     const doc = await myPlayerDocRef.get();
     const myPlayerData = doc.data();
-
-    console.log('debug: ', myPlayerData);
 
     const profileFormWrapper = document.getElementById('profile-form-wrapper');
     const profileEditForm = document.getElementById('profile-edit-form');
@@ -542,50 +525,44 @@ class UserInterfaceManager {
     const doc = await callerDocRef.get();
     const callerData = doc.data();
 
-    const callerName = document.createElement('div');
-    callerName.innerText = `${callerData.displayName}`;
-
-    const callerImage = document.createElement('img');
-    callerImage.setAttribute('id', 'caller-image');
-    callerImage.src =
-      callerData.profilePicURL || 'public/assets/placeholder-profile-pic.png';
-
-    const callerInfo = document.createElement('div');
-    callerInfo.setAttribute('id', 'caller-info');
-    callerInfo.innerText = `Position: ${callerData.position}\nEducation: ${callerData.education}\nLocation: ${callerData.city}`;
-
-    const acceptButton = document.createElement('button');
-    acceptButton.setAttribute('id', 'accept-button');
-    acceptButton.innerText = 'Accept';
-    acceptButton.addEventListener('click', () =>
-      acceptButtonCallback(callerId)
+    const CallerCard = () => (
+      <div id="caller-card">
+        <img
+          i="caller-image"
+          src={
+            callerData.profilePicURL ||
+            'public/assets/placeholder-profile-pic.png'
+          }
+        ></img>
+        <div>{callerData.displayName}</div>
+        <div id="caller-info">
+          Position: {callerData.position}
+          <br />
+          Education: {callerData.education}
+          <br />
+          Location: {callerData.city}
+        </div>
+        <div id="caller-buttons-wrapper">
+          <button
+            id="accept-button"
+            onClick={() => acceptButtonCallback(callerId)}
+          >
+            Accept
+          </button>
+          <button
+            id="decline-button"
+            onClick={() => declineButtonCallback(callerId)}
+          >
+            Decline
+          </button>
+        </div>
+      </div>
     );
-
-    const declineButton = document.createElement('button');
-    declineButton.setAttribute('id', 'decline-button');
-    declineButton.innerText = 'Decline';
-    declineButton.addEventListener('click', () =>
-      declineButtonCallback(callerId)
-    );
-
-    const buttonWrapper = document.createElement('div');
-    buttonWrapper.setAttribute('id', 'caller-buttons-wrapper');
-
-    buttonWrapper.appendChild(acceptButton);
-    buttonWrapper.appendChild(declineButton);
-
-    const callerCard = document.createElement('div');
-    callerCard.setAttribute('id', 'caller-card');
-
-    callerCard.appendChild(callerImage);
-    callerCard.appendChild(callerName);
-    callerCard.appendChild(callerInfo);
-    callerCard.appendChild(buttonWrapper);
 
     const callerCardWrapper = document.getElementById('caller-card-wrapper');
     callerCardWrapper.style.display = 'flex';
 
-    callerCardWrapper.appendChild(callerCard);
+    callerCardWrapper.appendChild(<CallerCard />);
   }
 
   createInCallButtons() {
@@ -716,7 +693,6 @@ class UserInterfaceManager {
   addStreamToVideoElement(stream, setMute = false) {
     const videoElement = document.createElement('video');
     videoElement.srcObject = stream;
-    videoElement.poster = 'http://gph.is/1Qb3vhn';
     if (setMute) {
       videoElement.muted = 'true';
     }
@@ -731,11 +707,8 @@ class UserInterfaceManager {
   addPlayerToOnlineList(playerName, playerSocketId, isCurrentPlayer = false) {
     if (document.getElementById(playerSocketId)) return;
 
+    const playerListItem = <li id={playerSocketId}>{playerName}</li>;
     const onlineList = document.getElementById('online-list');
-
-    const playerListItem = document.createElement('li');
-    playerListItem.innerText = playerName;
-    playerListItem.setAttribute('id', playerSocketId);
 
     if (isCurrentPlayer) {
       playerListItem.style.fontWeight = '600';
