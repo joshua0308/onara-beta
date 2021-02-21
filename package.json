@@ -8,11 +8,12 @@
   },
   "scripts": {
     "start": "NODE_ENV=production node server.js",
-    "dev": "NODE_ENV=development nodemon server.js",
+    "dev": "npm run build:dev & NODE_ENV=production nodemon server.js",
     "deploy": "git push heroku main",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "build": "rm -rf dist && webpack --config webpack.prod.js"
+    "build": "rm -rf dist && webpack --config webpack.prod.js",
+    "build:dev":"webpack --config webpack.dev.js"
   },
   "author": "",
   "license": "ISC",

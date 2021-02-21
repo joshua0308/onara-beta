@@ -2,6 +2,27 @@ import MyPlayer from '../entities/MyPlayer.js';
 import OtherPlayer from '../entities/OtherPlayer.js';
 import userInterfaceManager from '../UserInterfaceManager.js';
 
+const MyPeer = {
+  peer: null,
+  init: function () {
+    this.peer = new SimplePeer({
+      initiator: false,
+      trickle: true,
+      reconnectTimer: 3000,
+      config: {
+        iceServers: [
+          { urls: 'stun:stun.l.google.com:19302' },
+          { urls: 'stun:global.stun.twilio.com:3478?transport=udp' },
+          {
+            urls: 'turn:numb.viagenie.ca',
+            username: 'joshua940308@gmail.com',
+            credential: 'ju2B4vN9mze6Ld6Q'
+          }
+        ]
+      }
+    });
+  }
+};
 class Play extends Phaser.Scene {
   constructor(config) {
     super('PlayScene');
@@ -10,7 +31,7 @@ class Play extends Phaser.Scene {
 
     this.acceptButtonCallback = this.acceptButtonCallback.bind(this);
     this.declineButtonCallback = this.declineButtonCallback.bind(this);
-    this.endCallButtonCallback = this.endCallButtonCallback.bind(this);
+    // this.endCallButtonCallback = this.endCallButtonCallback.bind(this);
     this.updateMyPlayerInfo = this.updateMyPlayerInfo.bind(this);
   }
 
@@ -45,8 +66,8 @@ class Play extends Phaser.Scene {
 
   testDevEnv() {
     // enter bar scene
-    this.registry.set('map', 'town');
-    // this.registry.set('map', 'bar');
+    // this.registry.set('map', 'town');
+    this.registry.set('map', 'bar');
     return 'learn';
 
     // open bar questionnaire
@@ -54,6 +75,7 @@ class Play extends Phaser.Scene {
   }
 
   async create({ barId }) {
+    barId = this.testDevEnv(barId);
     // this.scale.on('resize', resize, this);
 
     function resize(gameSize, baseSize, displaySize, resolution) {
@@ -67,8 +89,6 @@ class Play extends Phaser.Scene {
       // );
     }
 
-    // barId = this.testDevEnv(barId);
-
     this.firebase = this.game.firebase;
     this.firebaseAuth = this.game.firebaseAuth;
     this.firebaseDb = this.game.firebaseDb;
@@ -79,7 +99,7 @@ class Play extends Phaser.Scene {
       this.firebaseDb
     );
 
-    // console.log('debug: barId', barId);
+    this.userInterfaceManager.createInCallInterface();
 
     this.myPlayer = {
       socketId: undefined,
@@ -262,12 +282,7 @@ class Play extends Phaser.Scene {
       this.myPeer.signal(callerSignalData);
 
       this.userInterfaceManager.removePlayerProfileInterface();
-      this.userInterfaceManager.createInCallInterface(
-        this.myStream,
-        this.toggleVideoButtonCallback,
-        this.toggleAudioButtonCallback,
-        this.endCallButtonCallback
-      );
+      this.userInterfaceManager.createInCallInterface(this.myStream);
     });
 
     this.socket.on('peer-offer', ({ receiverSignalData, receiverSocketId }) => {
@@ -326,12 +341,7 @@ class Play extends Phaser.Scene {
         });
 
         this.userInterfaceManager.removePlayerProfileInterface();
-        this.userInterfaceManager.createInCallInterface(
-          this.myStream,
-          this.toggleVideoButtonCallback,
-          this.toggleAudioButtonCallback,
-          this.endCallButtonCallback
-        );
+        this.userInterfaceManager.createInCallInterface(this.myStream);
 
         navigator.mediaDevices
           .getUserMedia({ video: true, audio: true })
@@ -469,43 +479,6 @@ class Play extends Phaser.Scene {
       });
   }
 
-  /**
-   * CALLBACK FUNCTIONS
-   */
-  toggleVideoButtonCallback(toggleVideoButton, stream) {
-    console.log('debug: toggle video button');
-
-    let enabled = stream.getVideoTracks()[0].enabled;
-    if (enabled) {
-      stream.getVideoTracks()[0].enabled = false;
-      toggleVideoButton.innerText = 'Show video';
-    } else {
-      stream.getVideoTracks()[0].enabled = true;
-      toggleVideoButton.innerText = 'Hide video';
-    }
-    console.log(
-      'debug: toggle video button - enabled',
-      stream.getVideoTracks()[0].enabled
-    );
-  }
-
-  toggleAudioButtonCallback(toggleAudioButton, stream) {
-    console.log('debug: toggle audio button');
-
-    let enabled = stream.getAudioTracks()[0].enabled;
-    if (enabled) {
-      stream.getAudioTracks()[0].enabled = false;
-      toggleAudioButton.innerText = 'Unmute';
-    } else {
-      stream.getAudioTracks()[0].enabled = true;
-      toggleAudioButton.innerText = 'Mute';
-    }
-    console.log(
-      'debug: toggle audio button - enabled',
-      stream.getAudioTracks()[0].enabled
-    );
-  }
-
   setMediaConstraints(devices) {
     const mediaConstraints = { video: false, audio: false };
     devices.forEach((device) => {
@@ -567,12 +540,7 @@ class Play extends Phaser.Scene {
     });
 
     this.userInterfaceManager.removeIncomingCallInterface();
-    this.userInterfaceManager.createInCallInterface(
-      this.myStream,
-      this.toggleVideoButtonCallback,
-      this.toggleAudioButtonCallback,
-      this.endCallButtonCallback
-    );
+    this.userInterfaceManager.createInCallInterface(this.myStream);
 
     navigator.mediaDevices
       .getUserMedia({ video: true, audio: true })
@@ -599,15 +567,15 @@ class Play extends Phaser.Scene {
     this.userInterfaceManager.removeIncomingCallInterface();
   }
 
-  endCallButtonCallback(endCallButton) {
-    console.log('debug: end call');
-    this.userInterfaceManager.removeInCallInterface();
-    this.stopStream();
-    endCallButton.remove();
+  // endCallButtonCallback(endCallButton) {
+  //   console.log('debug: end call');
+  //   this.userInterfaceManager.removeInCallInterface();
+  //   this.stopStream();
+  //   endCallButton.remove();
 
-    this.socket.emit('end-call', { peerSocketId: this.peerSocketId });
-    this.removePeerConnection();
-  }
+  //   this.socket.emit('end-call', { peerSocketId: this.peerSocketId });
+  //   this.removePeerConnection();
+  // }
 }
 
 export default Play;

@@ -4,6 +4,7 @@ const path = require('path');
 
 module.exports = {
   mode: 'development',
+  watch: true,
   entry: {
     bundle: './src/index.js',
     playground: './src/playground.js'

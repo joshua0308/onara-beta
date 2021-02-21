@@ -1,6 +1,5 @@
 import collidable from '../mixins/collidable.js';
-// import initAnimations from './playerAnims.js';
-import initNewAnimations from './newPlayerAnims.js';
+import initAnimations from './newPlayerAnims.js';
 
 class MyPlayer extends Phaser.GameObjects.Container {
   constructor(scene, x, y, socket, playerInfo) {
@@ -42,8 +41,7 @@ class MyPlayer extends Phaser.GameObjects.Container {
     this.body.setGravityY(this.gravity);
     this.body.setCollideWorldBounds(true);
 
-    // initAnimations(this.scene.anims);
-    initNewAnimations(this.scene.anims);
+    initAnimations(this.scene.anims);
     this.motion = 'idle';
     this.scene.events.on(Phaser.Scenes.Events.UPDATE, this.update, this);
   }
@@ -55,11 +53,10 @@ class MyPlayer extends Phaser.GameObjects.Container {
     this.scene.add.existing(this);
     this.scene.physics.add.existing(this);
   }
+
   createSprite() {
     const player = this.scene.add.sprite(0, 0, `${this.characterType}-idle`, 0);
     player.setScale(0.4);
-    // eslint-disable-next-line no-console
-    console.log('debug: player', player);
     player.name = 'sprite';
     this.add(player);
   }
