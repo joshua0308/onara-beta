@@ -76,18 +76,6 @@ class Play extends Phaser.Scene {
 
   async create({ barId }) {
     barId = this.testDevEnv(barId);
-    // this.scale.on('resize', resize, this);
-
-    function resize(gameSize, baseSize, displaySize, resolution) {
-      // // eslint-disable-next-line no-console
-      // console.log('debug: gameSize', gameSize);
-      // // eslint-disable-next-line no-console
-      // console.log(
-      //   'debug: this.map.width, this.map.height',
-      //   this.map.width,
-      //   this.map.height
-      // );
-    }
 
     this.firebase = this.game.firebase;
     this.firebaseAuth = this.game.firebaseAuth;
@@ -99,7 +87,7 @@ class Play extends Phaser.Scene {
       this.firebaseDb
     );
 
-    this.userInterfaceManager.createInCallInterface();
+    // this.userInterfaceManager.createInCallInterface();
 
     this.myPlayer = {
       socketId: undefined,
@@ -117,6 +105,7 @@ class Play extends Phaser.Scene {
     if (this.getCurrentMap() !== 'town') {
       this.barId = barId;
       this.socket = io('/game');
+      this.userInterfaceManager.addSocket(this.socket);
     } else {
       this.socket = { emit: () => {}, close: () => {} };
     }
@@ -282,7 +271,7 @@ class Play extends Phaser.Scene {
       this.myPeer.signal(callerSignalData);
 
       this.userInterfaceManager.removePlayerProfileInterface();
-      this.userInterfaceManager.createInCallInterface(this.myStream);
+      // this.userInterfaceManager.createInCallInterface(this.myStream);
     });
 
     this.socket.on('peer-offer', ({ receiverSignalData, receiverSocketId }) => {
@@ -338,6 +327,7 @@ class Play extends Phaser.Scene {
           console.log('debug: close peer');
           this.stopStream();
           this.removePeerConnection();
+          this.userInterfaceManager.removeInCallInterface();
         });
 
         this.userInterfaceManager.removePlayerProfileInterface();
@@ -347,6 +337,7 @@ class Play extends Phaser.Scene {
           .getUserMedia({ video: true, audio: true })
           .then((stream) => {
             this.myStream = stream;
+            this.userInterfaceManager.stream = this.myStream;
             this.userInterfaceManager.addStreamToVideoElement(
               this.myStream,
               true
@@ -537,6 +528,7 @@ class Play extends Phaser.Scene {
       console.log('debug: close peer');
       this.stopStream();
       this.removePeerConnection();
+      this.userInterfaceManager.removeInCallInterface();
     });
 
     this.userInterfaceManager.removeIncomingCallInterface();
@@ -546,6 +538,7 @@ class Play extends Phaser.Scene {
       .getUserMedia({ video: true, audio: true })
       .then((stream) => {
         this.myStream = stream;
+        this.userInterfaceManager.stream = this.myStream;
         this.userInterfaceManager.addStreamToVideoElement(this.myStream, true);
         console.log('debug: add stream');
         this.myPeer.addStream(this.myStream);

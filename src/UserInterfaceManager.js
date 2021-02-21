@@ -5,75 +5,29 @@ class UserInterfaceManager {
     this.firebase = firebase;
     this.firebaseAuth = firebaseAuth;
     this.firebaseDb = firebaseDb;
+    this.socket = null;
   }
 
-  createInCallInterface(
-    stream
-    // toggleVideoButtonCallback,
-    // toggleAudioButtonCallback,
-    // endCallButtonCallback
-  ) {
-    function toggleVideoButtonCallback(toggleVideoButton, stream) {
-      const toggleVideoButtonElement = document.getElementById('toggle-video');
-      console.log('debug: toggle video button');
+  addSocket(socket) {
+    this.socket = socket;
+  }
 
-      let enabled = stream.getVideoTracks()[0].enabled;
-      if (enabled) {
-        stream.getVideoTracks()[0].enabled = false;
-        toggleVideoButtonElement.innerText = 'Show video';
-      } else {
-        stream.getVideoTracks()[0].enabled = true;
-        toggleVideoButtonElement.innerText = 'Hide video';
-      }
-      console.log(
-        'debug: toggle video button - enabled',
-        stream.getVideoTracks()[0].enabled
-      );
-    }
-
-    function toggleAudioButtonCallback(toggleAudioButton, stream) {
-      const toggleAudioButtonElement = document.getElementById('toggle-audio');
-      console.log('debug: toggle audio button');
-
-      let enabled = stream.getAudioTracks()[0].enabled;
-      if (enabled) {
-        stream.getAudioTracks()[0].enabled = false;
-        toggleAudioButtonElement.innerText = 'Unmute';
-      } else {
-        stream.getAudioTracks()[0].enabled = true;
-        toggleAudioButtonElement.innerText = 'Mute';
-      }
-      console.log(
-        'debug: toggle audio button - enabled',
-        stream.getAudioTracks()[0].enabled
-      );
-    }
-
-    const endCallButtonCallback = () => {
-      console.log('debug: end call');
-      this.removeInCallInterface();
-      // this.stopStream();
-
-      this.socket.emit('end-call', { peerSocketId: this.peerSocketId });
-      this.removePeerConnection();
-    };
-
+  createInCallInterface(stream) {
     const inCallModalWrapper = document.getElementById('in-call-modal-wrapper');
     inCallModalWrapper.style.display = 'inline';
     inCallModalWrapper.isGameVisible = true;
     inCallModalWrapper.style.backgroundColor = 'rgba(74, 67, 67, 0.4)';
 
-    const videosWrapper = <div id="videos-wrapper"></div>;
+    const VideosWrapper = () => <div id="videos-wrapper"></div>;
 
-    const inCallButtonsWrapper = this.createInCallButtons(
-      stream,
-      toggleVideoButtonCallback,
-      toggleAudioButtonCallback,
-      endCallButtonCallback
+    const InCallButtonsWrapper = () => this.createInCallButtons(stream);
+
+    inCallModalWrapper.appendChild(
+      <>
+        <VideosWrapper />
+        <InCallButtonsWrapper />
+      </>
     );
-
-    inCallModalWrapper.appendChild(videosWrapper);
-    inCallModalWrapper.appendChild(inCallButtonsWrapper);
   }
 
   createOnlineList(barId) {
@@ -634,76 +588,94 @@ class UserInterfaceManager {
     callerCardWrapper.appendChild(callerCard);
   }
 
-  createInCallButtons(
-    stream,
-    toggleVideoButtonCallback,
-    toggleAudioButtonCallback,
-    endCallButtonCallback
-  ) {
-    const toggleVideoButton = (
-      <button
-        id="toggle-video"
-        onClick={() => {
-          toggleVideoButtonCallback(toggleVideoButton, stream);
-        }}
-      >
-        <i id="video-icon" className="fas fa-video fa-xs"></i>
-      </button>
-    );
+  createInCallButtons() {
+    const toggleVideo = () => {
+      const stream = this.stream;
+      const videoIcon = document.getElementById('video-icon');
+      console.log('debug: toggle video button');
 
-    const toggleAudioButton = (
-      <button
-        id="toggle-audio"
-        onClick={() => toggleAudioButtonCallback(toggleAudioButton, stream)}
-      >
-        <i id="mic-icon" className="fas fa-microphone fa-xs"></i>
-      </button>
-    );
+      let enabled = stream.getVideoTracks()[0].enabled;
+      if (enabled) {
+        stream.getVideoTracks()[0].enabled = false;
+        videoIcon.classList.remove('fa-video');
+        videoIcon.classList.add('fa-video-slash');
+      } else {
+        stream.getVideoTracks()[0].enabled = true;
+        videoIcon.classList.add('fa-video');
+        videoIcon.classList.remove('fa-video-slash');
+      }
+      console.log(
+        'debug: toggle video button - enabled',
+        stream.getVideoTracks()[0].enabled
+      );
+    };
 
-    function toggleBackgroundButtonCallback() {
+    const toggleAudio = () => {
+      const stream = this.stream;
+      const audioIcon = document.getElementById('audio-icon');
+      console.log('debug: toggle audio button');
+
+      let enabled = stream.getAudioTracks()[0].enabled;
+      if (enabled) {
+        stream.getAudioTracks()[0].enabled = false;
+        audioIcon.classList.remove('fa-microphone');
+        audioIcon.classList.add('fa-microphone-slash');
+      } else {
+        stream.getAudioTracks()[0].enabled = true;
+        audioIcon.classList.remove('fa-microphone-slash');
+        audioIcon.classList.add('fa-microphone');
+      }
+      console.log(
+        'debug: toggle audio button - enabled',
+        stream.getAudioTracks()[0].enabled
+      );
+    };
+
+    const toggleBackground = () => {
+      const backgroundIcon = document.getElementById('background-icon');
+
       const inCallModalWrapper = document.getElementById(
         'in-call-modal-wrapper'
       );
+
       if (inCallModalWrapper.isGameVisible) {
         inCallModalWrapper.style.backgroundColor = '#000000';
         inCallModalWrapper.isGameVisible = false;
-        toggleBackgroundButton.innerText = 'Show game';
+        backgroundIcon.classList.remove('fa-eye');
+        backgroundIcon.classList.add('fa-eye-slash');
       } else {
         inCallModalWrapper.style.backgroundColor = 'rgba(74, 67, 67, 0.4)';
         inCallModalWrapper.isGameVisible = true;
-        toggleBackgroundButton.innerText = 'Hide game';
+        backgroundIcon.classList.remove('fa-eye-slash');
+        backgroundIcon.classList.add('fa-eye');
       }
-    }
+    };
 
-    const toggleBackgroundButton = (
-      <button
-        id="toggle-background"
-        onClick={() => toggleBackgroundButtonCallback()}
-      >
-        {/* <i className="fas fa-eye-slash"></i> */}
-        <i className="fas fa-eye"></i>
-      </button>
-    );
+    const endCall = () => {
+      console.log('debug: end call');
+      this.removeInCallInterface();
+      this.scene.stopStream();
 
-    const endCallButton = (
-      <button
-        id="end-call-button-button"
-        onClick={() => endCallButtonCallback(endCallButton)}
-      >
-        <i className="fas fa-phone-slash fa-xs"></i>
-      </button>
-    );
+      this.socket.emit('end-call', { peerSocketId: this.peerSocketId });
+      this.scene.removePeerConnection();
+    };
 
-    const inCallButtonsWrapper = (
+    return (
       <div id="in-call-buttons-wrapper">
-        {toggleVideoButton}
-        {toggleAudioButton}
-        {toggleBackgroundButton}
-        {endCallButton}
+        <button id="toggle-video-button" onClick={() => toggleVideo()}>
+          <i id="video-icon" className="fas fa-video fa-xs"></i>
+        </button>
+        <button id="toggle-audio-button" onClick={() => toggleAudio()}>
+          <i id="audio-icon" className="fas fa-microphone fa-xs"></i>
+        </button>
+        <button id="toggle-background" onClick={() => toggleBackground()}>
+          <i id="background-icon" className="fas fa-eye fa-xs"></i>
+        </button>
+        <button id="end-call-button-button" onClick={() => endCall()}>
+          <i id="end-call-icon" className="fas fa-phone-slash fa-xs"></i>
+        </button>
       </div>
     );
-
-    return inCallButtonsWrapper;
   }
 
   removeIncomingCallInterface() {

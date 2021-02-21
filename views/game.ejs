@@ -28,32 +28,36 @@
       left: 0;
     }
 
-    /* global style conflicts with bootstrap */
-    button {
-      margin: 5px;
-      /* box-sizing: border-box;
-      width: 100px; */
-      /* height: 30px; */
-    }
-
     #in-call-buttons-wrapper {
       position: fixed;
-      width: 100%;
       bottom: 50px;
+      left: 50%;
+      margin-left: -150px;
+      width: 300px;
+      height: 60px;
+      border-radius: 30px;
       display: flex;
-      justify-content: center;
+      justify-content: space-evenly;
+      background: #16171a;
+      box-shadow: 9px 9px 16px #0a0b0c, -9px -9px 16px #222328;
     }
 
     #in-call-buttons-wrapper button {
+      width: 50px;
       background: transparent;
       border: none;
       border-radius: 5px;
       font-size: 30px;
       color: grey;
+      transition: all 0.3s ease-in-out;
     }
 
     #in-call-buttons-wrapper button:hover {
       color: white;
+    }
+
+    #in-call-buttons-wrapper button:focus {
+      outline: none;
     }
 
     #call-button-wrapper {
