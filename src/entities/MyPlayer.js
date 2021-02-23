@@ -124,24 +124,27 @@ class MyPlayer extends Phaser.GameObjects.Container {
       (isSpaceJustDown || isUpJustDown) &&
       (onFloor || this.jumpCount < this.consecutiveJumps)
     ) {
-      setTimeout(() => {
-        // need to bend the knees before jumping
-        // as soon as sprite is off the ground
-        // set the startJumpMotion property to false
-        this.body.setVelocityY(-this.playerSpeed * 1.3);
-        this.startJumpMotion = false;
-      }, 310);
+      this.body.setVelocityY(-this.playerSpeed * 1.3);
+      // this.startJumpMotion = false;
+      // setTimeout(() => {
+      //   // need to bend the knees before jumping
+      //   // as soon as sprite is off the ground
+      //   // set the startJumpMotion property to false
+      //   this.body.setVelocityY(-this.playerSpeed * 1.3);
+      //   this.startJumpMotion = false;
+      // }, 310);
       this.jumpCount += 1;
-      this.startJumpMotion = true;
+      // this.startJumpMotion = true;
     }
 
     // set animation based on movement
     if (this.startJumpMotion || !onFloor) {
       this.motion = 'jump';
-      if (this.startJumpMotion) {
-        // don't move horizontally while getting ready to jump
-        this.body.setVelocityX(0);
-      }
+      // if (this.startJumpMotion) {
+      //   // don't move horizontally while getting ready to jump
+      //   this.body.setVelocityX(0);
+      // }
+      this.motion = 'jump';
     } else if (onFloor && this.body.velocity.x !== 0) {
       this.motion = 'walk';
     } else if (onFloor && this.body.velocity.x === 0) {

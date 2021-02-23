@@ -37,9 +37,9 @@ class Preload extends Phaser.Scene {
     });
 
     this.load.spritesheet('boy-jump', 'assets/new-player/boy-jump.png', {
-      frameWidth: 382,
+      frameWidth: 482,
       frameHeight: 1080,
-      spacing: 211
+      spacing: 111
     });
 
     this.load.spritesheet('girl-idle', 'assets/new-player/girl-idle.png', {
@@ -55,9 +55,9 @@ class Preload extends Phaser.Scene {
     });
 
     this.load.spritesheet('girl-jump', 'assets/new-player/girl-jump.png', {
-      frameWidth: 382,
+      frameWidth: 482,
       frameHeight: 1080,
-      spacing: 211
+      spacing: 111
     });
 
     this.load.once('complete', () => {

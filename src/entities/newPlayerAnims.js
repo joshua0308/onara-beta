@@ -22,10 +22,10 @@ export default (anims) => {
   anims.create({
     key: 'boy-jump',
     frames: anims.generateFrameNumbers('boy-jump', {
-      start: 3,
-      end: 8
+      start: 2,
+      end: 7
     }),
-    frameRate: 2.5,
+    frameRate: 4,
     repeat: -1
   });
 
@@ -52,10 +52,10 @@ export default (anims) => {
   anims.create({
     key: 'girl-jump',
     frames: anims.generateFrameNumbers('girl-jump', {
-      start: 3,
-      end: 8
+      start: 2,
+      end: 6
     }),
-    frameRate: 2.5,
+    frameRate: 4,
     repeat: -1
   });
 };
