@@ -429,6 +429,124 @@ class UserInterfaceManager {
   }
 
   async createProfileFormInterface(myPlayer) {
+    const FormElements = () => (
+      <div className="container rounded bg-white mt-5 mb-5 w-50">
+        <div className="row">
+          <div className="col-md-3 border-right d-flex flex-column align-items-center text-center justify-content-center">
+            <div
+              className="nav flex-column nav-pills"
+              role="tablist"
+              aria-orientation="vertical"
+            >
+              <a
+                className="nav-link active"
+                data-toggle="pill"
+                href="#"
+                role="tab"
+              >
+                Profile
+              </a>
+            </div>
+          </div>
+          <div className="col-md-9">
+            <div className="p-3 py-5">
+              <div className="d-flex flex-column align-items-center text-center justify-content-center">
+                <img
+                  id="profile-image"
+                  className="rounded-circle"
+                  src="public/assets/placeholder-profile-pic.png"
+                  width="150"
+                />
+              </div>
+              <form
+                id="profile-edit-form"
+                className="main-form needs-validation"
+              >
+                <div className="row mt-2">
+                  <div className="col-md-12 mt-3">
+                    <label className="labels">Name</label>
+                    <input
+                      type="text"
+                      name="name"
+                      className="form-control"
+                      placeholder="Josh"
+                      required
+                    />
+                  </div>
+                </div>
+                <div className="row mt-3">
+                  <div className="col-md-12 mt-3">
+                    <label className="labels">Current position</label>
+                    <input
+                      type="text"
+                      name="position"
+                      className="form-control"
+                      placeholder="Software Engineer"
+                      required
+                    />
+                  </div>
+                  <div className="col-md-12  mt-3">
+                    <label className="labels">Education</label>
+                    <input
+                      type="text"
+                      name="education"
+                      className="form-control"
+                      placeholder="U of Michigan"
+                      required
+                    />
+                  </div>
+                </div>
+                <div className="row mt-3">
+                  <div className="col-md-6 mt-3">
+                    <label className="labels">City</label>
+                    <input
+                      type="text"
+                      name="city"
+                      className="form-control"
+                      placeholder="Montreal"
+                      required
+                    />
+                  </div>
+                  <div className="col-md-6 mt-3">
+                    <label className="labels">Country</label>
+                    <input
+                      type="text"
+                      name="country"
+                      className="form-control"
+                      placeholder="Canada"
+                      required
+                    />
+                  </div>
+                </div>
+                <div className="mt-5 text-center">
+                  <button
+                    className="btn btn-success"
+                    id="save-profile-button"
+                    type="submit"
+                  >
+                    Save Profile
+                  </button>
+                  <button
+                    className="btn btn-danger"
+                    id="close-profile-button"
+                    type="button"
+                  >
+                    Close
+                  </button>
+                </div>
+                <div
+                  className="text-center mt-2 alert-success"
+                  id="profile-update-status"
+                >
+                  Your profile has been updated
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+
     this.scene.scene.pause();
 
     const myPlayerDocRef = this.firebaseDb
@@ -439,6 +557,7 @@ class UserInterfaceManager {
     const myPlayerData = doc.data();
 
     const profileFormWrapper = document.getElementById('profile-form-wrapper');
+    profileFormWrapper.appendChild(<FormElements />);
     const profileEditForm = document.getElementById('profile-edit-form');
     const profileImage = document.getElementById('profile-image');
 
@@ -492,6 +611,7 @@ class UserInterfaceManager {
 
     const closeButtonCallback = () => {
       console.log('close profile');
+      this.scene.scene.resume();
 
       closeButton.removeEventListener('click', closeButtonCallback);
       saveButton.removeEventListener('click', saveButtonCallback);
@@ -499,7 +619,6 @@ class UserInterfaceManager {
 
       document.getElementById('profile-update-status').style.visibility =
         'hidden';
-      this.scene.scene.resume();
     };
 
     saveButton.addEventListener('click', saveButtonCallback);
@@ -510,10 +629,13 @@ class UserInterfaceManager {
 
   removeProfileFormInterface() {
     const profileFormWrapper = document.getElementById('profile-form-wrapper');
-    profileFormWrapper.style.display = 'none';
+    if (profileFormWrapper) {
+      profileFormWrapper.style.display = 'none';
+    }
 
-    const profileForm = document.getElementById('profile-edit-form');
-    profileForm.classList.remove('was-validated');
+    while (profileFormWrapper.firstChild) {
+      profileFormWrapper.removeChild(profileFormWrapper.lastChild);
+    }
   }
 
   async createIncomingCallInterface(
