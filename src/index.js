@@ -1,6 +1,6 @@
-import PlayScene from './scenes/Play.js';
-import PreloadScene from './scenes/Preload.js';
-import DemoScene from './scenes/Demo.js';
+import PlayScene from './scenes/Play';
+import PreloadScene from './scenes/Preload';
+import DemoScene from './scenes/Demo';
 
 const Scenes = [PreloadScene, PlayScene];
 const createScene = (Scene) => new Scene();

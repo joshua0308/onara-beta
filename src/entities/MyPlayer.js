@@ -23,6 +23,17 @@ class MyPlayer extends Phaser.GameObjects.Container {
     this.createPlayerName(this.playerInfo.displayName);
     this.init();
 
+    this.setInteractive().on(
+      Phaser.Input.Events.GAMEOBJECT_POINTER_DOWN,
+      () => {
+        this.scene.userInterfaceManager.createPlayerProfileInterface(
+          playerInfo,
+          socket,
+          true
+        );
+      }
+    );
+
     this.socket.emit('player-movement', {
       x,
       y,

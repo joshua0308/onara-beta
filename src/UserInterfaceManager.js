@@ -334,7 +334,7 @@ class UserInterfaceManager {
     }, 500);
   }
 
-  async createPlayerProfileInterface(player, socket) {
+  async createPlayerProfileInterface(player, socket, isMe = false) {
     console.log('debug: createPlayerProfileInterface', player);
 
     const playerProfileWrapper = document.getElementById(
@@ -403,9 +403,11 @@ class UserInterfaceManager {
           <br />
           Location: ${playerData.city}
         </div>
-        <button id="buy-drink-button" onClick={handleBuyADrinkButton}>
-          Buy a drink!
-        </button>
+        {!isMe && (
+          <button id="buy-drink-button" onClick={handleBuyADrinkButton}>
+            Buy a drink!
+          </button>
+        )}
         <button id="close-profile-button" onClick={handleCloseButton}>
           Close
         </button>
@@ -600,11 +602,19 @@ class UserInterfaceManager {
         audioIcon.classList.remove('fa-microphone');
         audioIcon.classList.add('fa-microphone-slash');
         toggleAudioButton.style.color = 'red';
+        console.log(
+          'debug: stream.getAudioTracks()[0]',
+          stream.getAudioTracks()[0].muted
+        );
       } else {
         stream.getAudioTracks()[0].enabled = true;
         audioIcon.classList.remove('fa-microphone-slash');
         audioIcon.classList.add('fa-microphone');
         toggleAudioButton.style.color = 'grey';
+        console.log(
+          'debug: stream.getAudioTracks()[0]',
+          stream.getAudioTracks()[0].muted
+        );
       }
       console.log(
         'debug: toggle audio button - enabled',
@@ -691,7 +701,10 @@ class UserInterfaceManager {
   }
 
   addStreamToVideoElement(stream, setMute = false) {
-    const videoElement = document.createElement('video');
+    console.log('debug: addStreamToVideoElement');
+    const videoElement = (
+      <video poster="https://media.giphy.com/media/VseXvvxwowwCc/giphy.gif"></video>
+    );
     videoElement.srcObject = stream;
     if (setMute) {
       videoElement.muted = 'true';

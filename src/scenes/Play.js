@@ -1,28 +1,9 @@
-import MyPlayer from '../entities/MyPlayer.js';
-import OtherPlayer from '../entities/OtherPlayer.js';
-import userInterfaceManager from '../UserInterfaceManager.js';
+import MyPlayer from '../entities/MyPlayer';
+import OtherPlayer from '../entities/OtherPlayer';
+import UserInterfaceManager from '../UserInterfaceManager';
+import PeerManager from '../PeerManager';
+import Logger from '../Logger';
 
-const MyPeer = {
-  peer: null,
-  init: function () {
-    this.peer = new SimplePeer({
-      initiator: false,
-      trickle: true,
-      reconnectTimer: 3000,
-      config: {
-        iceServers: [
-          { urls: 'stun:stun.l.google.com:19302' },
-          { urls: 'stun:global.stun.twilio.com:3478?transport=udp' },
-          {
-            urls: 'turn:numb.viagenie.ca',
-            username: 'joshua940308@gmail.com',
-            credential: 'ju2B4vN9mze6Ld6Q'
-          }
-        ]
-      }
-    });
-  }
-};
 class Play extends Phaser.Scene {
   constructor(config) {
     super('PlayScene');
@@ -31,7 +12,6 @@ class Play extends Phaser.Scene {
 
     this.acceptButtonCallback = this.acceptButtonCallback.bind(this);
     this.declineButtonCallback = this.declineButtonCallback.bind(this);
-    // this.endCallButtonCallback = this.endCallButtonCallback.bind(this);
     this.updateMyPlayerInfo = this.updateMyPlayerInfo.bind(this);
   }
 
@@ -75,19 +55,18 @@ class Play extends Phaser.Scene {
   }
 
   async create({ barId }) {
-    // barId = this.testDevEnv(barId);
+    barId = this.testDevEnv(barId);
 
+    this.logger = new Logger('Phaser');
     this.firebase = this.game.firebase;
     this.firebaseAuth = this.game.firebaseAuth;
     this.firebaseDb = this.game.firebaseDb;
-    this.userInterfaceManager = new userInterfaceManager(
+    this.userInterfaceManager = new UserInterfaceManager(
       this,
       this.firebase,
       this.firebaseAuth,
       this.firebaseDb
     );
-
-    // this.userInterfaceManager.createInCallInterface();
 
     this.myPlayer = {
       socketId: undefined,
@@ -106,11 +85,16 @@ class Play extends Phaser.Scene {
       this.barId = barId;
       this.socket = io('/game');
       this.userInterfaceManager.addSocket(this.socket);
+      this.peerManager = new PeerManager(
+        this,
+        this.userInterfaceManager,
+        this.socket
+      );
     } else {
       this.socket = { emit: () => {}, close: () => {} };
     }
 
-    this.myPeer = null;
+    // this.myPeer = null;
     this.myStream = null;
 
     this.otherPlayersGroup = this.physics.add.group();
@@ -157,7 +141,9 @@ class Play extends Phaser.Scene {
       this.myPlayer.socketId = this.socket.id;
 
       // tell the server it's ready to listen
-      console.log('debug: socket on connect', this.myPlayer.socketId);
+      this.logger.log('socket on connect', {
+        socketId: this.myPlayer.socketId
+      });
       this.socket.emit('join-room', {
         playerInfo: this.myPlayer,
         barId: this.barId
@@ -174,7 +160,7 @@ class Play extends Phaser.Scene {
     };
 
     this.socket.on('player-updated', (player) => {
-      console.log('socket-on: player-updated');
+      this.logger.log('socket on player-updated');
       this.userInterfaceManager.updateOnlineList(
         player.socketId,
         player.displayName
@@ -191,7 +177,7 @@ class Play extends Phaser.Scene {
 
     // receive live players in the room
     this.socket.on('current-players', (players) => {
-      console.log('socket-on: current players', players);
+      this.logger.log('socket on current players', { players });
       this.players = players;
 
       Object.keys(players).forEach((id) => {
@@ -217,7 +203,7 @@ class Play extends Phaser.Scene {
 
     // receive info about newly connected players
     this.socket.on('new-player', (player) => {
-      console.log('socket-on: new-player', player);
+      this.logger.log('socket on new-player', { player });
       this.players[player.socketId] = player;
       new OtherPlayer(
         this,
@@ -237,11 +223,10 @@ class Play extends Phaser.Scene {
 
     // receiver - when caller requests a call
     this.socket.on('call-received', ({ callerId }) => {
-      console.log(
-        'debug: call received',
+      this.logger.log('call received', {
         callerId,
-        this.players[callerId].displayName
-      );
+        displayName: this.players[callerId].displayName
+      });
       this.peerSocketId = callerId;
 
       this.userInterfaceManager.createIncomingCallInterface(
@@ -262,73 +247,19 @@ class Play extends Phaser.Scene {
     });
 
     this.socket.on('peer-answer', ({ callerSignalData }) => {
-      console.log(
-        'debug: receive peer answer',
-        callerSignalData,
-        new Date().toISOString()
-      );
-      console.log('debug: set remote SDP', callerSignalData);
-      this.myPeer.signal(callerSignalData);
-
+      this.logger.log('receive peer answer', { callerSignalData });
+      this.peerManager.bufferAndSetSignal(callerSignalData);
       this.userInterfaceManager.removePlayerProfileInterface();
-      // this.userInterfaceManager.createInCallInterface(this.myStream);
     });
 
     this.socket.on('peer-offer', ({ receiverSignalData, receiverSocketId }) => {
-      console.log('debug: receive peer offer', receiverSignalData);
-      if (this.myPeer) {
-        console.log('debug: set remote SDP', receiverSignalData);
-        this.myPeer.signal(receiverSignalData);
-      } else {
+      this.logger.log('Socket: receive peer offer', { receiverSignalData });
+      this.peerManager.bufferAndSetSignal(receiverSignalData);
+
+      if (!this.peerManager.peer) {
         this.peerSocketId = receiverSocketId;
-
-        console.log('debug: init peer');
-        this.myPeer = new SimplePeer({
-          initiator: false,
-          trickle: true,
-          reconnectTimer: 3000,
-          config: {
-            iceServers: [
-              { urls: 'stun:stun.l.google.com:19302' },
-              { urls: 'stun:global.stun.twilio.com:3478?transport=udp' },
-              {
-                urls: 'turn:numb.viagenie.ca',
-                username: 'joshua940308@gmail.com',
-                credential: 'ju2B4vN9mze6Ld6Q'
-              }
-            ]
-          }
-        });
-
-        console.log('debug: set remote SDP', receiverSignalData);
-        this.myPeer.signal(receiverSignalData);
-
-        this.myPeer.on('signal', (callerSignalData) => {
-          console.log(
-            'debug: send peer answer',
-            callerSignalData,
-            new Date().toISOString()
-          );
-          this.socket.emit('peer-answer', {
-            callerSignalData,
-            receiverSocketId
-          });
-        });
-
-        this.myPeer.on('stream', (receiverStream) => {
-          console.log('debug: receive stream');
-          this.userInterfaceManager.addStreamToVideoElement(
-            receiverStream,
-            false
-          );
-        });
-
-        this.myPeer.on('close', () => {
-          console.log('debug: close peer');
-          this.stopStream();
-          this.removePeerConnection();
-          this.userInterfaceManager.removeInCallInterface();
-        });
+        this.peerManager.initConnection(receiverSocketId, false);
+        this.peerManager.setSignal();
 
         this.userInterfaceManager.removePlayerProfileInterface();
         this.userInterfaceManager.createInCallInterface(this.myStream);
@@ -342,20 +273,19 @@ class Play extends Phaser.Scene {
               this.myStream,
               true
             );
-            console.log('debug: add stream');
-            this.myPeer.addStream(this.myStream);
+            this.peerManager.addStream(this.myStream);
           });
       }
     });
 
     this.socket.on('call-request-declined', ({ receiverId, message }) => {
-      console.log('debug: declined', receiverId);
+      this.logger.log('declined', { receiverId });
       this.userInterfaceManager.removePlayerProfileInterface();
       alert(message);
     });
 
     this.socket.on('call-ended', ({ peerSocketId }) => {
-      console.log('debug: call ended');
+      this.logger.log('call ended');
       this.userInterfaceManager.removeInCallInterface();
       this.stopStream();
 
@@ -366,16 +296,7 @@ class Play extends Phaser.Scene {
     this.socket.on('player-moved', (otherPlayerInfo) => {
       this.otherPlayersGroup.getChildren().forEach((otherPlayer) => {
         if (otherPlayerInfo.socketId === otherPlayer.socketId) {
-          /**
-           * CONTAINER
-           */
-          const otherPlayerSprite = otherPlayer.getByName('sprite');
-          otherPlayer.setPosition(otherPlayerInfo.x, otherPlayerInfo.y);
-          otherPlayerSprite.flipX = otherPlayerInfo.flipX;
-          otherPlayerSprite.play(
-            `${otherPlayer.characterType}-${otherPlayerInfo.motion}`,
-            true
-          );
+          otherPlayer.updateMovement(otherPlayerInfo);
         }
       });
     });
@@ -383,37 +304,30 @@ class Play extends Phaser.Scene {
     this.socket.on('player-disconnected', (otherPlayerSocketId) => {
       this.userInterfaceManager.removePlayerFromOnlineList(otherPlayerSocketId);
 
-      console.log('debug: player-disconnected', otherPlayerSocketId);
+      this.logger.log('player-disconnected', { otherPlayerSocketId });
       delete this.players[otherPlayerSocketId];
 
       if (this.peerSocketId === otherPlayerSocketId) {
-        console.log('debug: chat peer disconnected');
+        this.logger.log('chat peer disconnected');
         this.socket.emit('end-call', { peerSocketId: this.peerSocketId });
         this.userInterfaceManager.removeInCallInterface();
         this.stopStream();
         this.removePeerConnection();
       }
 
-      this.otherPlayersGroup.getChildren().forEach((player) => {
-        if (otherPlayerSocketId === player.socketId) {
-          player.removeAll(true); // remove all children and destroy
-          player.body.destroy(); // destroy the container itself
+      this.otherPlayersGroup.getChildren().forEach((otherPlayer) => {
+        if (otherPlayerSocketId === otherPlayer.socketId) {
+          otherPlayer.destroy();
         }
       });
     });
   }
 
   removePeerConnection() {
-    if (this.myPeer) {
-      this.myPeer.destroy();
-      this.myPeer = undefined;
-    }
-
+    this.peerManager.destroy();
     if (this.peerSocketId) {
-      this.peerSocketId = undefined;
+      this.peerSocketId = null;
     }
-
-    console.log('debug: remove peer', this.myPeer);
   }
 
   createMap() {
@@ -465,7 +379,7 @@ class Play extends Phaser.Scene {
     container
       .setInteractive()
       .on(Phaser.Input.Events.GAMEOBJECT_POINTER_DOWN, () => {
-        console.log('down');
+        this.logger.log('down');
         element.setVisible(!element.visible);
       });
   }
@@ -480,56 +394,14 @@ class Play extends Phaser.Scene {
       }
     });
 
-    console.log('debug: mediaConstraints', mediaConstraints);
-
+    this.logger.log('mediaConstraints', { mediaConstraints });
     return navigator.mediaDevices.getUserMedia(mediaConstraints);
   }
 
   acceptButtonCallback(callerId) {
-    console.log('debug: accepted call');
-
-    console.log('debug: init peer');
-    this.myPeer = new SimplePeer({
-      initiator: true,
-      trickle: true,
-      reconnectTimer: 3000,
-      config: {
-        iceServers: [
-          { urls: 'stun:stun.l.google.com:19302' },
-          { urls: 'stun:global.stun.twilio.com:3478?transport=udp' },
-          {
-            urls: 'turn:numb.viagenie.ca',
-            username: 'joshua940308@gmail.com',
-            credential: 'ju2B4vN9mze6Ld6Q'
-          }
-        ]
-      }
-    });
-
-    this.myPeer.on('signal', (receiverSignalData) => {
-      console.log(
-        'debug: send peer offer',
-        receiverSignalData,
-        new Date().toISOString()
-      );
-      this.socket.emit('peer-offer', {
-        receiverSignalData,
-        receiverSocketId: this.socket.id,
-        callerSocketId: callerId
-      });
-    });
-
-    this.myPeer.on('stream', (callerStream) => {
-      console.log('debug: receive stream');
-      this.userInterfaceManager.addStreamToVideoElement(callerStream, false);
-    });
-
-    this.myPeer.on('close', () => {
-      console.log('debug: close peer');
-      this.stopStream();
-      this.removePeerConnection();
-      this.userInterfaceManager.removeInCallInterface();
-    });
+    this.logger.log('accepted call');
+    this.peerManager.initConnection(callerId, true);
+    this.peerManager.setSignal();
 
     this.userInterfaceManager.removeIncomingCallInterface();
     this.userInterfaceManager.createInCallInterface(this.myStream);
@@ -540,13 +412,12 @@ class Play extends Phaser.Scene {
         this.myStream = stream;
         this.userInterfaceManager.stream = this.myStream;
         this.userInterfaceManager.addStreamToVideoElement(this.myStream, true);
-        console.log('debug: add stream');
-        this.myPeer.addStream(this.myStream);
+        this.peerManager.addStream(this.myStream);
       });
   }
 
   stopStream() {
-    console.log('debug: stop stream');
+    this.logger.log('stop stream');
     if (this.myStream) {
       const tracks = this.myStream.getTracks();
       tracks.forEach((track) => track.stop());
@@ -554,21 +425,11 @@ class Play extends Phaser.Scene {
   }
 
   declineButtonCallback(callerId) {
-    console.log('debug: call declined', this);
+    this.logger.log('call declined', this);
     this.socket.emit('call-declined', { callerId });
 
     this.userInterfaceManager.removeIncomingCallInterface();
   }
-
-  // endCallButtonCallback(endCallButton) {
-  //   console.log('debug: end call');
-  //   this.userInterfaceManager.removeInCallInterface();
-  //   this.stopStream();
-  //   endCallButton.remove();
-
-  //   this.socket.emit('end-call', { peerSocketId: this.peerSocketId });
-  //   this.removePeerConnection();
-  // }
 }
 
 export default Play;
