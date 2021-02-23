@@ -55,7 +55,7 @@ class Play extends Phaser.Scene {
   }
 
   async create({ barId }) {
-    barId = this.testDevEnv(barId);
+    // barId = this.testDevEnv(barId);
 
     this.logger = new Logger('Phaser');
     this.firebase = this.game.firebase;
