@@ -28,7 +28,6 @@ class MyPlayer extends Phaser.GameObjects.Container {
       () => {
         this.scene.userInterfaceManager.createPlayerProfileInterface(
           playerInfo,
-          socket,
           true
         );
       }
@@ -48,6 +47,7 @@ class MyPlayer extends Phaser.GameObjects.Container {
     this.jumpCount = 0;
     this.consecutiveJumps = 1;
     this.cursors = this.scene.input.keyboard.createCursorKeys();
+    this.scene.input.keyboard.disableGlobalCapture();
 
     this.body.setGravityY(this.gravity);
     this.body.setCollideWorldBounds(true);

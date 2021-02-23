@@ -25,7 +25,7 @@ class OtherPlayer extends Phaser.GameObjects.Container {
       () => {
         this.userInterfaceManager.createPlayerProfileInterface(
           playerInfo,
-          socket
+          false
         );
       }
     );

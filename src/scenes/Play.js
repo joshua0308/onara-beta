@@ -126,7 +126,7 @@ class Play extends Phaser.Scene {
     }
 
     this.userInterfaceManager.addPlayerToOnlineList(
-      this.myPlayer.displayName,
+      this.myPlayer,
       'my-unique-id',
       true
     );
@@ -194,7 +194,7 @@ class Play extends Phaser.Scene {
         );
 
         this.userInterfaceManager.addPlayerToOnlineList(
-          this.players[id].displayName,
+          this.players[id],
           id,
           false
         );
@@ -215,7 +215,7 @@ class Play extends Phaser.Scene {
         this.userInterfaceManager
       );
       this.userInterfaceManager.addPlayerToOnlineList(
-        player.displayName,
+        player,
         player.socketId,
         false
       );

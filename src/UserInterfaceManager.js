@@ -334,8 +334,8 @@ class UserInterfaceManager {
     }, 500);
   }
 
-  async createPlayerProfileInterface(player, socket, isMe = false) {
-    console.log('debug: createPlayerProfileInterface', player);
+  async createPlayerProfileInterface(player, isCurrentPlayer = false) {
+    console.log('debug: createPlayerProfileInterface', player, isCurrentPlayer);
 
     const playerProfileWrapper = document.getElementById(
       'player-profile-wrapper'
@@ -379,7 +379,7 @@ class UserInterfaceManager {
     const handleCloseButton = () => {
       const closeButton = document.getElementById('close-profile-button');
       if (closeButton.innerText === 'Cancel call') {
-        socket.emit('cancel-call', { receiverId: player.socketId });
+        this.socket.emit('cancel-call', { receiverId: player.socketId });
         this.profilePlayerId = null;
       }
 
@@ -397,13 +397,13 @@ class UserInterfaceManager {
         />
         <div id="player-name">{playerData.displayName}</div>
         <div id="player-bio">
-          Position: ${playerData.position}
+          Position: {playerData.position}
           <br />
-          Education: ${playerData.education}
+          Education: {playerData.education}
           <br />
-          Location: ${playerData.city}
+          Location: {playerData.city}
         </div>
-        {!isMe && (
+        {!isCurrentPlayer && (
           <button id="buy-drink-button" onClick={handleBuyADrinkButton}>
             Buy a drink!
           </button>
@@ -429,6 +429,8 @@ class UserInterfaceManager {
   }
 
   async createProfileFormInterface(myPlayer) {
+    this.scene.scene.pause();
+
     const myPlayerDocRef = this.firebaseDb
       .collection('players')
       .doc(myPlayer.uid);
@@ -497,6 +499,7 @@ class UserInterfaceManager {
 
       document.getElementById('profile-update-status').style.visibility =
         'hidden';
+      this.scene.scene.resume();
     };
 
     saveButton.addEventListener('click', saveButtonCallback);
@@ -717,10 +720,22 @@ class UserInterfaceManager {
     videosWrapper.appendChild(videoElement);
   }
 
-  addPlayerToOnlineList(playerName, playerSocketId, isCurrentPlayer = false) {
+  addPlayerToOnlineList(playerInfo, playerSocketId, isCurrentPlayer = false) {
+    // eslint-disable-next-line no-console
+    console.log('debug: playerInfo', playerInfo);
+    const playerName = playerInfo.displayName;
     if (document.getElementById(playerSocketId)) return;
 
-    const playerListItem = <li id={playerSocketId}>{playerName}</li>;
+    const playerListItem = (
+      <li
+        id={playerSocketId}
+        onClick={() => {
+          this.createPlayerProfileInterface(playerInfo, isCurrentPlayer);
+        }}
+      >
+        {playerName}
+      </li>
+    );
     const onlineList = document.getElementById('online-list');
 
     if (isCurrentPlayer) {
