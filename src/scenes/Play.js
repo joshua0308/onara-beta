@@ -54,9 +54,20 @@ class Play extends Phaser.Scene {
     // this.userInterfaceManager.createBarQuestionnaireInterface();
   }
 
+  updateCameraZoom() {
+    if (window.innerHeight > this.map.heightInPixels || this.isMobile) {
+      this.cameras.main.setZoom(window.innerHeight / this.map.heightInPixels);
+    }
+  }
+
   async create({ barId }) {
     // barId = this.testDevEnv(barId);
 
+    window.onresize = () => {
+      this.updateCameraZoom();
+    };
+
+    this.isMobile = this.game.isMobile;
     this.logger = new Logger('Phaser');
     this.firebase = this.game.firebase;
     this.firebaseAuth = this.game.firebaseAuth;
@@ -370,7 +381,9 @@ class Play extends Phaser.Scene {
     };
 
     this.physics.world.setBounds(0, 0, mapSize.width, mapSize.height);
-    this.cameras.main.setBounds(0, 0, mapSize.width, mapSize.height).setZoom(1);
+    this.cameras.main.setBounds(0, 0, mapSize.width, mapSize.height);
+
+    this.updateCameraZoom();
 
     this.cameras.main.startFollow(player);
   }
