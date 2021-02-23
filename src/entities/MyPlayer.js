@@ -42,7 +42,7 @@ class MyPlayer extends Phaser.GameObjects.Container {
   }
 
   init() {
-    this.gravity = 600;
+    this.gravity = 1400;
     this.playerSpeed = 400;
     this.jumpCount = 0;
     this.consecutiveJumps = 1;
@@ -124,7 +124,7 @@ class MyPlayer extends Phaser.GameObjects.Container {
       (isSpaceJustDown || isUpJustDown) &&
       (onFloor || this.jumpCount < this.consecutiveJumps)
     ) {
-      this.body.setVelocityY(-this.playerSpeed * 1.3);
+      this.body.setVelocityY(-this.playerSpeed * 2.1);
       // this.startJumpMotion = false;
       // setTimeout(() => {
       //   // need to bend the knees before jumping
