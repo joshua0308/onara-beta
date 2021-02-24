@@ -79,42 +79,28 @@ class UserInterfaceManager {
   }
 
   createLevelThreeRoom(levelTwoFilter, roomName) {
-    const handleRoomClick = (e) => {
-      const room = e.target;
-      if (room.selected) {
-        room.selected = false;
-        this.selectedBar = undefined;
-        room.classList.remove('room-selected');
-      } else {
-        room.selected = true;
-        room.classList.add('room-selected');
-        this.selectedBar = roomName;
-
-        const rooms = document.querySelectorAll('#room-container');
-        rooms.forEach((otherRoom) => {
-          if (room !== otherRoom) {
-            otherRoom.classList.remove('room-selected');
-            otherRoom.selected = false;
-          }
-        });
-      }
-
-      this.logger.log('this.selectedBar', this.selectedBar);
-    };
-
     const room = (
-      <button
-        id="room-container"
-        className="btn btn-warning"
-        onClick={handleRoomClick}
-      >
+      <div id="room-container" className="btn btn-warning">
         {roomName}
-      </button>
+        <br />
+        <button
+          onClick={(e) => {
+            e.preventDefault();
+            console.log('room clicked');
+            this.scene.socket.close();
+            this.scene.registry.set('map', 'bar');
+            this.removeOnlineList();
+            this.removeBarQuestionnaireInterface();
+            this.scene.scene.restart({ barId: roomName });
+          }}
+        >
+          Join
+        </button>
+      </div>
     );
 
     room.levelTwoFilter = levelTwoFilter;
     room.style.display = 'none';
-    room.selected = false;
 
     return room;
   }
@@ -258,24 +244,6 @@ class UserInterfaceManager {
       this.removeBarQuestionnaireInterface();
     };
 
-    const backToTownButton = (
-      <div id="back-to-game-button" onClick={handleBackToTownButton}>
-        Go back to town
-      </div>
-    );
-
-    const handleJoinBarButton = () => {
-      if (!this.selectedBar) {
-        alert('Please select a bar to join 🙂');
-      } else {
-        this.scene.socket.close();
-        this.scene.registry.set('map', 'bar');
-        this.removeOnlineList();
-        this.removeBarQuestionnaireInterface();
-        this.scene.scene.restart({ barId: this.selectedBar });
-      }
-    };
-
     const questionnaireWrapper = (
       <div id="questionnaire-wrapper">
         <div id="questionnaire-question">What are you here for?</div>
@@ -283,10 +251,17 @@ class UserInterfaceManager {
         <div id="level-two-option-wrapper"></div>
         <div id="level-three-option-wrapper"></div>
         <div id="action-buttons-wrapper">
-          <div id="join-bar-button" onClick={handleJoinBarButton}>
-            Join bar
-          </div>
-          {!(this.scene.getCurrentMap() === 'town') && backToTownButton}
+          {!(this.scene.getCurrentMap() === 'town') && (
+            <div id="back-to-game-button" onClick={handleBackToTownButton}>
+              Go back to town
+            </div>
+          )}
+          <button
+            id="back-to-game-button"
+            onClick={() => this.removeBarQuestionnaireInterface()}
+          >
+            Close
+          </button>
         </div>
       </div>
     );

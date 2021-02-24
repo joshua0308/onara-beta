@@ -34,16 +34,6 @@ class Play extends Phaser.Scene {
     };
   }
 
-  update() {
-    if (!this.myPlayerSprite) return;
-
-    if (!this.myPlayerSprite.body.touching.none) {
-      this.userInterfaceManager.createBarQuestionnaireInterface();
-    } else {
-      this.userInterfaceManager.removeBarQuestionnaireInterface();
-    }
-  }
-
   testDevEnv() {
     // enter bar scene
     // this.registry.set('map', 'town');
@@ -133,6 +123,25 @@ class Play extends Phaser.Scene {
       'my-unique-id',
       true
     );
+
+    this.barQuestionnaireDisplayed = false;
+    this.physics.add.overlap(this.myPlayerSprite, this.door, () => {
+      if (this.barQuestionnaireDisplayed) {
+        return;
+      }
+
+      this.barQuestionnaireDisplayed = true;
+      this.userInterfaceManager.createBarQuestionnaireInterface();
+    });
+  }
+
+  update() {
+    if (!this.myPlayerSprite) return;
+
+    if (this.myPlayerSprite.body.touching.none) {
+      this.barQuestionnaireDisplayed = false;
+      this.userInterfaceManager.removeBarQuestionnaireInterface();
+    }
   }
 
   getCurrentMap() {
