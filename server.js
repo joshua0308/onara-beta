@@ -30,13 +30,14 @@ const PLAYER_STATUS = {
 };
 
 class Player {
-  constructor({ barId, socketId, displayName, email, status, uid }) {
+  constructor({ barId, socketId, displayName, email, status, uid, gender }) {
     this.barId = barId;
     this.socketId = socketId;
     this.displayName = displayName;
     this.email = email;
     this.status = status;
     this.uid = uid;
+    this.gender = gender;
 
     this.x = undefined;
     this.y = undefined;
@@ -48,6 +49,7 @@ class Player {
     if (this.displayName !== playerInfo.displayName) {
       this.displayName = playerInfo.displayName;
     }
+    this.gender = playerInfo.gender;
   }
 }
 
@@ -57,7 +59,7 @@ gameIO.on('connection', (socket) => {
 
   // need to wait until socket listener is set up on the client side.
   socket.on('join-room', ({ playerInfo, barId }) => {
-    console.log('debug: user connected', socket.id, barId);
+    console.log('debug: user connected', playerInfo, socket.id, barId);
 
     players[socket.id] = new Player({
       barId,
@@ -65,7 +67,8 @@ gameIO.on('connection', (socket) => {
       displayName: playerInfo.displayName,
       email: playerInfo.email,
       status: PLAYER_STATUS.AVAILABLE,
-      uid: playerInfo.uid
+      uid: playerInfo.uid,
+      gender: playerInfo.gender
     });
 
     console.log('debug: current players', players);

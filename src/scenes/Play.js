@@ -50,7 +50,7 @@ class Play extends Phaser.Scene {
     }
   }
 
-  async create({ barId }) {
+  async create({ barId = 'town' }) {
     // barId = this.testDevEnv(barId);
 
     window.onresize = () => {
@@ -118,12 +118,6 @@ class Play extends Phaser.Scene {
     this.setupFollowupCameraOn(this.myPlayerSprite);
     this.setupSocket();
 
-    this.userInterfaceManager.addPlayerToOnlineList(
-      this.myPlayer,
-      'my-unique-id',
-      true
-    );
-
     this.barQuestionnaireDisplayed = false;
     this.physics.add.overlap(this.myPlayerSprite, this.door, () => {
       if (this.barQuestionnaireDisplayed) {
@@ -152,6 +146,12 @@ class Play extends Phaser.Scene {
     this.socket.on('connect', () => {
       this.myPlayer.socketId = this.socket.id;
 
+      this.userInterfaceManager.addPlayerToOnlineList(
+        this.myPlayer,
+        this.myPlayer.socketId,
+        true
+      );
+
       // tell the server it's ready to listen
       this.logger.log('socket on connect', {
         socketId: this.myPlayer.socketId
@@ -172,7 +172,7 @@ class Play extends Phaser.Scene {
     };
 
     this.socket.on('player-updated', (player) => {
-      this.logger.log('socket on player-updated');
+      this.logger.log('socket on player-updated', player);
       this.userInterfaceManager.updateOnlineList(
         player.socketId,
         player.displayName
@@ -184,6 +184,7 @@ class Play extends Phaser.Scene {
 
       if (otherPlayer.length) {
         otherPlayer[0].updatePlayerName(player.displayName);
+        otherPlayer[0].updateCharacterType(player.gender);
       }
     });
 

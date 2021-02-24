@@ -4,15 +4,11 @@ import initAnimations from './newPlayerAnims.js';
 class MyPlayer extends Phaser.GameObjects.Container {
   constructor(scene, x, y, socket, playerInfo) {
     super(scene, x, y);
-    this.characterType = 'girl';
-    const toggleButton = document.getElementById('toggle-character-button');
-    toggleButton.addEventListener('click', () => {
-      if (this.characterType === 'girl') {
-        this.characterType = 'boy';
-      } else {
-        this.characterType = 'girl';
-      }
-    });
+    if (playerInfo.gender) {
+      this.characterType = playerInfo.gender === 'male' ? 'boy' : 'girl';
+    } else {
+      this.characterType = 'girl';
+    }
 
     this.playerInfo = playerInfo;
     this.socket = socket;
@@ -90,6 +86,10 @@ class MyPlayer extends Phaser.GameObjects.Container {
   updatePlayerName(updatedName) {
     this.removePlayerName();
     this.createPlayerName(updatedName);
+  }
+
+  updateCharacterType(type) {
+    this.characterType = type === 'male' ? 'boy' : 'girl';
   }
 
   update() {

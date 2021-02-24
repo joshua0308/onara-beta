@@ -29,12 +29,6 @@ class UserInterfaceManager {
   }
 
   createOnlineList(barId) {
-    if (!barId) {
-      barId = 'Town';
-    } else {
-      barId = `Bar (${barId})`;
-    }
-
     const onlineListWrapper = document.getElementById('online-list-wrapper');
 
     const barName = document.createElement('div');
@@ -86,7 +80,6 @@ class UserInterfaceManager {
         <button
           onClick={(e) => {
             e.preventDefault();
-            console.log('room clicked');
             this.scene.socket.close();
             this.scene.registry.set('map', 'bar');
             this.removeOnlineList();
@@ -288,14 +281,8 @@ class UserInterfaceManager {
       this.firebaseAuth.signOut();
     });
 
-    const toggleCharacterButton = document.createElement('button');
-    toggleCharacterButton.classList.add('btn', 'btn-light', 'profile-button');
-    toggleCharacterButton.setAttribute('id', 'toggle-character-button');
-    toggleCharacterButton.innerText = 'Toggle character';
-
     menuButtonsWrapper.appendChild(profileButton);
     menuButtonsWrapper.appendChild(logoutButton);
-    menuButtonsWrapper.appendChild(toggleCharacterButton);
   }
 
   removePlayerProfileInterface() {
@@ -395,14 +382,7 @@ class UserInterfaceManager {
   }
 
   updateOnlineList(playerSocketId, updatedName) {
-    let listItem;
-    if (document.getElementById(playerSocketId)) {
-      listItem = document.getElementById(playerSocketId);
-    } else {
-      listItem = document.getElementById('my-unique-id');
-    }
-
-    listItem.innerText = updatedName;
+    document.getElementById(playerSocketId).innerText = updatedName;
   }
 
   async createProfileFormInterface(myPlayer) {
@@ -451,14 +431,34 @@ class UserInterfaceManager {
                     />
                   </div>
                 </div>
-                <div className="row mt-3">
+                <div className="row">
+                  <div className="col-md-12 mt-3">
+                    <label className="labels">Gender</label>
+                    <br />
+                    <input
+                      type="radio"
+                      id="male-radio"
+                      name="gender"
+                      value="male"
+                      checked
+                    />
+                    <label htmlFor="male-radio"> Male</label>
+                    <br />
+                    <input
+                      type="radio"
+                      id="female-radio"
+                      name="gender"
+                      value="female"
+                    />
+                    <label htmlFor="female-radio">Female</label>
+                  </div>
                   <div className="col-md-12 mt-3">
                     <label className="labels">Current position</label>
                     <input
                       type="text"
                       name="position"
                       className="form-control"
-                      placeholder="Software Engineer"
+                      placeholder="e.g. Software Engineer"
                       required
                     />
                   </div>
@@ -468,7 +468,7 @@ class UserInterfaceManager {
                       type="text"
                       name="education"
                       className="form-control"
-                      placeholder="U of Michigan"
+                      placeholder="e.g. U of Michigan"
                       required
                     />
                   </div>
@@ -480,7 +480,7 @@ class UserInterfaceManager {
                       type="text"
                       name="city"
                       className="form-control"
-                      placeholder="Montreal"
+                      placeholder="e.g. Montreal"
                       required
                     />
                   </div>
@@ -490,7 +490,7 @@ class UserInterfaceManager {
                       type="text"
                       name="country"
                       className="form-control"
-                      placeholder="Canada"
+                      placeholder="e.g. Canada"
                       required
                     />
                   </div>
@@ -549,6 +549,13 @@ class UserInterfaceManager {
       profileEditForm.elements['city'].value = myPlayerData.city;
     if (myPlayerData.country)
       profileEditForm.elements['country'].value = myPlayerData.country;
+    if (myPlayerData.gender) {
+      if (myPlayerData.gender === 'male') {
+        document.getElementById('male-radio').checked = true;
+      } else {
+        document.getElementById('female-radio').checked = true;
+      }
+    }
 
     const saveButton = document.getElementById('save-profile-button');
     const closeButton = document.getElementById('close-profile-button');
@@ -567,35 +574,31 @@ class UserInterfaceManager {
         education: profileEditForm.elements['education'].value,
         city: profileEditForm.elements['city'].value,
         country: profileEditForm.elements['country'].value,
-        updatedAt: this.firebase.firestore.Timestamp.now()
+        updatedAt: this.firebase.firestore.Timestamp.now(),
+        gender: document.getElementById('male-radio').checked
+          ? 'male'
+          : 'female'
       };
 
-      this.firebaseDb
-        .collection('players')
-        .doc(myPlayer.uid)
-        .set(formInputValues, { merge: true })
-        .then(() => {
-          this.scene.updateMyPlayerInfo(formInputValues);
-          this.updateOnlineList(myPlayer.socketId, formInputValues.displayName);
-          this.scene.myPlayerSprite.updatePlayerName(
-            formInputValues.displayName
-          );
-          this.scene.socket.emit('update-player', this.scene.myPlayer);
-          document.getElementById('profile-update-status').style.visibility =
-            'visible';
-        });
+      myPlayerDocRef.set(formInputValues, { merge: true }).then(() => {
+        this.scene.updateMyPlayerInfo(formInputValues);
+        this.updateOnlineList(
+          this.scene.myPlayer.socketId,
+          formInputValues.displayName
+        );
+        this.scene.myPlayerSprite.updatePlayerName(formInputValues.displayName);
+        this.scene.myPlayerSprite.updateCharacterType(formInputValues.gender);
+        this.scene.socket.emit('update-player', this.scene.myPlayer);
+      });
+
+      this.scene.scene.resume();
+      this.removeProfileFormInterface();
     };
 
     const closeButtonCallback = () => {
       this.logger.log('close profile');
       this.scene.scene.resume();
-
-      closeButton.removeEventListener('click', closeButtonCallback);
-      saveButton.removeEventListener('click', saveButtonCallback);
       this.removeProfileFormInterface();
-
-      document.getElementById('profile-update-status').style.visibility =
-        'hidden';
     };
 
     saveButton.addEventListener('click', saveButtonCallback);
