@@ -92,20 +92,15 @@ class Play extends Phaser.Scene {
     this.userInterfaceManager.createOnlineList(barId);
     this.userInterfaceManager.createMenuButtons(this.myPlayer);
 
-    if (this.getCurrentMap() !== 'town') {
-      this.barId = barId;
-      this.socket = io('/game');
-      this.userInterfaceManager.addSocket(this.socket);
-      this.peerManager = new PeerManager(
-        this,
-        this.userInterfaceManager,
-        this.socket
-      );
-    } else {
-      this.socket = { emit: () => {}, close: () => {} };
-    }
+    this.barId = barId;
+    this.socket = io('/game');
+    this.userInterfaceManager.addSocket(this.socket);
+    this.peerManager = new PeerManager(
+      this,
+      this.userInterfaceManager,
+      this.socket
+    );
 
-    // this.myPeer = null;
     this.myStream = null;
 
     this.otherPlayersGroup = this.physics.add.group();
@@ -131,10 +126,7 @@ class Play extends Phaser.Scene {
     this.physics.add.overlap(this.myPlayerSprite, this.door);
 
     this.setupFollowupCameraOn(this.myPlayerSprite);
-
-    if (this.getCurrentMap() !== 'town') {
-      this.setupSocket();
-    }
+    this.setupSocket();
 
     this.userInterfaceManager.addPlayerToOnlineList(
       this.myPlayer,

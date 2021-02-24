@@ -1,10 +1,12 @@
 import React from 'jsx-dom';
+import Logger from './Logger';
 class UserInterfaceManager {
   constructor(scene, firebase, firebaseAuth, firebaseDb) {
     this.scene = scene;
     this.firebase = firebase;
     this.firebaseAuth = firebaseAuth;
     this.firebaseDb = firebaseDb;
+    this.logger = new Logger('UserInterfaceManager');
     this.socket = null;
   }
 
@@ -97,7 +99,7 @@ class UserInterfaceManager {
         });
       }
 
-      console.log('debug: this.selectedBar', this.selectedBar);
+      this.logger.log('this.selectedBar', this.selectedBar);
     };
 
     const room = (
@@ -245,7 +247,7 @@ class UserInterfaceManager {
     });
 
     const handleBackToTownButton = () => {
-      console.log(this.scene.getCurrentMap());
+      this.logger.log(this.scene.getCurrentMap());
       if (this.scene.getCurrentMap() === 'bar') {
         this.scene.registry.set('map', 'town');
         this.scene.socket.close();
@@ -335,12 +337,12 @@ class UserInterfaceManager {
   }
 
   async createPlayerProfileInterface(player, isCurrentPlayer = false) {
-    console.log('debug: createPlayerProfileInterface', player, isCurrentPlayer);
+    this.logger.log('createPlayerProfileInterface', player, isCurrentPlayer);
 
     const playerProfileWrapper = document.getElementById(
       'player-profile-wrapper'
     );
-    console.log(playerProfileWrapper.style.width);
+    this.logger.log(playerProfileWrapper.style.width);
 
     // if selecting the same player but the profile is already opened, return
     if (
@@ -577,7 +579,7 @@ class UserInterfaceManager {
     const closeButton = document.getElementById('close-profile-button');
 
     const saveButtonCallback = (e) => {
-      console.log('save profile');
+      this.logger.log('save profile');
       e.preventDefault();
       if (profileEditForm.checkValidity() === false) {
         profileEditForm.classList.add('was-validated');
@@ -610,7 +612,7 @@ class UserInterfaceManager {
     };
 
     const closeButtonCallback = () => {
-      console.log('close profile');
+      this.logger.log('close profile');
       this.scene.scene.resume();
 
       closeButton.removeEventListener('click', closeButtonCallback);
@@ -644,7 +646,7 @@ class UserInterfaceManager {
     acceptButtonCallback,
     declineButtonCallback
   ) {
-    console.log('debug: incoming call from', players[callerId]);
+    this.logger.log('incoming call from', players[callerId]);
 
     const callerDocRef = this.firebaseDb
       .collection('players')
@@ -710,8 +712,8 @@ class UserInterfaceManager {
         videoIcon.classList.remove('fa-video-slash');
         toggleVideoButton.style.color = 'grey';
       }
-      console.log(
-        'debug: toggle video button - enabled',
+      this.logger.log(
+        'toggle video button - enabled',
         stream.getVideoTracks()[0].enabled
       );
     };
@@ -727,8 +729,8 @@ class UserInterfaceManager {
         audioIcon.classList.remove('fa-microphone');
         audioIcon.classList.add('fa-microphone-slash');
         toggleAudioButton.style.color = 'red';
-        console.log(
-          'debug: stream.getAudioTracks()[0]',
+        this.logger.log(
+          'stream.getAudioTracks()[0]',
           stream.getAudioTracks()[0].muted
         );
       } else {
@@ -736,13 +738,13 @@ class UserInterfaceManager {
         audioIcon.classList.remove('fa-microphone-slash');
         audioIcon.classList.add('fa-microphone');
         toggleAudioButton.style.color = 'grey';
-        console.log(
-          'debug: stream.getAudioTracks()[0]',
+        this.logger.log(
+          'stream.getAudioTracks()[0]',
           stream.getAudioTracks()[0].muted
         );
       }
-      console.log(
-        'debug: toggle audio button - enabled',
+      this.logger.log(
+        'toggle audio button - enabled',
         stream.getAudioTracks()[0].enabled
       );
     };
@@ -773,7 +775,7 @@ class UserInterfaceManager {
     };
 
     const endCall = () => {
-      console.log('debug: end call');
+      this.logger.log('end call');
       this.removeInCallInterface();
       this.scene.stopStream();
 
@@ -826,7 +828,7 @@ class UserInterfaceManager {
   }
 
   addStreamToVideoElement(stream, setMute = false) {
-    console.log('debug: addStreamToVideoElement');
+    this.logger.log('addStreamToVideoElement');
     const videoElement = (
       <video poster="https://media.giphy.com/media/VseXvvxwowwCc/giphy.gif"></video>
     );
@@ -843,8 +845,7 @@ class UserInterfaceManager {
   }
 
   addPlayerToOnlineList(playerInfo, playerSocketId, isCurrentPlayer = false) {
-    // eslint-disable-next-line no-console
-    console.log('debug: playerInfo', playerInfo);
+    this.logger.log('playerInfo', playerInfo);
     const playerName = playerInfo.displayName;
     if (document.getElementById(playerSocketId)) return;
 

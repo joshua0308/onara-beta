@@ -109,7 +109,7 @@ class MyPlayer extends Phaser.GameObjects.Container {
       this.body.setVelocityX(this.playerSpeed);
       sprite.setFlipX(false);
       this.motion = 'walk';
-    } else if (this.startJumpMotion || this.motion === 'jump') {
+    } else if (!onFloor) {
       this.motion = 'jump';
     } else {
       this.body.setVelocityX(0);
@@ -137,18 +137,17 @@ class MyPlayer extends Phaser.GameObjects.Container {
       // this.startJumpMotion = true;
     }
 
+    if (onFloor) {
+      this.jumpCount = 0;
+    }
+
     // set animation based on movement
-    if (this.startJumpMotion || !onFloor) {
-      this.motion = 'jump';
-      // if (this.startJumpMotion) {
-      //   // don't move horizontally while getting ready to jump
-      //   this.body.setVelocityX(0);
-      // }
-      this.motion = 'jump';
-    } else if (onFloor && this.body.velocity.x !== 0) {
+    if (onFloor && this.body.velocity.x !== 0) {
       this.motion = 'walk';
     } else if (onFloor && this.body.velocity.x === 0) {
       this.motion = 'idle';
+    } else if (!onFloor) {
+      this.motion = 'jump';
     }
 
     sprite.play(`${this.characterType}-${this.motion}`, true);
