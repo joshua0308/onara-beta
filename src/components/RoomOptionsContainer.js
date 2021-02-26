@@ -1,7 +1,8 @@
 import React from 'jsx-dom';
 import { rooms } from '../constants/rooms';
 
-function RoomOptionsContainer() {
+function RoomOptionsContainer({ props }) {
+  const { isBar } = props;
   const roomOptionsModal = document.getElementById(
     'bar-questionnaire-modal-wrapper'
   );
@@ -13,15 +14,18 @@ function RoomOptionsContainer() {
   const levelTwoOptions = [...new Set(rooms.map((room) => room.levelTwo))];
 
   const levelThreeRooms = rooms.map((room) => (
-    <this.LevelThreeOption
+    <this.Room
       key={room.name}
-      props={{ roomName: room.name, levelTwoFilter: room.levelTwo }}
-      name={room.name}
+      props={{
+        roomName: room.name,
+        displayName: room.name,
+        levelTwoFilter: room.levelTwo
+      }}
     />
   ));
 
   const levelTwoButtons = levelTwoOptions.map((levelTwoOption) => (
-    <this.LevelTwoOption
+    <this.LevelTwoButton
       key={levelTwoOption}
       props={{
         id: 'level-one-option',
@@ -55,7 +59,7 @@ function RoomOptionsContainer() {
 
             levelThreeRooms.forEach((room) => {
               if (filteredRooms.includes(room.attributes.name.value)) {
-                room.style.display = 'block';
+                room.style.display = 'flex';
               } else {
                 room.style.display = 'none';
               }
@@ -67,7 +71,7 @@ function RoomOptionsContainer() {
   ));
 
   const levelOneButtons = levelOneOptions.map((levelOneOption) => (
-    <this.LevelOneOption
+    <this.LevelOneButton
       key={levelOneOption}
       props={{
         id: 'level-one-option',
@@ -130,25 +134,30 @@ function RoomOptionsContainer() {
     this.removeBarQuestionnaireInterface();
   };
 
+  const style = isBar ? {} : { width: '50vw', height: '50vh' };
   return (
-    <div id="questionnaire-wrapper">
-      <div id="questionnaire-question">What are you here for?</div>
-      <div id="level-one-option-container">{levelOneButtons}</div>
-      <div id="level-two-option-container">{levelTwoButtons}</div>
-      <div id="level-three-option-container">{levelThreeRooms}</div>
-      <div id="action-buttons-wrapper">
-        {!(this.scene.getCurrentMap() === 'town') && (
-          <div id="back-to-game-button" onClick={handleBackToTownButton}>
-            Go back to town
-          </div>
-        )}
+    <div id="questionnaire-container" style={style}>
+      <i
+        id="close-button"
+        onClick={() => this.removeBarQuestionnaireInterface()}
+        className="fas fa-times-circle fa-lg"
+      ></i>
+      {isBar ? (
         <button
           id="back-to-game-button"
-          onClick={() => this.removeBarQuestionnaireInterface()}
+          className="btn"
+          onClick={handleBackToTownButton}
         >
-          Close
+          Go back to town
         </button>
-      </div>
+      ) : (
+        <>
+          <div id="questionnaire-question">What are you here for?</div>
+          <div id="level-one-option-container">{levelOneButtons}</div>
+          <div id="level-two-option-container">{levelTwoButtons}</div>
+          <div id="level-three-option-container">{levelThreeRooms}</div>
+        </>
+      )}
     </div>
   );
 }

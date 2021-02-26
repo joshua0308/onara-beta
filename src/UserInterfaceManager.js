@@ -1,8 +1,8 @@
 import React from 'jsx-dom';
 import Logger from './Logger';
-import LevelOneOption from './components/LevelOneOption';
-import LevelTwoOption from './components/LevelTwoOption';
-import LevelThreeOption from './components/LevelThreeOption';
+import LevelOneButton from './components/LevelOneButton';
+import LevelTwoButton from './components/LevelTwoButton';
+import Room from './components/Room';
 import RoomOptionsContainer from './components/RoomOptionsContainer';
 class UserInterfaceManager {
   constructor(scene, firebase, firebaseAuth, firebaseDb) {
@@ -14,9 +14,9 @@ class UserInterfaceManager {
     this.socket = null;
 
     this.RoomOptionsContainer = RoomOptionsContainer.bind(this);
-    this.LevelThreeOption = LevelThreeOption.bind(this);
-    this.LevelOneOption = LevelOneOption.bind(this);
-    this.LevelTwoOption = LevelTwoOption.bind(this);
+    this.Room = Room.bind(this);
+    this.LevelOneButton = LevelOneButton.bind(this);
+    this.LevelTwoButton = LevelTwoButton.bind(this);
   }
 
   addSocket(socket) {
@@ -72,12 +72,14 @@ class UserInterfaceManager {
     }
   }
 
-  createBarQuestionnaireInterface() {
+  createBarQuestionnaireInterface(isBar = false) {
     const barQuestionnaireModalWrapper = document.getElementById(
       'bar-questionnaire-modal-wrapper'
     );
 
-    barQuestionnaireModalWrapper.appendChild(<this.RoomOptionsContainer />);
+    barQuestionnaireModalWrapper.appendChild(
+      <this.RoomOptionsContainer props={{ isBar }} />
+    );
   }
 
   createMenuButtons(myPlayer) {

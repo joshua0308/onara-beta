@@ -1,7 +1,7 @@
 import React from 'jsx-dom';
 
 function LevelThreeOption({ props }) {
-  const { roomName, levelTwoFilter } = props;
+  const { roomName, levelTwoFilter, displayName } = props;
 
   const clickHandler = (e) => {
     e.preventDefault();
@@ -13,20 +13,23 @@ function LevelThreeOption({ props }) {
   };
 
   const style = {
-    display: 'none'
+    display: 'none',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    flexFlow: 'wrap'
   };
 
   return (
     <div
       style={style}
       id="room-container"
-      className="btn btn-warning"
       levelTwoFilter={levelTwoFilter}
       name={roomName}
     >
-      {roomName}
-      <br />
-      <button onClick={clickHandler}>Join</button>
+      <div>{displayName}</div>
+      <button className="btn" onClick={clickHandler}>
+        Join
+      </button>
     </div>
   );
 }
