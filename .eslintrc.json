@@ -22,6 +22,7 @@
         "no-undef": "off",
         "no-unused-vars": "off",
         "no-unreachable": "off",
-        "no-console": "off"
+        "no-console": "off",
+        "react/prop-types": "off"
     }
 }

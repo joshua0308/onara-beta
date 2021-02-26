@@ -81,6 +81,7 @@ class Play extends Phaser.Scene {
 
     this.userInterfaceManager.createOnlineList(barId);
     this.userInterfaceManager.createMenuButtons(this.myPlayer);
+    this.userInterfaceManager.createBarQuestionnaireInterface();
 
     this.barId = barId;
     this.socket = io('/game');
@@ -132,10 +133,10 @@ class Play extends Phaser.Scene {
   update() {
     if (!this.myPlayerSprite) return;
 
-    if (this.myPlayerSprite.body.touching.none) {
-      this.barQuestionnaireDisplayed = false;
-      this.userInterfaceManager.removeBarQuestionnaireInterface();
-    }
+    // if (this.myPlayerSprite.body.touching.none) {
+    //   this.barQuestionnaireDisplayed = false;
+    //   this.userInterfaceManager.removeBarQuestionnaireInterface();
+    // }
   }
 
   getCurrentMap() {
