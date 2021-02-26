@@ -22,6 +22,7 @@ function LevelThreeOption({ props }) {
       id="room-container"
       className="btn btn-warning"
       levelTwoFilter={levelTwoFilter}
+      name={roomName}
     >
       {roomName}
       <br />

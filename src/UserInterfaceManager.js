@@ -1,6 +1,7 @@
 import React from 'jsx-dom';
 import Logger from './Logger';
 import LevelOneOption from './components/LevelOneOption';
+import LevelTwoOption from './components/LevelTwoOption';
 import LevelThreeOption from './components/LevelThreeOption';
 import RoomOptionsContainer from './components/RoomOptionsContainer';
 class UserInterfaceManager {
@@ -15,6 +16,7 @@ class UserInterfaceManager {
     this.RoomOptionsContainer = RoomOptionsContainer.bind(this);
     this.LevelThreeOption = LevelThreeOption.bind(this);
     this.LevelOneOption = LevelOneOption.bind(this);
+    this.LevelTwoOption = LevelTwoOption.bind(this);
   }
 
   addSocket(socket) {
@@ -67,95 +69,6 @@ class UserInterfaceManager {
       barQuestionnaireModalWrapper.removeChild(
         barQuestionnaireModalWrapper.lastChild
       );
-    }
-  }
-
-  // createLevelOne(id, text, color = 'primary') {
-  //   const colorClass = `btn-outline-${color}`;
-  //   return (
-  //     <button id={id} className={'btn ' + colorClass} name={text}>
-  //       {text}
-  //     </button>
-  //   );
-  // }
-
-  createLevelTwo(levelTwoFilters) {
-    const levelTwoFiltersButtons = Object.keys(levelTwoFilters).map(
-      (levelTwoFilter) => (
-        <this.LevelOneOption
-          key={levelTwoFilters}
-          props={{
-            id: 'level-one-option',
-            text: levelTwoFilter,
-            color: 'success'
-          }}
-        />
-      )
-    );
-
-    // create all level three rooms
-    const levelThreeRooms = [];
-    Object.entries(levelTwoFilters).forEach(([level_two, level_three]) => {
-      levelThreeRooms.push(
-        ...level_three.map((room) => (
-          <this.LevelThreeOption
-            key={room}
-            props={{ roomName: room, levelTwoFilter: level_two }}
-          />
-        ))
-      );
-    });
-
-    levelTwoFiltersButtons.forEach((button) => {
-      button.addEventListener('click', () => {
-        const isSelected = button.classList.contains('btn-success');
-
-        if (isSelected) {
-          button.selected = false;
-          button.classList.remove('btn-success');
-          button.classList.add('btn-outline-success');
-          levelThreeRooms.forEach((room) => {
-            if (room.attributes.levelTwoFilter.value === button.name) {
-              room.style.display = 'none';
-            }
-          });
-        } else {
-          button.selected = true;
-          button.classList.remove('btn-outline-success');
-          button.classList.add('btn-success');
-          levelThreeRooms.forEach((room) => {
-            if (room.attributes.levelTwoFilter.value === button.name) {
-              room.style.display = 'inline-block';
-            }
-          });
-        }
-      });
-    });
-
-    const levelTwoFiltersWrapper = document.getElementById(
-      'level-two-option-wrapper'
-    );
-    levelTwoFiltersWrapper.append(...levelTwoFiltersButtons);
-    const levelThreeRoomsWrapper = document.getElementById(
-      'level-three-option-wrapper'
-    );
-    levelThreeRoomsWrapper.append(...levelThreeRooms);
-  }
-
-  removeLevelTwoFilters() {
-    const levelTwoFiltersWrapper = document.getElementById(
-      'level-two-option-wrapper'
-    );
-    const levelThreeFiltersWrapper = document.getElementById(
-      'level-three-option-wrapper'
-    );
-
-    while (levelTwoFiltersWrapper.firstChild) {
-      levelTwoFiltersWrapper.removeChild(levelTwoFiltersWrapper.lastChild);
-    }
-
-    while (levelThreeFiltersWrapper.firstChild) {
-      levelThreeFiltersWrapper.removeChild(levelThreeFiltersWrapper.lastChild);
     }
   }
 
