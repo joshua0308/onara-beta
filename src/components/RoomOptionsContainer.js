@@ -29,9 +29,15 @@ function RoomOptionsContainer() {
   if (roomOptionsModal.style.display === 'flex') return;
   roomOptionsModal.style.display = 'flex';
 
-  const levelOneOptions = Object.keys(rooms).map((levelOneOption) =>
-    this.createLevelOne('level-one-option', levelOneOption)
-  );
+  const levelOneOptions = Object.keys(rooms).map((levelOneOption) => (
+    <this.LevelOneOption
+      key={levelOneOption}
+      props={{
+        id: 'level-one-option',
+        text: levelOneOption
+      }}
+    />
+  ));
 
   levelOneOptions.forEach((button) => {
     button.addEventListener('click', () => {

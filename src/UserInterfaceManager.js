@@ -1,5 +1,6 @@
 import React from 'jsx-dom';
 import Logger from './Logger';
+import LevelOneOption from './components/LevelOneOption';
 import LevelThreeOption from './components/LevelThreeOption';
 import RoomOptionsContainer from './components/RoomOptionsContainer';
 class UserInterfaceManager {
@@ -13,6 +14,7 @@ class UserInterfaceManager {
 
     this.RoomOptionsContainer = RoomOptionsContainer.bind(this);
     this.LevelThreeOption = LevelThreeOption.bind(this);
+    this.LevelOneOption = LevelOneOption.bind(this);
   }
 
   addSocket(socket) {
@@ -68,20 +70,27 @@ class UserInterfaceManager {
     }
   }
 
-  createLevelOne(id, text, color = 'primary') {
-    const colorClass = `btn-outline-${color}`;
-    return (
-      <button id={id} className={'btn ' + colorClass} name={text}>
-        {text}
-      </button>
-    );
-  }
+  // createLevelOne(id, text, color = 'primary') {
+  //   const colorClass = `btn-outline-${color}`;
+  //   return (
+  //     <button id={id} className={'btn ' + colorClass} name={text}>
+  //       {text}
+  //     </button>
+  //   );
+  // }
 
   createLevelTwo(levelTwoFilters) {
-    const levelTwoFiltersButtons = Object.keys(
-      levelTwoFilters
-    ).map((levelTwoFilter) =>
-      this.createLevelOne('level-one-option', levelTwoFilter, 'success')
+    const levelTwoFiltersButtons = Object.keys(levelTwoFilters).map(
+      (levelTwoFilter) => (
+        <this.LevelOneOption
+          key={levelTwoFilters}
+          props={{
+            id: 'level-one-option',
+            text: levelTwoFilter,
+            color: 'success'
+          }}
+        />
+      )
     );
 
     // create all level three rooms
