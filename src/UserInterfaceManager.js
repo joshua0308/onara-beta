@@ -4,9 +4,11 @@ import LevelOneButton from './components/LevelOneButton';
 import LevelTwoButton from './components/LevelTwoButton';
 import MenuButtons from './components/MenuButtons';
 import Room from './components/Room';
+import OnlineList from './components/OnlineList';
 import ProfileForm from './components/ProfileForm';
 import RoomOptionsContainer from './components/RoomOptionsContainer';
 import InCallModalContainer from './components/InCallModalContainer';
+import PlayerProfileContainer from './components/PlayerProfileContainer';
 class UserInterfaceManager {
   constructor(scene, firebase, firebaseAuth, firebaseDb) {
     this.scene = scene;
@@ -18,11 +20,13 @@ class UserInterfaceManager {
 
     this.RoomOptionsContainer = RoomOptionsContainer.bind(this);
     this.Room = Room.bind(this);
+    this.OnlineList = OnlineList.bind(this);
     this.LevelOneButton = LevelOneButton.bind(this);
     this.LevelTwoButton = LevelTwoButton.bind(this);
     this.MenuButtons = MenuButtons.bind(this);
     this.ProfileForm = ProfileForm.bind(this);
     this.InCallModalContainer = InCallModalContainer.bind(this);
+    this.PlayerProfileContainer = PlayerProfileContainer.bind(this);
   }
 
   addSocket(socket) {
@@ -82,120 +86,43 @@ class UserInterfaceManager {
   }
 
   createOnlineList(barId) {
-    const onlineListWrapper = document.getElementById('online-list-wrapper');
-
-    const barName = <div>{barId}</div>;
-    const ul = <ul id="online-list"></ul>;
-
-    onlineListWrapper.appendChild(barName);
-    onlineListWrapper.appendChild(ul);
+    document.body.appendChild(<this.OnlineList props={{ barId }} />);
   }
 
   removeOnlineList() {
     const onlineListWrapper = document.getElementById('online-list-wrapper');
-    while (onlineListWrapper.firstChild) {
-      onlineListWrapper.removeChild(onlineListWrapper.lastChild);
+    while (onlineListWrapper) {
+      onlineListWrapper.remove();
     }
-  }
-
-  removePlayerProfileInterface() {
-    const playerProfileWrapper = document.getElementById(
-      'player-profile-wrapper'
-    );
-    playerProfileWrapper.style.width = '0px';
-
-    setTimeout(() => {
-      while (playerProfileWrapper.firstChild) {
-        playerProfileWrapper.removeChild(playerProfileWrapper.lastChild);
-      }
-    }, 500);
-  }
-
-  async createPlayerProfileInterface(player, isCurrentPlayer = false) {
-    this.logger.log('createPlayerProfileInterface', player, isCurrentPlayer);
-
-    const playerProfileWrapper = document.getElementById(
-      'player-profile-wrapper'
-    );
-    this.logger.log(playerProfileWrapper.style.width);
-
-    // if selecting the same player but the profile is already opened, return
-    if (
-      playerProfileWrapper.style.width !== '0px' &&
-      this.profilePlayerId === player.socketId
-    ) {
-      return;
-    } else if (
-      playerProfileWrapper.style.width !== '0px' &&
-      this.profilePlayerId !== player.socketId
-    ) {
-      // if selecting a different profile
-      while (playerProfileWrapper.firstChild) {
-        playerProfileWrapper.removeChild(playerProfileWrapper.lastChild);
-      }
-    }
-
-    this.profilePlayerId = player.socketId;
-
-    const playerDocRef = this.firebaseDb.collection('players').doc(player.uid);
-
-    const doc = await playerDocRef.get();
-    const playerData = doc.data();
-
-    const handleBuyADrinkButton = () => {
-      const buyADrinkButton = document.getElementById('buy-drink-button');
-      const closeButton = document.getElementById('close-profile-button');
-
-      buyADrinkButton.innerText = 'Calling...';
-      closeButton.innerText = 'Cancel call';
-      buyADrinkButton.style.backgroundColor = '#c9a747';
-      this.socket.emit('request-call', { receiverId: player.socketId });
-      buyADrinkButton.removeEventListener('click', handleBuyADrinkButton);
-    };
-
-    const handleCloseButton = () => {
-      const closeButton = document.getElementById('close-profile-button');
-      if (closeButton.innerText === 'Cancel call') {
-        this.socket.emit('cancel-call', { receiverId: player.socketId });
-        this.profilePlayerId = null;
-      }
-
-      this.removePlayerProfileInterface();
-    };
-
-    playerProfileWrapper.appendChild(
-      <>
-        <img
-          id="player-image"
-          src={
-            playerData.profilePicURL ||
-            'public/assets/placeholder-profile-pic.png'
-          }
-        />
-        <div id="player-name">{playerData.displayName}</div>
-        <div id="player-bio">
-          Position: {playerData.position}
-          <br />
-          Education: {playerData.education}
-          <br />
-          Location: {playerData.city}
-        </div>
-        {!isCurrentPlayer && (
-          <button id="buy-drink-button" onClick={handleBuyADrinkButton}>
-            Buy a drink!
-          </button>
-        )}
-        <button id="close-profile-button" onClick={handleCloseButton}>
-          Close
-        </button>
-      </>
-    );
-
-    playerProfileWrapper.style.width = '250px';
   }
 
   updateOnlineList(playerSocketId, updatedName) {
     document.getElementById(playerSocketId).innerText = updatedName;
+  }
+
+  async createPlayerProfileInterface(player, isCurrentPlayer = false) {
+    this.logger.log('createPlayerProfileInterface', player, isCurrentPlayer);
+    this.removePlayerProfileInterface();
+
+    const playerDocRef = this.firebaseDb.collection('players').doc(player.uid);
+    const doc = await playerDocRef.get();
+    const playerData = doc.data();
+
+    document.body.appendChild(
+      <this.PlayerProfileContainer
+        props={{ playerData, isCurrentPlayer, player }}
+      />
+    );
+  }
+
+  removePlayerProfileInterface() {
+    const playerProfileContainer = document.getElementById(
+      'player-profile-container'
+    );
+
+    if (playerProfileContainer) {
+      playerProfileContainer.remove();
+    }
   }
 
   async createIncomingCallInterface(
