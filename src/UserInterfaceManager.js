@@ -9,6 +9,7 @@ import ProfileForm from './components/ProfileForm';
 import RoomOptionsContainer from './components/RoomOptionsContainer';
 import InCallModalContainer from './components/InCallModalContainer';
 import PlayerProfileContainer from './components/PlayerProfileContainer';
+import IncomingCallContainer from './components/IncomingCallContainer';
 class UserInterfaceManager {
   constructor(scene, firebase, firebaseAuth, firebaseDb) {
     this.scene = scene;
@@ -27,6 +28,7 @@ class UserInterfaceManager {
     this.ProfileForm = ProfileForm.bind(this);
     this.InCallModalContainer = InCallModalContainer.bind(this);
     this.PlayerProfileContainer = PlayerProfileContainer.bind(this);
+    this.IncomingCallContainer = IncomingCallContainer.bind(this);
   }
 
   addSocket(socket) {
@@ -139,55 +141,23 @@ class UserInterfaceManager {
     const doc = await callerDocRef.get();
     const callerData = doc.data();
 
-    const CallerCard = () => (
-      <div id="caller-card">
-        <img
-          i="caller-image"
-          src={
-            callerData.profilePicURL ||
-            'public/assets/placeholder-profile-pic.png'
-          }
-        ></img>
-        <div>{callerData.displayName}</div>
-        <div id="caller-info">
-          Position: {callerData.position}
-          <br />
-          Education: {callerData.education}
-          <br />
-          Location: {callerData.city}
-        </div>
-        <div id="caller-buttons-wrapper">
-          <button
-            id="accept-button"
-            onClick={() => acceptButtonCallback(callerId)}
-          >
-            Accept
-          </button>
-          <button
-            id="decline-button"
-            onClick={() => declineButtonCallback(callerId)}
-          >
-            Decline
-          </button>
-        </div>
-      </div>
+    document.body.appendChild(
+      <this.IncomingCallContainer
+        props={{
+          callerData,
+          callerId,
+          acceptButtonCallback,
+          declineButtonCallback
+        }}
+      />
     );
-
-    const callerCardWrapper = document.getElementById('caller-card-wrapper');
-    callerCardWrapper.style.display = 'flex';
-
-    callerCardWrapper.appendChild(<CallerCard />);
   }
 
   removeIncomingCallInterface() {
-    const callerCardWrapper = document.getElementById('caller-card-wrapper');
+    const callerCardWrapper = document.getElementById('caller-card-container');
 
     if (callerCardWrapper) {
-      callerCardWrapper.style.display = 'none';
-    }
-
-    while (callerCardWrapper.firstChild) {
-      callerCardWrapper.removeChild(callerCardWrapper.lastChild);
+      callerCardWrapper.remove();
     }
   }
 
@@ -236,14 +206,6 @@ class UserInterfaceManager {
   removePlayerFromOnlineList(playerSocketId) {
     if (document.getElementById(playerSocketId)) {
       document.getElementById(playerSocketId).remove();
-    }
-  }
-
-  removeAllPlayersFromOnlineList() {
-    const onlineList = document.getElementById('online-list');
-
-    while (onlineList.firstChild) {
-      onlineList.removeChild(onlineList.lastChild);
     }
   }
 }
