@@ -93,7 +93,7 @@ class UserInterfaceManager {
 
   removeOnlineList() {
     const onlineListWrapper = document.getElementById('online-list-wrapper');
-    while (onlineListWrapper) {
+    if (onlineListWrapper) {
       onlineListWrapper.remove();
     }
   }
