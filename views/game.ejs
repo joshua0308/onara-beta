@@ -22,8 +22,8 @@
       flex-direction: column;
       justify-content: center;
       position: fixed;
-      top: 0;
-      left: 0;
+      top: 10px;
+      left: 10px;
     }
 
     #in-call-buttons-wrapper {
@@ -79,7 +79,7 @@
     }
 
     #bar-questionnaire-modal-wrapper {
-      display: none;
+      display: flex;
       justify-content: center;
       align-items: center;
     }
@@ -285,8 +285,6 @@
       justify-content: space-evenly;
     }
 
-    #caller-info {}
-
     #caller-buttons-wrapper {
       display: flex;
     }
@@ -337,17 +335,33 @@
       margin: 0;
       padding: 0;
     }
+
+    .menu-button {
+      border-style: none;
+      width: 40px;
+      height: 40px;
+      border-radius: 20px;
+      margin: 5px;
+      background-color: rgb(255 255 255 / 50%);
+      cursor: pointer;
+    }
+
+    .menu-button:hover {
+      background-color: rgb(255 255 255 / 80%);
+    }
+
+    .menu-button:focus {
+      outline: none;
+    }
   </style>
 </head>
 
 <body>
   <div id='caller-card-wrapper' class="background-overlay"></div>
   <div id="in-call-modal-wrapper" class="background-overlay"></div>
-  <div id='bar-questionnaire-modal-wrapper' class="background-overlay"></div>
   <div id='game-wrapper'></div>
   <div id='online-list-wrapper'></div>
   <div id='player-profile-wrapper'></div>
-  <div id='menu-buttons-wrapper'></div>
   <div id='profile-form-wrapper' class="background-overlay"></div>
 
   <!-- firebase -->

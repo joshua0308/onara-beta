@@ -2,6 +2,7 @@ import React from 'jsx-dom';
 import Logger from './Logger';
 import LevelOneButton from './components/LevelOneButton';
 import LevelTwoButton from './components/LevelTwoButton';
+import MenuButtons from './components/MenuButtons';
 import Room from './components/Room';
 import RoomOptionsContainer from './components/RoomOptionsContainer';
 class UserInterfaceManager {
@@ -17,10 +18,29 @@ class UserInterfaceManager {
     this.Room = Room.bind(this);
     this.LevelOneButton = LevelOneButton.bind(this);
     this.LevelTwoButton = LevelTwoButton.bind(this);
+    this.MenuButtons = MenuButtons.bind(this);
   }
 
   addSocket(socket) {
     this.socket = socket;
+  }
+
+  createBarQuestionnaireInterface(isBar = false) {
+    document.body.appendChild(<this.RoomOptionsContainer props={{ isBar }} />);
+  }
+
+  removeBarQuestionnaireInterface() {
+    const barQuestionnaireModalWrapper = document.getElementById(
+      'bar-questionnaire-modal-wrapper'
+    );
+
+    if (barQuestionnaireModalWrapper) {
+      barQuestionnaireModalWrapper.remove();
+    }
+  }
+
+  createMenuButtons(myPlayer) {
+    document.body.appendChild(<this.MenuButtons props={{ myPlayer }} />);
   }
 
   createInCallInterface(stream) {
@@ -55,54 +75,6 @@ class UserInterfaceManager {
     while (onlineListWrapper.firstChild) {
       onlineListWrapper.removeChild(onlineListWrapper.lastChild);
     }
-  }
-
-  removeBarQuestionnaireInterface() {
-    const barQuestionnaireModalWrapper = document.getElementById(
-      'bar-questionnaire-modal-wrapper'
-    );
-    if (barQuestionnaireModalWrapper.style.display === 'none') return;
-
-    barQuestionnaireModalWrapper.style.display = 'none';
-
-    while (barQuestionnaireModalWrapper.firstChild) {
-      barQuestionnaireModalWrapper.removeChild(
-        barQuestionnaireModalWrapper.lastChild
-      );
-    }
-  }
-
-  createBarQuestionnaireInterface(isBar = false) {
-    const barQuestionnaireModalWrapper = document.getElementById(
-      'bar-questionnaire-modal-wrapper'
-    );
-
-    barQuestionnaireModalWrapper.appendChild(
-      <this.RoomOptionsContainer props={{ isBar }} />
-    );
-  }
-
-  createMenuButtons(myPlayer) {
-    const menuButtonsWrapper = document.getElementById('menu-buttons-wrapper');
-
-    if (menuButtonsWrapper.childNodes.length) return;
-
-    const profileButton = document.createElement('button');
-    profileButton.classList.add('btn', 'btn-light', 'profile-button');
-    profileButton.innerText = 'Profile';
-    profileButton.addEventListener('click', () => {
-      this.createProfileFormInterface(myPlayer);
-    });
-
-    const logoutButton = document.createElement('button');
-    logoutButton.classList.add('btn', 'btn-light', 'profile-button');
-    logoutButton.innerText = 'Logout';
-    logoutButton.addEventListener('click', () => {
-      this.firebaseAuth.signOut();
-    });
-
-    menuButtonsWrapper.appendChild(profileButton);
-    menuButtonsWrapper.appendChild(logoutButton);
   }
 
   removePlayerProfileInterface() {

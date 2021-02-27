@@ -3,13 +3,6 @@ import { rooms } from '../constants/rooms';
 
 function RoomOptionsContainer({ props }) {
   const { isBar } = props;
-  const roomOptionsModal = document.getElementById(
-    'bar-questionnaire-modal-wrapper'
-  );
-
-  if (roomOptionsModal.style.display === 'flex') return;
-  roomOptionsModal.style.display = 'flex';
-
   const levelOneOptions = [...new Set(rooms.map((room) => room.levelOne))];
   const levelTwoOptions = [...new Set(rooms.map((room) => room.levelTwo))];
 
@@ -136,28 +129,30 @@ function RoomOptionsContainer({ props }) {
 
   const style = isBar ? {} : { width: '50vw', height: '50vh' };
   return (
-    <div id="questionnaire-container" style={style}>
-      <i
-        id="close-button"
-        onClick={() => this.removeBarQuestionnaireInterface()}
-        className="fas fa-times-circle fa-lg"
-      ></i>
-      {isBar ? (
-        <button
-          id="back-to-game-button"
-          className="btn"
-          onClick={handleBackToTownButton}
-        >
-          Go back to town
-        </button>
-      ) : (
-        <>
-          <div id="questionnaire-question">What are you here for?</div>
-          <div id="level-one-option-container">{levelOneButtons}</div>
-          <div id="level-two-option-container">{levelTwoButtons}</div>
-          <div id="level-three-option-container">{levelThreeRooms}</div>
-        </>
-      )}
+    <div id="bar-questionnaire-modal-wrapper" className="background-overlay">
+      <div id="questionnaire-container" style={style}>
+        <i
+          id="close-button"
+          onClick={() => this.removeBarQuestionnaireInterface()}
+          className="fas fa-times-circle fa-lg"
+        ></i>
+        {isBar ? (
+          <button
+            id="back-to-game-button"
+            className="btn"
+            onClick={handleBackToTownButton}
+          >
+            Go back to town
+          </button>
+        ) : (
+          <>
+            <div id="questionnaire-question">What are you here for?</div>
+            <div id="level-one-option-container">{levelOneButtons}</div>
+            <div id="level-two-option-container">{levelTwoButtons}</div>
+            <div id="level-three-option-container">{levelThreeRooms}</div>
+          </>
+        )}
+      </div>
     </div>
   );
 }
