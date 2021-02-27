@@ -73,9 +73,10 @@
       background-color: rgba(74, 67, 67, 0.4);
     }
 
-    #in-call-modal-wrapper {
-      display: none;
+    #in-call-modal-container {
+      display: inline;
       transition: all 0.3s ease-in-out;
+      background-color: rgba(74, 67, 67, 0.4);
     }
 
     #bar-questionnaire-modal-wrapper {
@@ -358,11 +359,9 @@
 
 <body>
   <div id='caller-card-wrapper' class="background-overlay"></div>
-  <div id="in-call-modal-wrapper" class="background-overlay"></div>
-  <div id='game-wrapper'></div>
-  <div id='online-list-wrapper'></div>
   <div id='player-profile-wrapper'></div>
-  <!-- <div id='profile-form-wrapper' class="background-overlay"></div> -->
+  <div id='online-list-wrapper'></div>
+  <div id='game-wrapper'></div>
 
   <!-- firebase -->
   <script src="https://www.gstatic.com/firebasejs/8.2.3/firebase-app.js"></script>

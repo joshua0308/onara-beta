@@ -6,6 +6,7 @@ import MenuButtons from './components/MenuButtons';
 import Room from './components/Room';
 import ProfileForm from './components/ProfileForm';
 import RoomOptionsContainer from './components/RoomOptionsContainer';
+import InCallModalContainer from './components/InCallModalContainer';
 class UserInterfaceManager {
   constructor(scene, firebase, firebaseAuth, firebaseDb) {
     this.scene = scene;
@@ -21,10 +22,15 @@ class UserInterfaceManager {
     this.LevelTwoButton = LevelTwoButton.bind(this);
     this.MenuButtons = MenuButtons.bind(this);
     this.ProfileForm = ProfileForm.bind(this);
+    this.InCallModalContainer = InCallModalContainer.bind(this);
   }
 
   addSocket(socket) {
     this.socket = socket;
+  }
+
+  createMenuButtons(myPlayer) {
+    document.body.appendChild(<this.MenuButtons props={{ myPlayer }} />);
   }
 
   createBarQuestionnaireInterface(isBar = false) {
@@ -39,10 +45,6 @@ class UserInterfaceManager {
     if (barQuestionnaireModalWrapper) {
       barQuestionnaireModalWrapper.remove();
     }
-  }
-
-  createMenuButtons(myPlayer) {
-    document.body.appendChild(<this.MenuButtons props={{ myPlayer }} />);
   }
 
   async createProfileFormInterface(myPlayer) {
@@ -68,28 +70,22 @@ class UserInterfaceManager {
     this.scene.scene.resume();
   }
 
-  createInCallInterface(stream) {
-    const inCallModalWrapper = document.getElementById('in-call-modal-wrapper');
-    inCallModalWrapper.style.display = 'inline';
-    inCallModalWrapper.isGameVisible = true;
-    inCallModalWrapper.style.backgroundColor = 'rgba(74, 67, 67, 0.4)';
+  createInCallInterface() {
+    document.body.appendChild(<this.InCallModalContainer />);
+  }
 
-    inCallModalWrapper.appendChild(
-      <>
-        <div id="videos-wrapper"></div>
-        {this.createInCallButtons(stream)}
-      </>
-    );
+  removeInCallInterface() {
+    const modalWrapper = document.getElementById('in-call-modal-container');
+    if (modalWrapper) {
+      modalWrapper.remove();
+    }
   }
 
   createOnlineList(barId) {
     const onlineListWrapper = document.getElementById('online-list-wrapper');
 
-    const barName = document.createElement('div');
-    barName.innerText = barId;
-
-    const ul = document.createElement('ul');
-    ul.setAttribute('id', 'online-list');
+    const barName = <div>{barId}</div>;
+    const ul = <ul id="online-list"></ul>;
 
     onlineListWrapper.appendChild(barName);
     onlineListWrapper.appendChild(ul);
@@ -256,116 +252,6 @@ class UserInterfaceManager {
     callerCardWrapper.appendChild(<CallerCard />);
   }
 
-  createInCallButtons() {
-    const toggleVideo = () => {
-      const stream = this.stream;
-      const videoIcon = document.getElementById('video-icon');
-      const toggleVideoButton = document.getElementById('toggle-video-button');
-
-      let enabled = stream.getVideoTracks()[0].enabled;
-      if (enabled) {
-        stream.getVideoTracks()[0].enabled = false;
-        videoIcon.classList.remove('fa-video');
-        videoIcon.classList.add('fa-video-slash');
-        toggleVideoButton.style.color = 'red';
-      } else {
-        stream.getVideoTracks()[0].enabled = true;
-        videoIcon.classList.add('fa-video');
-        videoIcon.classList.remove('fa-video-slash');
-        toggleVideoButton.style.color = 'grey';
-      }
-      this.logger.log(
-        'toggle video button - enabled',
-        stream.getVideoTracks()[0].enabled
-      );
-    };
-
-    const toggleAudio = () => {
-      const stream = this.stream;
-      const audioIcon = document.getElementById('audio-icon');
-      const toggleAudioButton = document.getElementById('toggle-audio-button');
-
-      let enabled = stream.getAudioTracks()[0].enabled;
-      if (enabled) {
-        stream.getAudioTracks()[0].enabled = false;
-        audioIcon.classList.remove('fa-microphone');
-        audioIcon.classList.add('fa-microphone-slash');
-        toggleAudioButton.style.color = 'red';
-        this.logger.log(
-          'stream.getAudioTracks()[0]',
-          stream.getAudioTracks()[0].muted
-        );
-      } else {
-        stream.getAudioTracks()[0].enabled = true;
-        audioIcon.classList.remove('fa-microphone-slash');
-        audioIcon.classList.add('fa-microphone');
-        toggleAudioButton.style.color = 'grey';
-        this.logger.log(
-          'stream.getAudioTracks()[0]',
-          stream.getAudioTracks()[0].muted
-        );
-      }
-      this.logger.log(
-        'toggle audio button - enabled',
-        stream.getAudioTracks()[0].enabled
-      );
-    };
-
-    const toggleBackground = () => {
-      const backgroundIcon = document.getElementById('background-icon');
-      const toggleBackgroundButton = document.getElementById(
-        'toggle-background-button'
-      );
-
-      const inCallModalWrapper = document.getElementById(
-        'in-call-modal-wrapper'
-      );
-
-      if (inCallModalWrapper.isGameVisible) {
-        inCallModalWrapper.style.backgroundColor = 'rgb(0, 0, 0)';
-        inCallModalWrapper.isGameVisible = false;
-        backgroundIcon.classList.remove('fa-eye');
-        backgroundIcon.classList.add('fa-eye-slash');
-        toggleBackgroundButton.style.color = 'red';
-      } else {
-        inCallModalWrapper.style.backgroundColor = 'rgba(74, 67, 67, 0.4)';
-        inCallModalWrapper.isGameVisible = true;
-        backgroundIcon.classList.remove('fa-eye-slash');
-        backgroundIcon.classList.add('fa-eye');
-        toggleBackgroundButton.style.color = 'grey';
-      }
-    };
-
-    const endCall = () => {
-      this.logger.log('end call');
-      this.removeInCallInterface();
-      this.scene.stopStream();
-
-      this.socket.emit('end-call', { peerSocketId: this.peerSocketId });
-      this.scene.removePeerConnection();
-    };
-
-    return (
-      <div id="in-call-buttons-wrapper">
-        <button id="toggle-video-button" onClick={() => toggleVideo()}>
-          <i id="video-icon" className="fas fa-video fa-xs"></i>
-        </button>
-        <button id="toggle-audio-button" onClick={() => toggleAudio()}>
-          <i id="audio-icon" className="fas fa-microphone fa-xs"></i>
-        </button>
-        <button
-          id="toggle-background-button"
-          onClick={() => toggleBackground()}
-        >
-          <i id="background-icon" className="fas fa-eye fa-xs"></i>
-        </button>
-        <button id="end-call-button-button" onClick={() => endCall()}>
-          <i id="end-call-icon" className="fas fa-phone-slash fa-xs"></i>
-        </button>
-      </div>
-    );
-  }
-
   removeIncomingCallInterface() {
     const callerCardWrapper = document.getElementById('caller-card-wrapper');
 
@@ -375,17 +261,6 @@ class UserInterfaceManager {
 
     while (callerCardWrapper.firstChild) {
       callerCardWrapper.removeChild(callerCardWrapper.lastChild);
-    }
-  }
-
-  removeInCallInterface() {
-    const modalWrapper = document.getElementById('in-call-modal-wrapper');
-    if (modalWrapper) {
-      modalWrapper.style.display = 'none';
-    }
-
-    while (modalWrapper.firstChild) {
-      modalWrapper.removeChild(modalWrapper.lastChild);
     }
   }
 
