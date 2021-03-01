@@ -6,6 +6,7 @@ class Preload extends Phaser.Scene {
   }
 
   preload() {
+    console.time('load images');
     this.load.tilemapTiledJSON('bar-map', 'assets/updated-bar-map.json');
     this.load.tilemapTiledJSON('town-map', 'assets/updated-town-map.json');
     /**
@@ -66,6 +67,7 @@ class Preload extends Phaser.Scene {
   }
 
   startGame() {
+    console.timeEnd('load images');
     this.registry.set('map', 'town');
     this.scene.start('PlayScene');
   }
