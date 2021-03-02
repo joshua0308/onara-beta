@@ -360,11 +360,19 @@ class Play extends Phaser.Scene {
 
     const platformsColliders = map.createLayer('platforms_colliders', tileset);
     map.createLayer('background', backgroundTileset);
-
     const playerZones = map.getObjectLayer('player_zones');
 
     // collide player with platform
     platformsColliders.setCollisionByProperty({ collides: true });
+    platformsColliders.layer.data.forEach((row) => {
+      row.forEach((tile) => {
+        if (tile.collides) {
+          tile.collideDown = false;
+          tile.collideRight = false;
+          tile.collideLeft = false;
+        }
+      });
+    });
 
     return { platformsColliders, playerZones };
   }
