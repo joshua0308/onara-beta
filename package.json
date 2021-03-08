@@ -13,18 +13,21 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "build": "rm -rf dist && webpack --config webpack.prod.js",
-    "build:dev":"webpack --config webpack.dev.js"
+    "build:dev": "webpack --config webpack.dev.js"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "dotenv": "^8.2.0",
     "ejs": "^3.1.5",
     "express": "^4.17.1",
     "firebase": "^8.2.3",
     "jsx-dom": "^7.0.0-beta.0",
     "peer": "^0.6.1",
     "socket.io": "^3.0.5",
-    "socket.io-client": "^3.0.5"
+    "socket.io-client": "^3.0.5",
+    "twilio": "^3.57.0",
+    "uuid": "^8.3.2"
   },
   "devDependencies": {
     "@babel/cli": "^7.12.16",

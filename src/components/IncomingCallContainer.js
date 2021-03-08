@@ -1,4 +1,5 @@
 import React from 'jsx-dom';
+import { v4 as uuidv4 } from 'uuid';
 
 function IncomingCallContainer({ props }) {
   const {
@@ -28,7 +29,15 @@ function IncomingCallContainer({ props }) {
         <div id="caller-buttons-wrapper">
           <button
             id="accept-button"
-            onClick={() => acceptButtonCallback(callerId)}
+            onClick={() => {
+              this.removeIncomingCallInterface();
+
+              const roomHash = uuidv4();
+              this.scene.roomHash = roomHash;
+              this.scene.startUp();
+              this.socket.emit('accept-call', { to: callerId, roomHash });
+            }}
+            // onClick={() => acceptButtonCallback(callerId)}
           >
             Accept
           </button>

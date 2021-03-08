@@ -1,3 +1,5 @@
+require('dotenv').config();
+
 const express = require('express');
 
 const app = express();
@@ -7,6 +9,12 @@ const io = require('socket.io')(server);
 const PORT = process.env.PORT || 3000;
 const players = {};
 const gameIO = io.of('/game');
+
+var twillioAuthToken =
+  process.env.HEROKU_AUTH_TOKEN || process.env.LOCAL_AUTH_TOKEN;
+var twillioAccountSID =
+  process.env.HEROKU_TWILLIO_SID || process.env.LOCAL_TWILLIO_SID;
+var twilio = require('twilio')(twillioAccountSID, twillioAuthToken);
 
 let BUNDLE_PATH;
 let PLAYGROUND_PATH;
@@ -54,12 +62,67 @@ class Player {
 }
 
 gameIO.on('connection', (socket) => {
+  socket.on('accept-call', ({ to, roomHash }) => {
+    socket.to(to).emit('accept-call', { roomHash });
+  });
+
+  socket.on('join', async function (room) {
+    console.log('debug: A client joined the room', room);
+    const clients = [...(await gameIO.in(room).allSockets())];
+    const numClients = typeof clients !== 'undefined' ? clients.length : 0;
+    socket.join(room);
+
+    console.log('debug: numClients', numClients);
+
+    if (numClients === 0) {
+      socket.join(room);
+    } else if (numClients === 1) {
+      socket.join(room);
+      // When the client is second to join the room, both clients are ready.
+      console.log('Broadcasting ready message', room);
+      // First to join call initiates call
+      socket.broadcast.to(room).emit('willInitiateCall', room);
+      socket.broadcast.to(room).emit('ready', room);
+    } else {
+      console.log('room already full', room);
+      socket.emit('full', room);
+    }
+  });
+
+  socket.on('token', function (room) {
+    twilio.tokens.create(function (err, response) {
+      if (err) {
+        console.log(err);
+      } else {
+        console.log(
+          'Token generated. Returning it to the browser client',
+          room
+        );
+        socket.emit('token', response);
+      }
+    });
+  });
+
+  socket.on('candidate', function (candidate, room) {
+    console.log('Received candidate. Broadcasting...', room, socket.id);
+    socket.broadcast.to(room).emit('candidate', candidate);
+  });
+
+  socket.on('offer', function (offer, room) {
+    console.log('Received offer. Broadcasting...', room);
+    socket.broadcast.to(room).emit('offer', offer);
+  });
+
+  socket.on('answer', function (answer, room) {
+    console.log('Received answer. Broadcasting...', room);
+    socket.broadcast.to(room).emit('answer', answer);
+  });
   // GAME SOCKETS
   // add player to the object keyed by socket.id
 
   // need to wait until socket listener is set up on the client side.
   socket.on('join-room', ({ playerInfo, barId }) => {
-    console.log('debug: user connected', playerInfo, socket.id, barId);
+    console.log('debug: user connected', playerInfo.displayName, socket.id);
 
     players[socket.id] = new Player({
       barId,
@@ -71,7 +134,7 @@ gameIO.on('connection', (socket) => {
       gender: playerInfo.gender
     });
 
-    console.log('debug: current players', players);
+    console.log('debug: current players', Object.keys(players));
 
     socket.join(barId);
 
