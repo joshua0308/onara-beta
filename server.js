@@ -63,11 +63,11 @@ class Player {
 
 gameIO.on('connection', (socket) => {
   socket.on('accept-call', ({ to, roomHash }) => {
-    socket.to(to).emit('accept-call', { roomHash });
+    socket.to(to).emit('accept-call', { roomHash, from: socket.id });
   });
 
   socket.on('join', async function (room) {
-    console.log('debug: A client joined the room', room);
+    console.log('debug: A client joined the room', socket.id, room);
     const clients = [...(await gameIO.in(room).allSockets())];
     const numClients = typeof clients !== 'undefined' ? clients.length : 0;
     socket.join(room);
@@ -85,7 +85,6 @@ gameIO.on('connection', (socket) => {
       socket.broadcast.to(room).emit('ready', room);
     } else {
       console.log('room already full', room);
-      socket.emit('full', room);
     }
   });
 
@@ -182,7 +181,7 @@ gameIO.on('connection', (socket) => {
     //   players[receiverId].status = PLAYER_STATUS.INCOMING_CALL;
     //   players[socket.id].status = PLAYER_STATUS.OUTGOING_CALL;
 
-    return socket.to(receiverId).emit('call-received', { callerId: socket.id });
+    return socket.to(receiverId).emit('request-call', { callerId: socket.id });
     // }
 
     // if (players[receiverId].status === PLAYER_STATUS.INCOMING_CALL) {
@@ -255,11 +254,11 @@ gameIO.on('connection', (socket) => {
   });
 
   socket.on('end-call', ({ peerSocketId }) => {
-    console.log('debug: end-call');
+    console.log('debug: end-call', peerSocketId);
     // if (players[socket.id]) players[socket.id].status = PLAYER_STATUS.AVAILABLE;
     // if (players[peerSocketId]) players[peerSocketId].status = PLAYER_STATUS.AVAILABLE;
 
-    socket.to(peerSocketId).emit('call-ended', { peerSocketId });
+    socket.to(peerSocketId).emit('end-call');
   });
 
   socket.on('disconnect', () => {

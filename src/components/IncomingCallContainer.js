@@ -2,12 +2,14 @@ import React from 'jsx-dom';
 import { v4 as uuidv4 } from 'uuid';
 
 function IncomingCallContainer({ props }) {
-  const {
-    callerData,
-    callerId,
-    acceptButtonCallback,
-    declineButtonCallback
-  } = props;
+  const { callerData, callerId } = props;
+  const declineButtonCallback = (callerId) => {
+    console.log('call declined', this);
+    this.socket.emit('call-declined', { callerId });
+
+    this.removeIncomingCallInterface();
+  };
+
   return (
     <div id="caller-card-container" className="background-overlay">
       <div id="caller-card">
@@ -34,10 +36,9 @@ function IncomingCallContainer({ props }) {
 
               const roomHash = uuidv4();
               this.scene.roomHash = roomHash;
-              this.scene.startUp();
+              this.scene.nativePeerManager.init(roomHash, callerId);
               this.socket.emit('accept-call', { to: callerId, roomHash });
             }}
-            // onClick={() => acceptButtonCallback(callerId)}
           >
             Accept
           </button>

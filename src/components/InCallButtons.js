@@ -2,7 +2,7 @@ import React from 'jsx-dom';
 
 function InCallButtons() {
   const toggleVideo = () => {
-    const stream = this.stream;
+    const stream = this.scene.nativePeerManager.localStream;
     const videoIcon = document.getElementById('video-icon');
     const toggleVideoButton = document.getElementById('toggle-video-button');
 
@@ -25,7 +25,7 @@ function InCallButtons() {
   };
 
   const toggleAudio = () => {
-    const stream = this.stream;
+    const stream = this.scene.nativePeerManager.localStream;
     const audioIcon = document.getElementById('audio-icon');
     const toggleAudioButton = document.getElementById('toggle-audio-button');
 
@@ -84,12 +84,13 @@ function InCallButtons() {
   };
 
   const endCall = () => {
-    this.logger.log('end call');
+    this.logger.log('click end call');
     this.removeInCallInterface();
-    this.scene.stopStream();
 
-    this.socket.emit('end-call', { peerSocketId: this.peerSocketId });
-    this.scene.removePeerConnection();
+    this.socket.emit('end-call', {
+      peerSocketId: this.scene.nativePeerManager.remoteSocketId
+    });
+    this.scene.nativePeerManager.endCall();
   };
 
   return (

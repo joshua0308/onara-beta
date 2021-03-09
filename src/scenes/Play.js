@@ -1,196 +1,17 @@
 import MyPlayer from '../entities/MyPlayer';
 import OtherPlayer from '../entities/OtherPlayer';
 import UserInterfaceManager from '../UserInterfaceManager';
-import PeerManager from '../PeerManager';
 import Logger from '../Logger';
+import NativePeerManager from '../NativePeerManager';
 
-// const roomHash = 'roomhash';
 class Play extends Phaser.Scene {
   constructor(config) {
     super('PlayScene');
     this.player = {};
     this.config = config;
-    this.localICECandidates = [];
     this.logger = new Logger('Phaser');
 
-    // this.acceptButtonCallback = this.acceptButtonCallback.bind(this);
-    this.declineButtonCallback = this.declineButtonCallback.bind(this);
     this.updateMyPlayerInfo = this.updateMyPlayerInfo.bind(this);
-
-    this.chatRoomFull = this.chatRoomFull.bind(this);
-    this.onMediaStream = this.onMediaStream.bind(this);
-    this.readyToCall = this.readyToCall.bind(this);
-    this.onIceCandidate = this.onIceCandidate.bind(this);
-    this.onCandidate = this.onCandidate.bind(this);
-    this.createOffer = this.createOffer.bind(this);
-    this.createAnswer = this.createAnswer.bind(this);
-    this.onOffer = this.onOffer.bind(this);
-    this.onAnswer = this.onAnswer.bind(this);
-    this.onAddStream = this.onAddStream.bind(this);
-  }
-
-  startUp() {
-    this.logger.log('startUp', this.roomHash);
-    this.requestMediaStream();
-  }
-
-  requestMediaStream() {
-    navigator.mediaDevices
-      .getUserMedia({ video: true, audio: true })
-      .then((stream) => {
-        this.onMediaStream(stream);
-      })
-      .catch((error) => {
-        this.logger.log(error);
-      });
-  }
-
-  onMediaStream(stream) {
-    this.localStream = stream;
-    this.userInterfaceManager.createInCallInterface();
-    this.userInterfaceManager.addStreamToVideoElement(stream, true);
-    this.socket.emit('join', this.roomHash);
-    this.socket.on('full', this.chatRoomFull);
-    this.socket.on('offer', this.onOffer);
-    this.socket.on('ready', this.readyToCall);
-    this.socket.on('willInitiateCall', () => (this.willInitiateCall = true));
-  }
-
-  chatRoomFull() {
-    console.log('chatroom full');
-  }
-
-  readyToCall() {
-    this.logger.log('readyToCall');
-    if (this.willInitiateCall) {
-      this.logger.log('Initiating call');
-      this.startCall();
-    }
-  }
-
-  startCall() {
-    this.socket.on('token', this.onToken(this.createOffer));
-    this.socket.emit('token', this.roomHash);
-  }
-
-  onToken(callback) {
-    return (token) => {
-      this.logger.log('onToken', token);
-      this.peerConnection = new RTCPeerConnection({
-        iceServers: token.iceServers
-      });
-
-      this.localStream.getTracks().forEach((track) => {
-        this.peerConnection.addTrack(track, this.localStream);
-      });
-
-      this.dataChannel = this.peerConnection.createDataChannel('chat', {
-        negotiated: true,
-        id: 0
-      });
-
-      this.dataChannel.onopen = (event) => {
-        this.logger.log('dataChannel opened');
-      };
-
-      this.dataChannel.onmessage = (event) => {
-        const receivedData = event.data;
-        this.logger.log('dataChannel onmessage', receivedData);
-      };
-
-      this.peerConnection.onicecandidate = this.onIceCandidate;
-      this.peerConnection.onaddstream = this.onAddStream;
-      this.socket.on('candidate', this.onCandidate);
-      this.socket.on('answer', this.onAnswer);
-
-      this.peerConnection.oniceconnectionstatechange = (event) => {
-        switch (this.peerConnection.iceConnectionState) {
-          case 'connected':
-            this.logger.log('connected');
-            break;
-          case 'disconnected':
-            this.logger.log('disconnected');
-            break;
-          case 'failed':
-            this.logger.log('failed');
-            break;
-          case 'closed':
-            this.logger.log('closed');
-            break;
-        }
-      };
-      callback();
-    };
-  }
-
-  onIceCandidate(event) {
-    this.logger.log('onIceCandidate');
-    if (event.candidate) {
-      if (this.connected) {
-        this.socket.emit(
-          'candidate',
-          JSON.stringify(event.candidate),
-          this.roomHash
-        );
-      } else {
-        this.localICECandidates.push(event.candidate);
-      }
-    }
-  }
-
-  onCandidate(candidate) {
-    const rtcCandidate = new RTCIceCandidate(JSON.parse(candidate));
-    this.peerConnection.addIceCandidate(rtcCandidate);
-  }
-
-  createOffer() {
-    this.logger.log('createOffer');
-    this.peerConnection
-      .createOffer()
-      .then((offer) => {
-        this.peerConnection.setLocalDescription(offer);
-        this.socket.emit('offer', JSON.stringify(offer), this.roomHash);
-      })
-      .catch((err) => this.logger.log(err));
-  }
-
-  createAnswer(offer) {
-    this.logger.log('createAnswer');
-    return () => {
-      const rtcOffer = new RTCSessionDescription(JSON.parse(offer));
-      this.peerConnection.setRemoteDescription(rtcOffer);
-      this.peerConnection
-        .createAnswer()
-        .then((answer) => {
-          this.peerConnection.setLocalDescription(answer);
-          this.socket.emit('answer', JSON.stringify(answer), this.roomHash);
-        })
-        .catch((err) => this.logger.log(err));
-    };
-  }
-
-  onOffer(offer) {
-    this.logger.log('onOffer');
-    this.socket.on('token', this.onToken(this.createAnswer(offer)));
-    this.socket.emit('token', this.roomHash);
-  }
-
-  onAnswer(answer) {
-    this.logger.log('onAnswer');
-    const rtcAnswer = new RTCSessionDescription(JSON.parse(answer));
-    this.peerConnection.setRemoteDescription(rtcAnswer);
-    this.localICECandidates.forEach((candidate) => {
-      this.logger.log('sending local ICE candidates');
-      this.socket.emit('candidate', JSON.stringify(candidate), this.roomHash);
-    });
-
-    this.localICECandidates = [];
-  }
-
-  onAddStream(event) {
-    // this.remoteVideo.srcObject = event.stream;
-    this.userInterfaceManager.addStreamToVideoElement(event.stream, false);
-    this.connected = true;
   }
 
   updateMyPlayerInfo(updatedPlayerInfo) {
@@ -255,13 +76,11 @@ class Play extends Phaser.Scene {
     this.barId = barId;
     this.socket = io('/game');
     this.userInterfaceManager.addSocket(this.socket);
-    this.peerManager = new PeerManager(
-      this,
-      this.userInterfaceManager,
-      this.socket
-    );
 
-    this.myStream = null;
+    this.nativePeerManager = new NativePeerManager(
+      this.socket,
+      this.userInterfaceManager
+    );
 
     this.otherPlayersGroup = this.physics.add.group();
     this.callButtonPressedDown = false;
@@ -333,10 +152,11 @@ class Play extends Phaser.Scene {
       });
     });
 
-    this.socket.on('accept-call', ({ roomHash }) => {
+    this.socket.on('accept-call', ({ roomHash, from }) => {
+      this.userInterfaceManager.removePlayerProfileInterface();
       this.logger.log('accept-call', roomHash);
       this.roomHash = roomHash;
-      this.startUp();
+      this.nativePeerManager.init(roomHash, from);
     });
 
     // I can't tell if this event handler is working properly
@@ -412,8 +232,8 @@ class Play extends Phaser.Scene {
     });
 
     // receiver - when caller requests a call
-    this.socket.on('call-received', ({ callerId }) => {
-      this.logger.log('call received', {
+    this.socket.on('request-call', ({ callerId }) => {
+      this.logger.log('request-call', {
         callerId,
         displayName: this.players[callerId].displayName
       });
@@ -421,10 +241,7 @@ class Play extends Phaser.Scene {
 
       this.userInterfaceManager.createIncomingCallInterface(
         this.players,
-        callerId,
-        () => {},
-        // this.acceptButtonCallback,
-        this.declineButtonCallback
+        callerId
       );
     });
 
@@ -437,50 +254,16 @@ class Play extends Phaser.Scene {
       this.userInterfaceManager.removeIncomingCallInterface();
     });
 
-    // this.socket.on('peer-answer', ({ callerSignalData }) => {
-    //   this.logger.log('receive peer answer', { callerSignalData });
-    //   this.peerManager.bufferAndSetSignal(callerSignalData);
-    //   this.userInterfaceManager.removePlayerProfileInterface();
-    // });
-
-    // this.socket.on('peer-offer', ({ receiverSignalData, receiverSocketId }) => {
-    //   this.logger.log('Socket: receive peer offer', { receiverSignalData });
-    //   this.peerManager.bufferAndSetSignal(receiverSignalData);
-
-    //   if (!this.peerManager.peer) {
-    //     this.peerSocketId = receiverSocketId;
-    //     this.peerManager.initConnection(receiverSocketId, false);
-    //     this.peerManager.setSignal();
-
-    //     this.userInterfaceManager.removePlayerProfileInterface();
-    //     this.userInterfaceManager.createInCallInterface();
-
-    //     navigator.mediaDevices
-    //       .getUserMedia({ video: true, audio: true })
-    //       .then((stream) => {
-    //         this.myStream = stream;
-    //         this.userInterfaceManager.stream = this.myStream;
-    //         this.userInterfaceManager.addStreamToVideoElement(
-    //           this.myStream,
-    //           true
-    //         );
-    //         this.peerManager.addStream(this.myStream);
-    //       });
-    //   }
-    // });
-
     this.socket.on('call-request-declined', ({ receiverId, message }) => {
       this.logger.log('declined', { receiverId });
       this.userInterfaceManager.removePlayerProfileInterface();
       alert(message);
     });
 
-    this.socket.on('call-ended', ({ peerSocketId }) => {
+    this.socket.on('end-call', () => {
       this.logger.log('call ended');
       this.userInterfaceManager.removeInCallInterface();
-      this.stopStream();
-
-      this.removePeerConnection();
+      this.nativePeerManager.endCall();
     });
 
     // player movement
@@ -502,8 +285,6 @@ class Play extends Phaser.Scene {
         this.logger.log('chat peer disconnected');
         this.socket.emit('end-call', { peerSocketId: this.peerSocketId });
         this.userInterfaceManager.removeInCallInterface();
-        this.stopStream();
-        this.removePeerConnection();
       }
 
       this.otherPlayersGroup.getChildren().forEach((otherPlayer) => {
@@ -512,13 +293,6 @@ class Play extends Phaser.Scene {
         }
       });
     });
-  }
-
-  removePeerConnection() {
-    this.peerManager.destroy();
-    if (this.peerSocketId) {
-      this.peerSocketId = null;
-    }
   }
 
   createMap() {
@@ -599,20 +373,12 @@ class Play extends Phaser.Scene {
     return navigator.mediaDevices.getUserMedia(mediaConstraints);
   }
 
-  stopStream() {
-    this.logger.log('stop stream');
-    if (this.myStream) {
-      const tracks = this.myStream.getTracks();
-      tracks.forEach((track) => track.stop());
-    }
-  }
-
-  declineButtonCallback(callerId) {
-    this.logger.log('call declined', this);
-    this.socket.emit('call-declined', { callerId });
-
-    this.userInterfaceManager.removeIncomingCallInterface();
-  }
+  // stopStream() {
+  //   this.logger.log('stop stream');
+  //   // if (this.myStream) {
+  //   // const tracks = this.myStream.getTracks();
+  //   tracks.forEach((track) => track.stop());
+  // }
 }
 
 export default Play;
