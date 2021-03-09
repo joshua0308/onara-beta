@@ -154,14 +154,17 @@ class UserInterfaceManager {
     }
   }
 
-  addStreamToVideoElement(stream, setMute = false) {
+  addStreamToVideoElement(stream, isLocalStream) {
     this.logger.log('addStreamToVideoElement');
     const videoElement = (
       <video poster="https://media.giphy.com/media/VseXvvxwowwCc/giphy.gif"></video>
     );
     videoElement.srcObject = stream;
-    if (setMute) {
+    if (isLocalStream) {
       videoElement.muted = 'true';
+      videoElement.setAttribute('id', 'local-video');
+    } else {
+      videoElement.setAttribute('id', 'remote-video');
     }
     videoElement.addEventListener('loadedmetadata', () => {
       videoElement.play();
@@ -169,6 +172,8 @@ class UserInterfaceManager {
 
     const videosWrapper = document.getElementById('videos-wrapper');
     videosWrapper.appendChild(videoElement);
+
+    return videoElement;
   }
 
   addPlayerToOnlineList(playerInfo, playerSocketId, isCurrentPlayer = false) {

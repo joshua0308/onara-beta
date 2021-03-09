@@ -83,6 +83,55 @@ function InCallButtons() {
     }
   };
 
+  const toggleScreenshare = () => {
+    this.logger.log('toggleScreenshare');
+
+    const screenshareIcon = document.getElementById('screenshare-icon');
+    if (this.scene.nativePeerManager.mode === 'video') {
+      this.scene.nativePeerManager.setMode('screenshare');
+      screenshareIcon.classList.remove('fa-desktop');
+      screenshareIcon.classList.add('fa-camera');
+
+      this.scene.nativePeerManager.requestScreenshare();
+      // navigator.mediaDevices
+      //   .getDisplayMedia({
+      //     video: true,
+      //     audio: false
+      //   })
+      //   .then((stream) => {
+      //     this.scene.nativePeerManager.switchStreamHelper(stream);
+      //   })
+      //   .catch((err) => {
+      //     console.log(err);
+      //     console.log('Error sharing screen');
+      //   });
+    } else {
+      screenshareIcon.classList.remove('fa-camera');
+      screenshareIcon.classList.add('fa-desktop');
+
+      this.scene.nativePeerManager.requestVideo();
+      // Stop the screen share track
+      // this.scene.nativePeerManager.localVideo.srcObject
+      //   .getTracks()
+      //   .forEach((track) => track.stop());
+
+      // // Get webcam input
+      // navigator.mediaDevices
+      //   .getUserMedia({
+      //     video: true,
+      //     audio: true
+      //   })
+      //   .then((stream) => {
+      //     this.scene.nativePeerManager.setMode('video');
+      //     this.scene.nativePeerManager.switchStreamHelper(stream);
+      //   })
+      //   .catch((err) => {
+      //     console.log(err);
+      //     console.log('Error sharing video');
+      //   });
+    }
+  };
+
   const endCall = () => {
     this.logger.log('click end call');
     this.removeInCallInterface();
@@ -103,6 +152,12 @@ function InCallButtons() {
       </button>
       <button id="toggle-background-button" onClick={() => toggleBackground()}>
         <i id="background-icon" className="fas fa-eye fa-xs"></i>
+      </button>
+      <button
+        id="toggle-screenshare-button"
+        onClick={() => toggleScreenshare()}
+      >
+        <i id="screenshare-icon" className="fas fa-desktop fa-xs"></i>
       </button>
       <button id="end-call-button-button" onClick={() => endCall()}>
         <i id="end-call-icon" className="fas fa-phone-slash fa-xs"></i>

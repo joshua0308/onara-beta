@@ -1,3 +1,9 @@
+const MODE = {
+  VIDEO: 'video',
+  SCREENSHARE: 'screenshare',
+  AUDIO: 'audio'
+};
+
 class NativePeerManager {
   constructor(socket, userInterfaceManager) {
     this.socket = socket;
@@ -8,6 +14,8 @@ class NativePeerManager {
     this.roomHash = null;
     this.connected = false;
     this.localICECandidates = [];
+    this.mode = null;
+    this.localVideo = null;
 
     this.readyToCall = this.readyToCall.bind(this);
     this.onIceCandidate = this.onIceCandidate.bind(this);
@@ -33,6 +41,7 @@ class NativePeerManager {
     navigator.mediaDevices
       .getUserMedia({ video: true, audio: true })
       .then((stream) => {
+        this.setMode(MODE.VIDEO);
         this.onMediaStream(stream);
       })
       .catch((error) => {
@@ -40,12 +49,19 @@ class NativePeerManager {
       });
   }
 
+  setMode(mode) {
+    this.mode = mode;
+  }
+
   onMediaStream(stream) {
     console.log('onMediaStream');
 
     this.localStream = stream;
     this.userInterfaceManager.createInCallInterface();
-    this.userInterfaceManager.addStreamToVideoElement(stream, true);
+    this.localVideo = this.userInterfaceManager.addStreamToVideoElement(
+      stream,
+      true
+    );
     this.socket.emit('join', this.roomHash);
     this.setupSocket();
   }
@@ -193,16 +209,81 @@ class NativePeerManager {
     this.connected = true;
   }
 
+  // Swap current video track with passed in stream
+  switchStreamHelper(stream) {
+    // Get current video track
+    let videoTrack = stream.getVideoTracks()[0];
+    // Add listen for if the current track swaps, swap back
+    videoTrack.onended = () => {
+      console.log('videoTrack onended');
+      this.requestVideo();
+    };
+
+    // Find sender
+    const sender = this.peerConnection.getSenders().find(function (s) {
+      // make sure track types match
+      return s.track.kind === videoTrack.kind;
+    });
+
+    // Replace sender track
+    sender.replaceTrack(videoTrack);
+
+    // Update local video object
+    this.localVideo.srcObject = stream;
+  }
+
+  requestScreenshare() {
+    navigator.mediaDevices
+      .getDisplayMedia({
+        video: true,
+        audio: false
+      })
+      .then((stream) => {
+        this.switchStreamHelper(stream);
+      })
+      .catch((err) => {
+        console.log(err);
+        console.log('Error sharing screen');
+      });
+  }
+
+  requestVideo() {
+    this.localVideo.srcObject.getTracks().forEach((track) => track.stop());
+
+    // Get webcam input
+    navigator.mediaDevices
+      .getUserMedia({
+        video: true,
+        audio: true
+      })
+      .then((stream) => {
+        this.setMode('video');
+        this.switchStreamHelper(stream);
+      })
+      .catch((err) => {
+        console.log(err);
+        console.log('Error sharing video');
+      });
+  }
+
   endCall() {
     console.log('endCall');
     if (this.localStream) {
-      const tracks = this.localStream.getTracks();
-      tracks.forEach((track) => track.stop());
+      this.localStream.getTracks().forEach((track) => track.stop());
     }
+
+    // when call is ended during screenshare, localVideo is set to the screenshare stream
+    // while the localStream is set to the video and audio streams
+    // so we need to stop both
+    if (this.localVideo.srcObject) {
+      this.localVideo.srcObject.getTracks().forEach((track) => track.stop());
+    }
+
     if (this.peerConnection) {
       this.peerConnection.close();
     }
 
+    this.localVideo = null;
     this.remoteSocketId = null;
     this.peerConnection = null;
     this.localStream = null;
