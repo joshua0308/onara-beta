@@ -10,7 +10,11 @@ function PlayerProfileContainer({ props }) {
     buyADrinkButton.innerText = 'Calling...';
     closeButton.innerText = 'Cancel call';
     buyADrinkButton.style.backgroundColor = '#c9a747';
-    this.socket.emit('request-call', { receiverId: player.socketId });
+    this.socket.emit('request-call', {
+      receiverId: player.socketId,
+      roomHash: this.scene.nativePeerManager.roomHash,
+      socketIdsInRoom: Object.keys(this.scene.nativePeerManager.peerConnections)
+    });
     buyADrinkButton.removeEventListener('click', handleBuyADrinkButton);
   };
 

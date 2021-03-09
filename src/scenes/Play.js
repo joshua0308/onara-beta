@@ -155,8 +155,12 @@ class Play extends Phaser.Scene {
     this.socket.on('accept-call', ({ roomHash, from }) => {
       this.userInterfaceManager.removePlayerProfileInterface();
       this.logger.log('accept-call', roomHash);
-      this.roomHash = roomHash;
-      this.nativePeerManager.init(roomHash, from, false);
+
+      if (!this.nativePeerManager.connected) {
+        this.nativePeerManager.init(roomHash, from, false);
+      } else {
+        this.nativePeerManager.addPlayer(from);
+      }
     });
 
     // I can't tell if this event handler is working properly
@@ -232,18 +236,24 @@ class Play extends Phaser.Scene {
     });
 
     // receiver - when caller requests a call
-    this.socket.on('request-call', ({ callerId }) => {
-      this.logger.log('request-call', {
-        callerId,
-        displayName: this.players[callerId].displayName
-      });
-      this.peerSocketId = callerId;
+    this.socket.on(
+      'request-call',
+      ({ callerId, roomHash, socketIdsInRoom }) => {
+        this.logger.log('request-call', {
+          callerId,
+          displayName: this.players[callerId].displayName,
+          socketIdsInRoom
+        });
+        this.peerSocketId = callerId;
 
-      this.userInterfaceManager.createIncomingCallInterface(
-        this.players,
-        callerId
-      );
-    });
+        this.userInterfaceManager.createIncomingCallInterface(
+          this.players,
+          callerId,
+          roomHash,
+          socketIdsInRoom
+        );
+      }
+    );
 
     this.socket.on('alert', ({ message }) => {
       alert(message);

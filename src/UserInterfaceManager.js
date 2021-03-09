@@ -127,7 +127,12 @@ class UserInterfaceManager {
     }
   }
 
-  async createIncomingCallInterface(players, callerId) {
+  async createIncomingCallInterface(
+    players,
+    callerId,
+    roomHash,
+    socketIdsInRoom
+  ) {
     this.logger.log('incoming call from', players[callerId]);
 
     const callerDocRef = this.firebaseDb
@@ -140,7 +145,9 @@ class UserInterfaceManager {
       <this.IncomingCallContainer
         props={{
           callerData,
-          callerId
+          callerId,
+          roomHash,
+          socketIdsInRoom
         }}
       />
     );

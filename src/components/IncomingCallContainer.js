@@ -2,7 +2,8 @@ import React from 'jsx-dom';
 import { v4 as uuidv4 } from 'uuid';
 
 function IncomingCallContainer({ props }) {
-  const { callerData, callerId } = props;
+  const { callerData, callerId, socketIdsInRoom } = props;
+  let { roomHash } = props;
   const declineButtonCallback = (callerId) => {
     console.log('call declined', this);
     this.socket.emit('call-declined', { callerId });
@@ -32,12 +33,21 @@ function IncomingCallContainer({ props }) {
           <button
             id="accept-button"
             onClick={() => {
+              console.log('accept-button');
               this.removeIncomingCallInterface();
+              if (!roomHash) {
+                roomHash = uuidv4();
+              }
 
-              const roomHash = uuidv4();
-              this.scene.roomHash = roomHash;
-              this.scene.nativePeerManager.init(roomHash, callerId, true);
-              this.socket.emit('accept-call', { to: callerId, roomHash });
+              socketIdsInRoom.forEach((socketId) => {
+                this.scene.nativePeerManager.init(roomHash, socketId, true);
+              });
+
+              this.socket.emit('accept-call', {
+                to: callerId,
+                roomHash,
+                socketIdsInRoom
+              });
             }}
           >
             Accept
