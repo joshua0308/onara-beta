@@ -156,7 +156,7 @@ class Play extends Phaser.Scene {
       this.userInterfaceManager.removePlayerProfileInterface();
       this.logger.log('accept-call', roomHash);
       this.roomHash = roomHash;
-      this.nativePeerManager.init(roomHash, from);
+      this.nativePeerManager.init(roomHash, from, false);
     });
 
     // I can't tell if this event handler is working properly

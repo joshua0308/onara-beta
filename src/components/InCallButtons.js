@@ -105,7 +105,7 @@ function InCallButtons() {
     this.removeInCallInterface();
 
     this.socket.emit('end-call', {
-      peerSocketId: this.scene.nativePeerManager.remoteSocketId
+      roomHash: this.scene.nativePeerManager.roomHash
     });
     this.scene.nativePeerManager.endCall();
   };

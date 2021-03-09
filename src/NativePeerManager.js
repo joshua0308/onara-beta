@@ -17,7 +17,7 @@ class NativePeerManager {
     this.mode = null;
     this.localVideo = null;
 
-    this.readyToCall = this.readyToCall.bind(this);
+    // this.readyToCall = this.readyToCall.bind(this);
     this.onIceCandidate = this.onIceCandidate.bind(this);
     this.onCandidate = this.onCandidate.bind(this);
     this.createOffer = this.createOffer.bind(this);
@@ -27,22 +27,41 @@ class NativePeerManager {
     this.onAddStream = this.onAddStream.bind(this);
   }
 
-  init(roomHash, remoteSocketId) {
+  async init(roomHash, remoteSocketId, willInitiateCall) {
     console.log('init');
 
-    this.remoteSocketId = remoteSocketId;
+    // this.peerConnections[remoteSocketId] = {
+    //   willInitiateCall,
+    //   socketId: remoteSocketId,
+    //   peerConnection: null
+    // };
+
+    // this.remoteSocketId = remoteSocketId;
     this.roomHash = roomHash;
-    this.requestMediaStream();
+
+    if (!this.localStream) {
+      await this.requestMediaStream();
+    }
+
+    this.socket.emit('join', this.roomHash);
+    if (willInitiateCall) {
+      this.startCall(remoteSocketId);
+    } else {
+      this.socket.on('offer', this.onOffer(remoteSocketId));
+    }
+
+    // this.setupSocket();
   }
 
   requestMediaStream() {
     console.log('requestMediaStream');
 
-    navigator.mediaDevices
+    return navigator.mediaDevices
       .getUserMedia({ video: true, audio: true })
       .then((stream) => {
         this.setMode(MODE.VIDEO);
         this.onMediaStream(stream);
+        return;
       })
       .catch((error) => {
         console.log(error);
@@ -62,34 +81,27 @@ class NativePeerManager {
       stream,
       true
     );
-    this.socket.emit('join', this.roomHash);
-    this.setupSocket();
   }
 
-  setupSocket() {
-    this.socket.on('offer', this.onOffer);
-    this.socket.on('ready', this.readyToCall);
-    this.socket.on('willInitiateCall', () => {
-      console.log('willInitiateCall');
-      this.willInitiateCall = true;
-    });
-  }
+  // setupSocket() {
+  //   this.socket.on('offer', this.onOffer);
+  // this.socket.on('ready', this.readyToCall);
+  // }
 
-  readyToCall() {
-    console.log('readyToCall');
-    if (this.willInitiateCall) {
-      console.log('Initiating call');
-      this.startCall();
-    }
-  }
+  // readyToCall({ to }) {
+  //   console.log('readyToCall');
 
-  startCall() {
+  //   console.log('Initiating call');
+  //   this.startCall();
+  // }
+
+  startCall(remoteSocketId) {
     console.log('startCall');
-    this.socket.on('token', this.onToken(this.createOffer));
-    this.socket.emit('token', this.roomHash);
+    this.socket.on('token', this.onToken(remoteSocketId, this.createOffer));
+    this.socket.emit('token');
   }
 
-  onToken(callback) {
+  onToken(remoteSocketId, callback) {
     return (token) => {
       console.log('onToken', token);
       this.peerConnection = new RTCPeerConnection({
@@ -114,10 +126,10 @@ class NativePeerManager {
         console.log('dataChannel onmessage', receivedData);
       };
 
-      this.peerConnection.onicecandidate = this.onIceCandidate;
+      this.peerConnection.onicecandidate = this.onIceCandidate(remoteSocketId);
       this.peerConnection.onaddstream = this.onAddStream;
       this.socket.on('candidate', this.onCandidate);
-      this.socket.on('answer', this.onAnswer);
+      this.socket.on('answer', this.onAnswer(remoteSocketId));
 
       this.peerConnection.oniceconnectionstatechange = (event) => {
         switch (this.peerConnection.iceConnectionState) {
@@ -135,23 +147,25 @@ class NativePeerManager {
             break;
         }
       };
-      callback();
+      callback(remoteSocketId);
     };
   }
 
-  onIceCandidate(event) {
-    console.log('onIceCandidate');
-    if (event.candidate) {
-      if (this.connected) {
-        this.socket.emit(
-          'candidate',
-          JSON.stringify(event.candidate),
-          this.roomHash
-        );
-      } else {
-        this.localICECandidates.push(event.candidate);
+  onIceCandidate(remoteSocketId) {
+    return (event) => {
+      console.log('onIceCandidate');
+      if (event.candidate) {
+        if (this.connected) {
+          this.socket.emit(
+            'candidate',
+            JSON.stringify(event.candidate),
+            remoteSocketId
+          );
+        } else {
+          this.localICECandidates.push(event.candidate);
+        }
       }
-    }
+    };
   }
 
   onCandidate(candidate) {
@@ -159,48 +173,59 @@ class NativePeerManager {
     this.peerConnection.addIceCandidate(rtcCandidate);
   }
 
-  createOffer() {
-    console.log('createOffer');
+  createOffer(remoteSocketId) {
+    console.log('createOffer', remoteSocketId);
     this.peerConnection
       .createOffer()
       .then((offer) => {
         this.peerConnection.setLocalDescription(offer);
-        this.socket.emit('offer', JSON.stringify(offer), this.roomHash);
+        this.socket.emit('offer', JSON.stringify(offer), remoteSocketId);
       })
       .catch((err) => console.log(err));
   }
 
   createAnswer(offer) {
     console.log('createAnswer');
-    return () => {
+    return (remoteSocketId) => {
       const rtcOffer = new RTCSessionDescription(JSON.parse(offer));
       this.peerConnection.setRemoteDescription(rtcOffer);
       this.peerConnection
         .createAnswer()
         .then((answer) => {
           this.peerConnection.setLocalDescription(answer);
-          this.socket.emit('answer', JSON.stringify(answer), this.roomHash);
+          this.socket.emit('answer', JSON.stringify(answer), remoteSocketId);
         })
         .catch((err) => console.log(err));
     };
   }
 
-  onOffer(offer) {
-    console.log('onOffer');
-    this.socket.on('token', this.onToken(this.createAnswer(offer)));
-    this.socket.emit('token', this.roomHash);
+  onOffer(remoteSocketId) {
+    return (offer) => {
+      console.log('onOffer');
+      this.socket.on(
+        'token',
+        this.onToken(remoteSocketId, this.createAnswer(offer))
+      );
+      this.socket.emit('token');
+    };
   }
 
-  onAnswer(answer) {
-    console.log('onAnswer');
-    const rtcAnswer = new RTCSessionDescription(JSON.parse(answer));
-    this.peerConnection.setRemoteDescription(rtcAnswer);
-    this.localICECandidates.forEach((candidate) => {
-      console.log('sending local ICE candidates');
-      this.socket.emit('candidate', JSON.stringify(candidate), this.roomHash);
-    });
+  onAnswer(remoteSocketId) {
+    return (answer) => {
+      console.log('onAnswer');
+      const rtcAnswer = new RTCSessionDescription(JSON.parse(answer));
+      this.peerConnection.setRemoteDescription(rtcAnswer);
+      this.localICECandidates.forEach((candidate) => {
+        console.log('sending local ICE candidates');
+        this.socket.emit(
+          'candidate',
+          JSON.stringify(candidate),
+          remoteSocketId
+        );
+      });
 
-    this.localICECandidates = [];
+      this.localICECandidates = [];
+    };
   }
 
   onAddStream(event) {

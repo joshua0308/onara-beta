@@ -73,48 +73,47 @@ gameIO.on('connection', (socket) => {
     socket.join(room);
 
     console.log('debug: numClients', numClients);
-
-    if (numClients === 0) {
-      socket.join(room);
-    } else if (numClients === 1) {
-      socket.join(room);
-      // When the client is second to join the room, both clients are ready.
-      console.log('Broadcasting ready message', room);
-      // First to join call initiates call
-      socket.broadcast.to(room).emit('willInitiateCall', room);
-      socket.broadcast.to(room).emit('ready', room);
-    } else {
-      console.log('room already full', room);
-    }
+    socket.join(room);
+    // if (numClients === 0) {
+    //   socket.join(room);
+    // } else {
+    //   socket.join(room);
+    //   // When the client is second to join the room, both clients are ready.
+    //   // console.log('Broadcasting ready message', room);
+    //   // First to join call initiates call
+    //   // socket.broadcast.to(room).emit('willInitiateCall', room);
+    //   // socket.broadcast.to(room).emit('ready', { to: socket.id });
+    // }
   });
 
-  socket.on('token', function (room) {
+  socket.on('token', function () {
     twilio.tokens.create(function (err, response) {
       if (err) {
         console.log(err);
       } else {
-        console.log(
-          'Token generated. Returning it to the browser client',
-          room
-        );
+        console.log('Token generated. Returning it to the browser client');
         socket.emit('token', response);
       }
     });
   });
 
-  socket.on('candidate', function (candidate, room) {
-    console.log('Received candidate. Broadcasting...', room, socket.id);
-    socket.broadcast.to(room).emit('candidate', candidate);
+  socket.on('candidate', function (candidate, remoteSocketId) {
+    console.log(
+      'Received candidate. Broadcasting...',
+      remoteSocketId,
+      socket.id
+    );
+    socket.to(remoteSocketId).emit('candidate', candidate);
   });
 
-  socket.on('offer', function (offer, room) {
-    console.log('Received offer. Broadcasting...', room);
-    socket.broadcast.to(room).emit('offer', offer);
+  socket.on('offer', function (offer, remoteSocketId) {
+    console.log('Received offer. Broadcasting...', remoteSocketId);
+    socket.to(remoteSocketId).emit('offer', offer);
   });
 
-  socket.on('answer', function (answer, room) {
-    console.log('Received answer. Broadcasting...', room);
-    socket.broadcast.to(room).emit('answer', answer);
+  socket.on('answer', function (answer, remoteSocketId) {
+    console.log('Received answer. Broadcasting...', remoteSocketId);
+    socket.to(remoteSocketId).emit('answer', answer);
   });
   // GAME SOCKETS
   // add player to the object keyed by socket.id
@@ -253,12 +252,12 @@ gameIO.on('connection', (socket) => {
     socket.to(receiverSocketId).emit('peer-answer', { callerSignalData });
   });
 
-  socket.on('end-call', ({ peerSocketId }) => {
-    console.log('debug: end-call', peerSocketId);
+  socket.on('end-call', ({ roomHash }) => {
+    console.log('debug: end-call', roomHash);
     // if (players[socket.id]) players[socket.id].status = PLAYER_STATUS.AVAILABLE;
     // if (players[peerSocketId]) players[peerSocketId].status = PLAYER_STATUS.AVAILABLE;
 
-    socket.to(peerSocketId).emit('end-call');
+    socket.broadcast.to(roomHash).emit('end-call');
   });
 
   socket.on('disconnect', () => {
