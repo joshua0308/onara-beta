@@ -8,14 +8,16 @@ class NativePeerManager {
   constructor(socket, userInterfaceManager) {
     this.socket = socket;
     this.userInterfaceManager = userInterfaceManager;
-    this.localStream = null;
-    this.peerConnections = {};
+
     this.dataChannel = null;
-    this.roomHash = null;
-    this.connected = false;
-    this.localICECandidates = [];
-    this.mode = null;
+    this.localStream = null;
     this.localVideo = null;
+    this.roomHash = null;
+    this.mode = null;
+    this.connected = false;
+
+    this.peerConnections = {};
+    this.localICECandidates = {};
 
     this.onIceCandidate = this.onIceCandidate.bind(this);
     this.onCandidate = this.onCandidate.bind(this);
@@ -146,7 +148,11 @@ class NativePeerManager {
             remoteSocketId
           );
         } else {
-          this.localICECandidates.push(event.candidate);
+          if (this.localICECandidates[remoteSocketId]) {
+            this.localICECandidates[remoteSocketId].push(event.candidate);
+          } else {
+            this.localICECandidates[remoteSocketId] = [event.candidate];
+          }
         }
       }
     };
@@ -201,7 +207,7 @@ class NativePeerManager {
       console.log('onAnswer');
       const rtcAnswer = new RTCSessionDescription(JSON.parse(answer));
       this.peerConnections[remoteSocketId].setRemoteDescription(rtcAnswer);
-      this.localICECandidates.forEach((candidate) => {
+      this.localICECandidates[remoteSocketId].forEach((candidate) => {
         console.log('sending local ICE candidates');
         this.socket.emit(
           'candidate',
@@ -210,7 +216,7 @@ class NativePeerManager {
         );
       });
 
-      this.localICECandidates = [];
+      this.localICECandidates[remoteSocketId] = [];
     };
   }
 
@@ -308,7 +314,7 @@ class NativePeerManager {
     this.dataChannel = null;
     this.roomHash = null;
     this.connected = false;
-    this.localICECandidates = [];
+    this.localICECandidates = {};
 
     this.socket.removeAllListeners('offer');
     this.socket.removeAllListeners('ready');
