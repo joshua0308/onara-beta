@@ -233,6 +233,8 @@ class NativePeerManager {
   }
 
   requestScreenshare() {
+    this.scene.nativePeerManager.setMode('screenshare');
+
     navigator.mediaDevices
       .getDisplayMedia({
         video: true,
@@ -248,6 +250,9 @@ class NativePeerManager {
   }
 
   requestVideo() {
+    this.scene.nativePeerManager.setMode('video');
+
+    // stop screenshare streams
     this.localVideo.srcObject.getTracks().forEach((track) => track.stop());
 
     // Get webcam input
