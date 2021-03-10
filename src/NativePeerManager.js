@@ -227,7 +227,10 @@ class NativePeerManager {
   onAddStream(remoteSocketId) {
     return (event) => {
       console.log('onAddStream');
-      this.userInterfaceManager.addStreamToVideoElement(event.stream, false);
+      this.userInterfaceManager.addStreamToVideoElement(
+        event.stream,
+        remoteSocketId
+      );
       this.connected[remoteSocketId] = true;
     };
   }
@@ -294,6 +297,11 @@ class NativePeerManager {
         console.log(err);
         console.log('Error sharing video');
       });
+  }
+
+  removeConnection(remoteSocketId) {
+    this.peerConnections[remoteSocketId].close();
+    this.userInterfaceManager.removeVideoElement(remoteSocketId);
   }
 
   endCall() {

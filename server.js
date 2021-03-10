@@ -276,12 +276,17 @@ gameIO.on('connection', (socket) => {
     socket.to(receiverSocketId).emit('peer-answer', { callerSignalData });
   });
 
-  socket.on('end-call', ({ roomHash }) => {
+  socket.on('end-call', async ({ roomHash }) => {
     console.log('debug: end-call', roomHash);
     // if (players[socket.id]) players[socket.id].status = PLAYER_STATUS.AVAILABLE;
     // if (players[peerSocketId]) players[peerSocketId].status = PLAYER_STATUS.AVAILABLE;
 
-    socket.broadcast.to(roomHash).emit('end-call');
+    socket.leave(roomHash);
+
+    const clients = [...(await gameIO.in(roomHash).allSockets())];
+    console.log('clients', clients);
+
+    socket.broadcast.to(roomHash).emit('end-call', socket.id, clients.length);
   });
 
   socket.on('disconnect', () => {

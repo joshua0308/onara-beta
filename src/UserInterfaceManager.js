@@ -161,22 +161,32 @@ class UserInterfaceManager {
     }
   }
 
-  addStreamToVideoElement(stream, isLocalStream) {
+  removeVideoElement(remoteSocketId) {
+    const remoteVideoElement = document.getElementById(
+      `remote-video-${remoteSocketId}`
+    );
+
+    if (remoteVideoElement) {
+      remoteVideoElement.remove();
+    }
+  }
+
+  addStreamToVideoElement(stream, remoteSocketId = null) {
     this.logger.log('addStreamToVideoElement');
     const videoElement = (
       <video poster="https://media.giphy.com/media/VseXvvxwowwCc/giphy.gif"></video>
     );
     videoElement.srcObject = stream;
 
-    if (isLocalStream) {
+    if (!remoteSocketId) {
       videoElement.classList.add('flipX');
     }
 
-    if (isLocalStream) {
+    if (!remoteSocketId) {
       videoElement.muted = 'true';
       videoElement.setAttribute('id', 'local-video');
     } else {
-      videoElement.setAttribute('id', 'remote-video');
+      videoElement.setAttribute('id', `remote-video-${remoteSocketId}`);
     }
     videoElement.addEventListener('loadedmetadata', () => {
       videoElement.play();

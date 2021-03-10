@@ -268,10 +268,16 @@ class Play extends Phaser.Scene {
       alert(message);
     });
 
-    this.socket.on('end-call', () => {
-      this.logger.log('call ended');
-      this.userInterfaceManager.removeInCallInterface();
-      this.nativePeerManager.endCall();
+    this.socket.on('end-call', (remoteSocketId, numClients) => {
+      this.logger.log('call ended', remoteSocketId, numClients);
+
+      if (numClients === 1) {
+        // if I am the only person left in the room
+        this.userInterfaceManager.removeInCallInterface();
+        this.nativePeerManager.endCall();
+      } else {
+        this.nativePeerManager.removeConnection(remoteSocketId);
+      }
     });
 
     // player movement
