@@ -268,13 +268,14 @@ class Play extends Phaser.Scene {
       alert(message);
     });
 
-    this.socket.on('end-call', (remoteSocketId, numClients) => {
+    this.socket.on('end-call', (remoteSocketId, numClients, roomHash) => {
       this.logger.log('call ended', remoteSocketId, numClients);
 
       if (numClients === 1) {
         // if I am the only person left in the room
         this.userInterfaceManager.removeInCallInterface();
         this.nativePeerManager.endCall();
+        this.socket.emit('end-call', { roomHash });
       } else {
         this.nativePeerManager.removeConnection(remoteSocketId);
       }

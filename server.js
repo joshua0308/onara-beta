@@ -69,11 +69,11 @@ gameIO.on('connection', (socket) => {
     socket.to(to).emit('accept-call', { roomHash });
   });
 
-  socket.on('join', async function (room) {
-    console.log('debug: A client joined the room', socket.id, room);
-    socket.join(room);
+  socket.on('join', async (roomHash) => {
+    console.log('debug: A client joined the room', socket.id, roomHash);
+    socket.join(roomHash);
 
-    const clients = [...(await gameIO.in(room).allSockets())];
+    const clients = [...(await gameIO.in(roomHash).allSockets())];
     console.log('clients', clients);
 
     const numClients = typeof clients !== 'undefined' ? clients.length : 0;
@@ -286,7 +286,11 @@ gameIO.on('connection', (socket) => {
     const clients = [...(await gameIO.in(roomHash).allSockets())];
     console.log('clients', clients);
 
-    socket.broadcast.to(roomHash).emit('end-call', socket.id, clients.length);
+    if (clients.length) {
+      socket.broadcast
+        .to(roomHash)
+        .emit('end-call', socket.id, clients.length, roomHash);
+    }
   });
 
   socket.on('disconnect', () => {

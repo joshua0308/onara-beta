@@ -155,10 +155,7 @@ class NativePeerManager {
 
     this.localStream = stream;
     this.userInterfaceManager.createInCallInterface();
-    this.localVideo = this.userInterfaceManager.addStreamToVideoElement(
-      stream,
-      true
-    );
+    this.localVideo = this.userInterfaceManager.addStreamToVideoElement(stream);
   }
 
   onIceCandidate(remoteSocketId) {
