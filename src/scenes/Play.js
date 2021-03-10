@@ -153,12 +153,11 @@ class Play extends Phaser.Scene {
     });
 
     this.socket.on('accept-call', ({ roomHash }) => {
-      this.userInterfaceManager.removePlayerProfileInterface();
       this.logger.log('accept-call', roomHash);
+      this.userInterfaceManager.removePlayerProfileInterface();
 
-      if (!this.nativePeerManager.roomHash) {
+      if (!this.nativePeerManager.connected) {
         this.nativePeerManager.joinRoom(roomHash);
-        // this.nativePeerManager.init(roomHash, from, false);
       }
     });
 

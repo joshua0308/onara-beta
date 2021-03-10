@@ -4,6 +4,7 @@ function PlayerProfileContainer({ props }) {
   const { playerData, isCurrentPlayer, player } = props;
 
   const handleBuyADrinkButton = () => {
+    console.log('request-call', this.scene.nativePeerManager.roomHash);
     const buyADrinkButton = document.getElementById('buy-drink-button');
     const closeButton = document.getElementById('close-profile-button');
 
