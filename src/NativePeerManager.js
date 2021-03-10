@@ -13,7 +13,7 @@ class NativePeerManager {
     this.localVideo = null;
     this.roomHash = null;
     this.mode = null;
-    this.connected = false;
+    this.connected = {};
     this.token = null;
 
     this.dataChannels = {};
@@ -107,7 +107,9 @@ class NativePeerManager {
     this.peerConnections[remoteSocketId].onicecandidate = this.onIceCandidate(
       remoteSocketId
     );
-    this.peerConnections[remoteSocketId].onaddstream = this.onAddStream;
+    this.peerConnections[remoteSocketId].onaddstream = this.onAddStream(
+      remoteSocketId
+    );
 
     this.peerConnections[remoteSocketId].oniceconnectionstatechange = (
       event
@@ -163,7 +165,7 @@ class NativePeerManager {
     return (event) => {
       console.log('onIceCandidate', remoteSocketId);
       if (event.candidate) {
-        if (this.connected) {
+        if (this.connected[remoteSocketId]) {
           this.socket.emit(
             'candidate',
             JSON.stringify(event.candidate),
@@ -222,10 +224,12 @@ class NativePeerManager {
     this.localICECandidates[remoteSocketId] = [];
   }
 
-  onAddStream(event) {
-    console.log('onAddStream');
-    this.userInterfaceManager.addStreamToVideoElement(event.stream, false);
-    this.connected = true;
+  onAddStream(remoteSocketId) {
+    return (event) => {
+      console.log('onAddStream');
+      this.userInterfaceManager.addStreamToVideoElement(event.stream, false);
+      this.connected[remoteSocketId] = true;
+    };
   }
 
   // Swap current video track with passed in stream
@@ -315,7 +319,7 @@ class NativePeerManager {
     this.localStream = null;
     this.dataChannels = {};
     this.roomHash = null;
-    this.connected = false;
+    this.connected = {};
     this.localICECandidates = {};
     this.token = null;
 

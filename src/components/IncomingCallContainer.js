@@ -33,13 +33,15 @@ function IncomingCallContainer({ props }) {
           <button
             id="accept-button"
             onClick={() => {
-              console.log('accept-button');
+              console.log('accept-button: roomHash', roomHash);
               this.removeIncomingCallInterface();
               if (!roomHash) {
                 roomHash = uuidv4();
               }
 
-              if (!this.scene.nativePeerManager.connected) {
+              if (
+                Object.keys(this.scene.nativePeerManager.connected).length === 0
+              ) {
                 this.scene.nativePeerManager.joinRoom(roomHash);
               }
 

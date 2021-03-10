@@ -167,6 +167,11 @@ class UserInterfaceManager {
       <video poster="https://media.giphy.com/media/VseXvvxwowwCc/giphy.gif"></video>
     );
     videoElement.srcObject = stream;
+
+    if (isLocalStream) {
+      videoElement.classList.add('flipX');
+    }
+
     if (isLocalStream) {
       videoElement.muted = 'true';
       videoElement.setAttribute('id', 'local-video');

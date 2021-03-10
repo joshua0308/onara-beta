@@ -156,7 +156,7 @@ class Play extends Phaser.Scene {
       this.logger.log('accept-call', roomHash);
       this.userInterfaceManager.removePlayerProfileInterface();
 
-      if (!this.nativePeerManager.connected) {
+      if (Object.keys(this.nativePeerManager.connected).length === 0) {
         this.nativePeerManager.joinRoom(roomHash);
       }
     });
