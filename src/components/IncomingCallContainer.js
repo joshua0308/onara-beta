@@ -39,9 +39,10 @@ function IncomingCallContainer({ props }) {
                 roomHash = uuidv4();
               }
 
-              socketIdsInRoom.forEach((socketId) => {
-                this.scene.nativePeerManager.init(roomHash, socketId, true);
-              });
+              // socketIdsInRoom.forEach((socketId) => {
+              //   this.scene.nativePeerManager.init(roomHash, socketId, true);
+              // });
+              this.scene.nativePeerManager.joinRoom(roomHash);
 
               this.socket.emit('accept-call', {
                 to: callerId,

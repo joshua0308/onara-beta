@@ -63,20 +63,32 @@ class Player {
 
 gameIO.on('connection', (socket) => {
   socket.on('accept-call', ({ to, roomHash, socketIdsInRoom }) => {
-    socketIdsInRoom.forEach((socketId) => {
-      socket.to(socketId).emit('accept-call', { roomHash, from: socket.id });
-    });
+    // socketIdsInRoom.forEach((socketId) => {
+    //   socket.to(socketId).emit('accept-call', { roomHash, from: socket.id });
+    // });
+    socket.to(to).emit('accept-call', { roomHash });
   });
 
   socket.on('join', async function (room) {
     console.log('debug: A client joined the room', socket.id, room);
-    const clients = [...(await gameIO.in(room).allSockets())];
-    console.log('clients', clients);
-    const numClients = typeof clients !== 'undefined' ? clients.length : 0;
     socket.join(room);
 
+    const clients = [...(await gameIO.in(room).allSockets())];
+    console.log('clients', clients);
+
+    const numClients = typeof clients !== 'undefined' ? clients.length : 0;
     console.log('debug: numClients', numClients);
-    socket.join(room);
+
+    // if numClients === 1, do nothing. Call will be initiated by the people who join after.
+
+    if (numClients > 1) {
+      // tell the person who just joined that he is ready to establish peer connection as the initiator
+      socket.emit(
+        'ready',
+        clients.filter((id) => id !== socket.id)
+      );
+      // socket.broadcast.to(room).emit('join', socket.id);
+    }
   });
 
   socket.on('token', function () {
@@ -96,17 +108,29 @@ gameIO.on('connection', (socket) => {
       remoteSocketId,
       socket.id
     );
-    socket.to(remoteSocketId).emit('candidate', candidate);
+    socket.to(remoteSocketId).emit('candidate', candidate, socket.id);
   });
 
   socket.on('offer', function (offer, remoteSocketId) {
-    console.log('Received offer. Broadcasting...', remoteSocketId);
-    socket.to(remoteSocketId).emit('offer', offer);
+    console.log(
+      'Received offer. Broadcasting...',
+      'from',
+      socket.id,
+      'to',
+      remoteSocketId
+    );
+    socket.to(remoteSocketId).emit('offer', offer, socket.id);
   });
 
   socket.on('answer', function (answer, remoteSocketId) {
-    console.log('Received answer. Broadcasting...', remoteSocketId);
-    socket.to(remoteSocketId).emit('answer', answer);
+    console.log(
+      'Received answer. Broadcasting...',
+      'from',
+      socket.id,
+      'to',
+      remoteSocketId
+    );
+    socket.to(remoteSocketId).emit('answer', answer, socket.id);
   });
   // GAME SOCKETS
   // add player to the object keyed by socket.id
@@ -168,19 +192,19 @@ gameIO.on('connection', (socket) => {
     console.log('debug: request-call', new Date().toISOString());
     console.log('caller -', socket.id);
     console.log('receiver -', receiverId);
-    console.log('socketIdsInRoom', socketIdsInRoom);
+    // console.log('socketIdsInRoom', socketIdsInRoom);
 
     // if (players[socket.id].status === PLAYER_STATUS.AVAILABLE && players[receiverId].status === PLAYER_STATUS.AVAILABLE) {
     //   players[receiverId].status = PLAYER_STATUS.INCOMING_CALL;
     //   players[socket.id].status = PLAYER_STATUS.OUTGOING_CALL;
 
-    if (socketIdsInRoom.length === 0) {
-      socketIdsInRoom = [socket.id];
-    }
+    // if (socketIdsInRoom.length === 0) {
+    //   socketIdsInRoom = [socket.id];
+    // }
 
     return socket
       .to(receiverId)
-      .emit('request-call', { callerId: socket.id, roomHash, socketIdsInRoom });
+      .emit('request-call', { callerId: socket.id, roomHash });
     // }
 
     // if (players[receiverId].status === PLAYER_STATUS.INCOMING_CALL) {
