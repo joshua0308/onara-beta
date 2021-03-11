@@ -10,6 +10,7 @@ import RoomOptionsContainer from './components/RoomOptionsContainer';
 import InCallModalContainer from './components/InCallModalContainer';
 import PlayerProfileContainer from './components/PlayerProfileContainer';
 import IncomingCallContainer from './components/IncomingCallContainer';
+import { FlexFlowContext } from 'twilio/lib/rest/flexApi/v1/flexFlow';
 class UserInterfaceManager {
   constructor(scene, firebase, firebaseAuth, firebaseDb) {
     this.scene = scene;
@@ -157,7 +158,7 @@ class UserInterfaceManager {
 
   removeVideoElement(remoteSocketId) {
     const remoteVideoElement = document.getElementById(
-      `remote-video-${remoteSocketId}`
+      `video-${remoteSocketId}`
     );
 
     if (remoteVideoElement) {
@@ -165,29 +166,48 @@ class UserInterfaceManager {
     }
   }
 
-  addStreamToVideoElement(stream, remoteSocketId = null) {
-    this.logger.log('addStreamToVideoElement');
-    const videoElement = (
-      <video poster="https://media.giphy.com/media/VseXvvxwowwCc/giphy.gif"></video>
+  addStreamToVideoElement(stream, socketId, isLocalStream) {
+    this.logger.log(
+      'addStreamToVideoElement',
+      this.scene.players[socketId].displayName
     );
+    const videoElement = (
+      <video
+        id={`video-${socketId}`}
+        poster="https://media.giphy.com/media/VseXvvxwowwCc/giphy.gif"
+      ></video>
+    );
+
     videoElement.srcObject = stream;
 
-    if (!remoteSocketId) {
+    if (isLocalStream) {
       videoElement.classList.add('flipX');
+      videoElement.muted = 'true';
     }
 
-    if (!remoteSocketId) {
-      videoElement.muted = 'true';
-      videoElement.setAttribute('id', 'local-video');
-    } else {
-      videoElement.setAttribute('id', `remote-video-${remoteSocketId}`);
-    }
     videoElement.addEventListener('loadedmetadata', () => {
       videoElement.play();
     });
 
+    const VideoElement = () => videoElement;
+
     const videosWrapper = document.getElementById('videos-wrapper');
-    videosWrapper.appendChild(videoElement);
+    const VideoContainer = () => (
+      <div
+        id="video-container"
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center'
+        }}
+      >
+        <VideoElement />
+        <span style={{ color: 'white', marginTop: '5px', fontSize: '20px' }}>
+          {this.scene.players[socketId].displayName}
+        </span>
+      </div>
+    );
+    videosWrapper.appendChild(<VideoContainer />);
 
     return videoElement;
   }
