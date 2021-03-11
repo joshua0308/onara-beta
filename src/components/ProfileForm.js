@@ -46,10 +46,10 @@ function ProfileForm({ props }) {
     this.removeProfileFormInterface();
   };
 
-  const closeButtonCallback = () => {
-    this.logger.log('close profile');
-    this.removeProfileFormInterface();
-  };
+  // const closeButtonCallback = () => {
+  //   this.logger.log('close profile');
+  //   this.removeProfileFormInterface();
+  // };
 
   return (
     <div id="profile-form-wrapper" className="background-overlay">
@@ -179,14 +179,14 @@ function ProfileForm({ props }) {
                   >
                     Save Profile
                   </button>
-                  <button
+                  {/* <button
                     className="btn btn-danger"
                     id="close-profile-button"
                     type="button"
                     onClick={closeButtonCallback}
                   >
                     Close
-                  </button>
+                  </button> */}
                 </div>
                 <div
                   className="text-center mt-2 alert-success"

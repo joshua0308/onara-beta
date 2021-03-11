@@ -13,21 +13,21 @@ function MenuButtons({ props }) {
     </button>
   );
 
-  const LogoutButton = () => (
-    <button
-      className="menu-button"
-      title="Logout"
-      alt="Logout"
-      onClick={() => this.firebaseAuth.signOut()}
-    >
-      <i className="fas fa-sign-out-alt"></i>
-    </button>
-  );
+  // const LogoutButton = () => (
+  //   <button
+  //     className="menu-button"
+  //     title="Logout"
+  //     alt="Logout"
+  //     onClick={() => this.firebaseAuth.signOut()}
+  //   >
+  //     <i className="fas fa-sign-out-alt"></i>
+  //   </button>
+  // );
 
   return (
     <div id="menu-buttons-wrapper">
       <ProfileButton />
-      <LogoutButton />
+      {/* <LogoutButton /> */}
     </div>
   );
 }
