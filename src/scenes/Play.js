@@ -247,8 +247,7 @@ class Play extends Phaser.Scene {
         this.userInterfaceManager.createIncomingCallInterface(
           this.players,
           callerId,
-          roomHash,
-          socketIdsInRoom
+          roomHash
         );
       }
     );

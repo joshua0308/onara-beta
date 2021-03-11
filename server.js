@@ -62,10 +62,9 @@ class Player {
 }
 
 gameIO.on('connection', (socket) => {
-  socket.on('accept-call', ({ to, roomHash, socketIdsInRoom }) => {
-    // socketIdsInRoom.forEach((socketId) => {
-    //   socket.to(socketId).emit('accept-call', { roomHash, from: socket.id });
-    // });
+  socket.on('accept-call', ({ to, roomHash }) => {
+    console.log('debug: accept-call', roomHash);
+
     socket.to(to).emit('accept-call', { roomHash });
   });
 
