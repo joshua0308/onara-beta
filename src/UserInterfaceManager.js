@@ -227,7 +227,10 @@ class UserInterfaceManager {
           id={`image-${socketId}`}
           style={{ position: 'absolute', display: 'none' }}
           className="video-element"
-          src={this.scene.players[socketId].profilePicURL}
+          src={
+            this.scene.players[socketId].profilePicURL ||
+            '/public/assets/placeholder-profile-pic.png'
+          }
         ></img>
         <span
           style={{
@@ -283,16 +286,22 @@ class UserInterfaceManager {
     const videosWrapper = document.getElementById('videos-wrapper');
     const videoElements = document.querySelectorAll('video');
     const modalContainer = document.getElementById('in-call-modal-container');
+    const imageElements = document
+      .getElementById('in-call-modal-container')
+      .querySelectorAll('img');
 
     if (mode === 'screenshare') {
-      // videosWrapper.classList.add('screenshare-mode');
-
       videosWrapper.style.width = '300px';
       videosWrapper.style.flexDirection = 'column';
       videosWrapper.style.justifyContent = 'space-evenly';
       videosWrapper.style.marginLeft = '30px';
 
       videoElements.forEach((element) => {
+        element.style.height = '250px';
+        element.style.width = '250px';
+      });
+
+      imageElements.forEach((element) => {
         element.style.height = '250px';
         element.style.width = '250px';
       });
@@ -337,13 +346,17 @@ class UserInterfaceManager {
 
       modalContainer.appendChild(<ImageElement />);
     } else if (mode === 'video') {
-      // videosWrapper.classList.remove('screenshare-mode');
       videosWrapper.style.width = '100%';
       videosWrapper.style.flexDirection = 'row';
       videosWrapper.style.justifyContent = 'none';
       videosWrapper.style.marginLeft = '0';
 
       videoElements.forEach((element) => {
+        element.style.height = '500px';
+        element.style.width = '500px';
+      });
+
+      imageElements.forEach((element) => {
         element.style.height = '500px';
         element.style.width = '500px';
       });

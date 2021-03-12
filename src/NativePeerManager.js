@@ -17,6 +17,7 @@ class NativePeerManager {
     this.mode = null;
     this.connected = {};
     this.token = null;
+    this.isFakeVideo = false;
 
     this.dataChannels = {};
     this.peerConnections = {};
@@ -28,15 +29,22 @@ class NativePeerManager {
     this.createAnswer = this.createAnswer.bind(this);
     this.onAnswer = this.onAnswer.bind(this);
     this.onAddStream = this.onAddStream.bind(this);
+    this.onGetStream = this.onGetStream.bind(this);
   }
 
   async joinRoom(roomHash) {
     console.log('joinRoom', roomHash);
     // initiate local camera
-    if (!this.localStream) {
-      await this.requestMediaStream();
+    try {
+      if (!this.localStream) {
+        await this.requestMediaStream();
+      }
+    } catch (e) {
+      console.log('inside catch');
+      return;
     }
 
+    console.log('after try catch');
     // the socket listeners should be initialized here when joining a new room
     this.socket.on('join', (remoteSocketId) => {
       console.log('new player joined');
@@ -81,11 +89,9 @@ class NativePeerManager {
     });
 
     this.socket.on('set-display-mode', (socketId, mode) => {
-      // eslint-disable-next-line no-console
       console.log('debug: set display mode', socketId, mode);
       const remoteVideoElement = document.getElementById(`video-${socketId}`);
 
-      // eslint-disable-next-line no-console
       console.log('debug: remoteVideoElement', remoteVideoElement);
       this.userInterfaceManager.setDisplayMode(
         mode,
@@ -158,28 +164,87 @@ class NativePeerManager {
     };
   }
 
-  requestMediaStream() {
+  getMediaConstraints() {
+    return navigator.mediaDevices.enumerateDevices().then((devices) => {
+      let audioExists = false;
+      let videoExists = false;
+
+      for (const device of devices) {
+        if (device.kind === 'audioinput') {
+          audioExists = true;
+        } else if (device.kind === 'videoinput') {
+          videoExists = true;
+        }
+      }
+
+      return {
+        video: videoExists,
+        audio: audioExists
+      };
+    });
+  }
+  async requestMediaStream() {
     console.log('requestMediaStream');
 
+    const constraints = await this.getMediaConstraints();
+
     return navigator.mediaDevices
-      .getUserMedia({ video: true, audio: true })
-      .then((stream) => {
-        this.setMode(MODE.VIDEO);
-        this.onMediaStream(stream);
-        return;
-      })
-      .catch((error) => {
-        console.log(error);
+      .getUserMedia(constraints)
+      .then(this.onGetStream)
+      .catch((err) => {
+        console.log(err);
+
+        // if video & audio doesn't work, try only audio
+        return navigator.mediaDevices
+          .getUserMedia({ video: false, audio: true })
+          .then(this.onGetStream)
+          .catch((err) => {
+            console.log(err);
+            alert('Please allow camera and mic access in order join the call');
+            throw new Error('access to video/audio blocked');
+          });
       });
+  }
+
+  onGetStream(stream) {
+    this.setMode(MODE.VIDEO);
+    this.onMediaStream(stream);
+    return;
   }
 
   setMode(mode) {
     this.mode = mode;
   }
 
-  onMediaStream(stream) {
-    console.log('onMediaStream');
+  addFakeVideoTrackToStream(stream) {
+    // console.log('fakeVideoStream', stream.getTracks());
+    let canvas = Object.assign(document.createElement('canvas'), {
+      width: 200,
+      height: 200
+    });
+    canvas.getContext('2d').fillRect(0, 0, 200, 200);
 
+    this.isFakeVideo = true;
+    const fakeVideoStream = canvas.captureStream();
+    const videoTrack = fakeVideoStream.getVideoTracks()[0];
+    stream.addTrack(videoTrack);
+    // stream.addTrack(fakeVideoStream.getVideoTracks()[0]);
+  }
+
+  onMediaStream(stream) {
+    console.log('onMediaStream', stream.getTracks());
+
+    if (!this.hasVideoTrack(stream)) {
+      this.addFakeVideoTrackToStream(stream);
+      // const audioTrack = stream.getAudioTracks()[0];
+      // audioTrack.enabled = true;
+      // newStream = new MediaStream([
+      //   this.addFakeVideoTrackToStream(stream),
+      //   audioTrack
+      // ]);
+    }
+
+    console.log('localStream', stream.getTracks());
     this.localStream = stream;
     this.userInterfaceManager.createInCallInterface();
     this.localVideoElement = this.userInterfaceManager.addStreamToVideoElement(
@@ -187,6 +252,11 @@ class NativePeerManager {
       this.socket.id,
       true
     );
+
+    if (this.isFakeVideo) {
+      document.getElementById(`image-${this.socket.id}`).style.display =
+        'inline';
+    }
   }
 
   onIceCandidate(remoteSocketId) {
@@ -254,29 +324,44 @@ class NativePeerManager {
 
   onAddStream(remoteSocketId) {
     return (event) => {
-      console.log('onAddStream');
+      console.log('onAddStream', event.stream.getTracks());
       this.userInterfaceManager.addStreamToVideoElement(
         event.stream,
         remoteSocketId,
         false
       );
+
+      if (this.isFakeVideo) {
+        document.getElementById(`image-${remoteSocketId}`).style.display =
+          'inline';
+      }
+
       this.connected[remoteSocketId] = true;
     };
   }
 
+  hasVideoTrack(stream) {
+    return stream.getVideoTracks().length > 0;
+  }
+
   // Swap current video track with passed in stream
   switchStreamHelper(stream) {
+    console.log('switchStreamHelper', stream.getTracks());
+
     // Get current video track
     let videoTrack = stream.getVideoTracks()[0];
     // Add listen for if the current track swaps, swap back
-    videoTrack.onended = () => {
-      console.log('videoTrack onended');
-      this.requestVideo();
-    };
+    if (videoTrack) {
+      videoTrack.onended = () => {
+        console.log('videoTrack onended');
+        this.requestVideo();
+      };
+    }
 
     // Find sender
     const senders = Object.values(this.peerConnections).map((peerConnection) =>
       peerConnection.getSenders().find(function (s) {
+        console.log('s.track', s.track);
         // make sure track types match
         return s.track.kind === videoTrack.kind;
       })
@@ -284,9 +369,12 @@ class NativePeerManager {
 
     // Replace sender track
     senders.forEach((sender) => sender.replaceTrack(videoTrack));
+    // }
 
     // Update local video object
-    this.localVideoElement.srcObject = stream;
+    if (this.mode !== 'screenshare') {
+      this.localVideoElement.srcObject = stream;
+    }
   }
 
   requestScreenshare() {
@@ -326,17 +414,34 @@ class NativePeerManager {
       .then((stream) => {
         this.setMode('video');
         this.switchStreamHelper(stream);
-        // eslint-disable-next-line no-console
+
         console.log('debug: this.mode', this.mode);
         this.userInterfaceManager.setDisplayMode(this.mode, stream);
         this.socket.emit('set-display-mode', {
           roomHash: this.roomHash,
           mode: this.mode
         });
+        return;
       })
       .catch((err) => {
         console.log(err);
-        console.log('Error sharing video');
+        navigator.mediaDevices
+          .getUserMedia({
+            video: false,
+            audio: true
+          })
+          .then((stream) => {
+            this.setMode('video');
+            this.addFakeVideoTrackToStream(stream);
+            this.switchStreamHelper(stream);
+
+            console.log('debug: this.mode', this.mode);
+            this.userInterfaceManager.setDisplayMode(this.mode, stream);
+            this.socket.emit('set-display-mode', {
+              roomHash: this.roomHash,
+              mode: this.mode
+            });
+          });
       });
   }
 
@@ -373,6 +478,7 @@ class NativePeerManager {
     this.connected = {};
     this.localICECandidates = {};
     this.token = null;
+    this.isFakeVideo = false;
 
     this.socket.removeAllListeners('offer');
     this.socket.removeAllListeners('ready');
