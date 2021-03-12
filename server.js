@@ -38,7 +38,16 @@ const PLAYER_STATUS = {
 };
 
 class Player {
-  constructor({ barId, socketId, displayName, email, status, uid, gender }) {
+  constructor({
+    barId,
+    socketId,
+    displayName,
+    email,
+    status,
+    uid,
+    gender,
+    profilePicURL
+  }) {
     this.barId = barId;
     this.socketId = socketId;
     this.displayName = displayName;
@@ -46,6 +55,7 @@ class Player {
     this.status = status;
     this.uid = uid;
     this.gender = gender;
+    this.profilePicURL = profilePicURL;
 
     this.x = undefined;
     this.y = undefined;
@@ -131,6 +141,14 @@ gameIO.on('connection', (socket) => {
     );
     socket.to(remoteSocketId).emit('answer', answer, socket.id);
   });
+
+  socket.on('toggle-video', ({ roomHash, shouldDisplayVideo }) => {
+    console.log('debug: shouldDisplayVideo', shouldDisplayVideo);
+    socket.broadcast
+      .to(roomHash)
+      .emit('toggle-video', socket.id, shouldDisplayVideo);
+  });
+
   // GAME SOCKETS
   // add player to the object keyed by socket.id
 
@@ -145,7 +163,8 @@ gameIO.on('connection', (socket) => {
       email: playerInfo.email,
       status: PLAYER_STATUS.AVAILABLE,
       uid: playerInfo.uid,
-      gender: playerInfo.gender
+      gender: playerInfo.gender,
+      profilePicURL: playerInfo.profilePicURL
     });
 
     console.log('debug: current players', Object.keys(players));

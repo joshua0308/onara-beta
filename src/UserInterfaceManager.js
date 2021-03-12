@@ -166,6 +166,21 @@ class UserInterfaceManager {
     }
   }
 
+  toggleRemoteVideo(socketId, shouldDisplayVideo) {
+    const imageElement = document.getElementById(`image-${socketId}`);
+
+    console.log('debug: imageElement', imageElement, shouldDisplayVideo);
+    if (!imageElement) return;
+
+    if (shouldDisplayVideo) {
+      // display video
+      imageElement.style.display = 'none';
+    } else {
+      // display image
+      imageElement.style.display = 'inline';
+    }
+  }
+
   addStreamToVideoElement(stream, socketId, isLocalStream) {
     this.logger.log(
       'addStreamToVideoElement',
@@ -173,6 +188,7 @@ class UserInterfaceManager {
     );
     const videoElement = (
       <video
+        className="video-element"
         id={`video-${socketId}`}
         poster="https://media.giphy.com/media/VseXvvxwowwCc/giphy.gif"
       ></video>
@@ -191,6 +207,11 @@ class UserInterfaceManager {
 
     const VideoElement = () => videoElement;
 
+    console.log(
+      'debug: this.scene.players[socketId]',
+      this.scene.players[socketId]
+    );
+
     const videosWrapper = document.getElementById('videos-wrapper');
     const VideoContainer = () => (
       <div
@@ -202,6 +223,12 @@ class UserInterfaceManager {
         }}
       >
         <VideoElement />
+        <img
+          id={`image-${socketId}`}
+          style={{ position: 'absolute', display: 'none' }}
+          className="video-element"
+          src={this.scene.players[socketId].profilePicURL}
+        ></img>
         <span style={{ color: 'white', marginTop: '5px', fontSize: '20px' }}>
           {this.scene.players[socketId].displayName}
         </span>

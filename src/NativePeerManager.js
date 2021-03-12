@@ -74,8 +74,20 @@ class NativePeerManager {
 
     this.socket.on('candidate', this.onCandidate);
 
+    this.socket.on('toggle-video', (socketId, shouldDisplayVideo) => {
+      this.userInterfaceManager.toggleRemoteVideo(socketId, shouldDisplayVideo);
+    });
+
     // first we need to get the token before establishing peer connections
     this.socket.emit('token');
+  }
+
+  toggleVideo(shouldDisplayVideo) {
+    console.log('debug: shouldDisplayVideo', shouldDisplayVideo);
+    this.socket.emit('toggle-video', {
+      shouldDisplayVideo,
+      roomHash: this.roomHash
+    });
   }
 
   setupPeerConnection(remoteSocketId) {

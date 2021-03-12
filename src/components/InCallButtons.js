@@ -4,19 +4,25 @@ function InCallButtons() {
   const toggleVideo = () => {
     const stream = this.scene.nativePeerManager.localStream;
     const videoIcon = document.getElementById('video-icon');
+    const imageElement = document.getElementById(`image-${this.socket.id}`);
     const toggleVideoButton = document.getElementById('toggle-video-button');
 
     let enabled = stream.getVideoTracks()[0].enabled;
+
     if (enabled) {
       stream.getVideoTracks()[0].enabled = false;
       videoIcon.classList.remove('fa-video');
       videoIcon.classList.add('fa-video-slash');
       toggleVideoButton.style.color = 'red';
+      imageElement.style.display = 'inline';
+      this.scene.nativePeerManager.toggleVideo(false);
     } else {
       stream.getVideoTracks()[0].enabled = true;
       videoIcon.classList.add('fa-video');
       videoIcon.classList.remove('fa-video-slash');
       toggleVideoButton.style.color = 'grey';
+      imageElement.style.display = 'none';
+      this.scene.nativePeerManager.toggleVideo(true);
     }
     this.logger.log(
       'toggle video button - enabled',
