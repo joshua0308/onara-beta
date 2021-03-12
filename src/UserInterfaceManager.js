@@ -229,7 +229,16 @@ class UserInterfaceManager {
           className="video-element"
           src={this.scene.players[socketId].profilePicURL}
         ></img>
-        <span style={{ color: 'white', marginTop: '5px', fontSize: '20px' }}>
+        <span
+          style={{
+            color: 'white',
+            marginTop: '5px',
+            fontSize: '20px',
+            padding: '0px 5px',
+            backgroundColor: 'rgba(123, 114, 114, 0.8)',
+            borderRadius: '10px'
+          }}
+        >
           {this.scene.players[socketId].displayName}
         </span>
       </div>
@@ -267,6 +276,79 @@ class UserInterfaceManager {
   removePlayerFromOnlineList(playerSocketId) {
     if (document.getElementById(playerSocketId)) {
       document.getElementById(playerSocketId).remove();
+    }
+  }
+
+  setDisplayMode(mode, stream) {
+    const videosWrapper = document.getElementById('videos-wrapper');
+    const videoElements = document.querySelectorAll('video');
+    const modalContainer = document.getElementById('in-call-modal-container');
+
+    if (mode === 'screenshare') {
+      // videosWrapper.classList.add('screenshare-mode');
+
+      videosWrapper.style.width = '300px';
+      videosWrapper.style.flexDirection = 'column';
+      videosWrapper.style.justifyContent = 'space-evenly';
+      videosWrapper.style.marginLeft = '30px';
+
+      videoElements.forEach((element) => {
+        element.style.height = '250px';
+        element.style.width = '250px';
+      });
+
+      const screenshareElement = (
+        <video
+          style={{
+            width: '70vw',
+            marginLeft: '300px'
+          }}
+          id="screenshare-element"
+          poster="https://media.giphy.com/media/VseXvvxwowwCc/giphy.gif"
+        ></video>
+      );
+
+      screenshareElement.srcObject = stream;
+
+      screenshareElement.addEventListener('loadedmetadata', () => {
+        screenshareElement.play();
+      });
+
+      const ScreenshareElement = () => screenshareElement;
+
+      const ImageElement = () => (
+        <div
+          id="screenshare-container"
+          style={{
+            position: 'fixed',
+            zIndex: 1,
+            left: 0,
+            top: 0,
+            width: '100%',
+            height: '90%',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center'
+          }}
+        >
+          <ScreenshareElement />
+        </div>
+      );
+
+      modalContainer.appendChild(<ImageElement />);
+    } else if (mode === 'video') {
+      // videosWrapper.classList.remove('screenshare-mode');
+      videosWrapper.style.width = '100%';
+      videosWrapper.style.flexDirection = 'row';
+      videosWrapper.style.justifyContent = 'none';
+      videosWrapper.style.marginLeft = '0';
+
+      videoElements.forEach((element) => {
+        element.style.height = '500px';
+        element.style.width = '500px';
+      });
+
+      document.getElementById('screenshare-container').remove();
     }
   }
 }

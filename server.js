@@ -149,6 +149,11 @@ gameIO.on('connection', (socket) => {
       .emit('toggle-video', socket.id, shouldDisplayVideo);
   });
 
+  socket.on('set-display-mode', ({ roomHash, mode }) => {
+    console.log('debug: mode', mode);
+    socket.broadcast.to(roomHash).emit('set-display-mode', socket.id, mode);
+  });
+
   // GAME SOCKETS
   // add player to the object keyed by socket.id
 

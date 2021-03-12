@@ -10,7 +10,9 @@ class NativePeerManager {
     this.userInterfaceManager = userInterfaceManager;
 
     this.localStream = null;
-    this.localVideo = null;
+    // this.localVideoElementStream = null;
+    // this.localScreenshareStream = null;
+    this.localVideoElement = null;
     this.roomHash = null;
     this.mode = null;
     this.connected = {};
@@ -76,6 +78,19 @@ class NativePeerManager {
 
     this.socket.on('toggle-video', (socketId, shouldDisplayVideo) => {
       this.userInterfaceManager.toggleRemoteVideo(socketId, shouldDisplayVideo);
+    });
+
+    this.socket.on('set-display-mode', (socketId, mode) => {
+      // eslint-disable-next-line no-console
+      console.log('debug: set display mode', socketId, mode);
+      const remoteVideoElement = document.getElementById(`video-${socketId}`);
+
+      // eslint-disable-next-line no-console
+      console.log('debug: remoteVideoElement', remoteVideoElement);
+      this.userInterfaceManager.setDisplayMode(
+        mode,
+        remoteVideoElement.srcObject
+      );
     });
 
     // first we need to get the token before establishing peer connections
@@ -167,7 +182,7 @@ class NativePeerManager {
 
     this.localStream = stream;
     this.userInterfaceManager.createInCallInterface();
-    this.localVideo = this.userInterfaceManager.addStreamToVideoElement(
+    this.localVideoElement = this.userInterfaceManager.addStreamToVideoElement(
       stream,
       this.socket.id,
       true
@@ -271,19 +286,23 @@ class NativePeerManager {
     senders.forEach((sender) => sender.replaceTrack(videoTrack));
 
     // Update local video object
-    this.localVideo.srcObject = stream;
+    this.localVideoElement.srcObject = stream;
   }
 
   requestScreenshare() {
-    this.setMode('screenshare');
-
     navigator.mediaDevices
       .getDisplayMedia({
         video: true,
         audio: false
       })
       .then((stream) => {
+        this.setMode('screenshare');
         this.switchStreamHelper(stream);
+        this.userInterfaceManager.setDisplayMode(this.mode, stream);
+        this.socket.emit('set-display-mode', {
+          roomHash: this.roomHash,
+          mode: this.mode
+        });
       })
       .catch((err) => {
         console.log(err);
@@ -292,10 +311,11 @@ class NativePeerManager {
   }
 
   requestVideo() {
-    this.setMode('video');
-
+    console.log('requestVideo');
     // stop screenshare streams
-    this.localVideo.srcObject.getTracks().forEach((track) => track.stop());
+    this.localVideoElement.srcObject
+      .getTracks()
+      .forEach((track) => track.stop());
 
     // Get webcam input
     navigator.mediaDevices
@@ -306,6 +326,13 @@ class NativePeerManager {
       .then((stream) => {
         this.setMode('video');
         this.switchStreamHelper(stream);
+        // eslint-disable-next-line no-console
+        console.log('debug: this.mode', this.mode);
+        this.userInterfaceManager.setDisplayMode(this.mode, stream);
+        this.socket.emit('set-display-mode', {
+          roomHash: this.roomHash,
+          mode: this.mode
+        });
       })
       .catch((err) => {
         console.log(err);
@@ -327,15 +354,17 @@ class NativePeerManager {
     // when call is ended during screenshare, localVideo is set to the screenshare stream
     // while the localStream is set to the video and audio streams
     // so we need to stop both
-    if (this.localVideo.srcObject) {
-      this.localVideo.srcObject.getTracks().forEach((track) => track.stop());
+    if (this.localVideoElement.srcObject) {
+      this.localVideoElement.srcObject
+        .getTracks()
+        .forEach((track) => track.stop());
     }
 
     if (Object.values(this.peerConnections).length) {
       Object.values(this.peerConnections).forEach((pc) => pc.close());
     }
 
-    this.localVideo = null;
+    this.localVideoElement = null;
     this.remoteSocketId = null;
     this.peerConnections = {};
     this.localStream = null;
