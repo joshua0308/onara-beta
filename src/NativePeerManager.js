@@ -217,18 +217,12 @@ class NativePeerManager {
   }
 
   addFakeVideoTrackToStream(stream) {
-    // console.log('fakeVideoStream', stream.getTracks());
-    let canvas = Object.assign(document.createElement('canvas'), {
-      width: 200,
-      height: 200
-    });
-    canvas.getContext('2d').fillRect(0, 0, 200, 200);
+    let canvas = document.createElement('canvas');
 
     this.isFakeVideo = true;
     const fakeVideoStream = canvas.captureStream();
     const videoTrack = fakeVideoStream.getVideoTracks()[0];
     stream.addTrack(videoTrack);
-    // stream.addTrack(fakeVideoStream.getVideoTracks()[0]);
   }
 
   onMediaStream(stream) {
@@ -386,7 +380,7 @@ class NativePeerManager {
       .then((stream) => {
         this.setMode('screenshare');
         this.switchStreamHelper(stream);
-        this.userInterfaceManager.setDisplayMode(this.mode, stream);
+        this.userInterfaceManager.setDisplayMode(this.mode, stream, true);
         this.socket.emit('set-display-mode', {
           roomHash: this.roomHash,
           mode: this.mode

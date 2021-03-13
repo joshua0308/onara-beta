@@ -282,7 +282,7 @@ class UserInterfaceManager {
     }
   }
 
-  setDisplayMode(mode, stream) {
+  setDisplayMode(mode, stream, isMyScreenshare = false) {
     const videosWrapper = document.getElementById('videos-wrapper');
     const videoElements = document.querySelectorAll('video');
     const modalContainer = document.getElementById('in-call-modal-container');
@@ -306,16 +306,40 @@ class UserInterfaceManager {
         element.style.width = '250px';
       });
 
-      const screenshareElement = (
-        <video
-          style={{
-            width: '70vw',
-            marginLeft: '300px'
-          }}
-          id="screenshare-element"
-          poster="https://media.giphy.com/media/VseXvvxwowwCc/giphy.gif"
-        ></video>
-      );
+      let screenshareElement;
+
+      if (!isMyScreenshare) {
+        screenshareElement = (
+          <video
+            style={{
+              width: '70vw',
+              marginLeft: '300px'
+            }}
+            id="screenshare-element"
+            poster="https://media.giphy.com/media/VseXvvxwowwCc/giphy.gif"
+          ></video>
+        );
+      } else {
+        screenshareElement = (
+          <div
+            style={{
+              width: '70vw',
+              marginLeft: '300px',
+              backgroundColor: '#8585858f',
+              height: '40vh',
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              fontSize: '40px',
+              borderRadius: '40px',
+              boxShadow: ' 3px 3px 16px #23262b, -3px -3px 16px #1c1d23'
+            }}
+            id="screenshare-element"
+          >
+            You are presenting your screen
+          </div>
+        );
+      }
 
       screenshareElement.srcObject = stream;
 
@@ -325,7 +349,7 @@ class UserInterfaceManager {
 
       const ScreenshareElement = () => screenshareElement;
 
-      const ImageElement = () => (
+      const ScreenshareContainer = () => (
         <div
           id="screenshare-container"
           style={{
@@ -344,7 +368,7 @@ class UserInterfaceManager {
         </div>
       );
 
-      modalContainer.appendChild(<ImageElement />);
+      modalContainer.appendChild(<ScreenshareContainer />);
     } else if (mode === 'video') {
       videosWrapper.style.width = '100%';
       videosWrapper.style.flexDirection = 'row';
