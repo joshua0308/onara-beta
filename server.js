@@ -111,6 +111,11 @@ gameIO.on('connection', (socket) => {
     });
   });
 
+  socket.on('chat-message', ({ roomHash, message }) => {
+    console.log('chat-message', message);
+    gameIO.to(roomHash).emit('chat-message', { from: socket.id, message });
+  });
+
   socket.on('candidate', function (candidate, remoteSocketId) {
     console.log(
       'Received candidate. Broadcasting...',

@@ -84,6 +84,11 @@ class NativePeerManager {
 
     this.socket.on('candidate', this.onCandidate);
 
+    this.socket.on('chat-message', ({ from, message }) => {
+      console.log('chat-message', from, message);
+      this.userInterfaceManager.createMessage(from, message);
+    });
+
     this.socket.on('toggle-video', (socketId, shouldDisplayVideo) => {
       this.userInterfaceManager.toggleRemoteVideo(socketId, shouldDisplayVideo);
     });
@@ -109,6 +114,10 @@ class NativePeerManager {
       shouldDisplayVideo,
       roomHash: this.roomHash
     });
+  }
+
+  sendMessage(message) {
+    this.socket.emit('chat-message', { roomHash: this.roomHash, message });
   }
 
   setupPeerConnection(remoteSocketId) {
@@ -230,12 +239,6 @@ class NativePeerManager {
 
     if (!this.hasVideoTrack(stream)) {
       this.addFakeVideoTrackToStream(stream);
-      // const audioTrack = stream.getAudioTracks()[0];
-      // audioTrack.enabled = true;
-      // newStream = new MediaStream([
-      //   this.addFakeVideoTrackToStream(stream),
-      //   audioTrack
-      // ]);
     }
 
     console.log('localStream', stream.getTracks());

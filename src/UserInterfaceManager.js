@@ -10,7 +10,7 @@ import RoomOptionsContainer from './components/RoomOptionsContainer';
 import InCallModalContainer from './components/InCallModalContainer';
 import PlayerProfileContainer from './components/PlayerProfileContainer';
 import IncomingCallContainer from './components/IncomingCallContainer';
-import { FlexFlowContext } from 'twilio/lib/rest/flexApi/v1/flexFlow';
+
 class UserInterfaceManager {
   constructor(scene, firebase, firebaseAuth, firebaseDb) {
     this.scene = scene;
@@ -34,6 +34,43 @@ class UserInterfaceManager {
 
   addSocket(socket) {
     this.socket = socket;
+  }
+
+  createMessage(socketId, message) {
+    const messagesUnorderedList = document.getElementById('messages-ul');
+    console.log(this.scene.players[socketId]);
+    const MessageElement = () => (
+      <li className="message" style={{ display: 'flex', margin: '0 0 2px 0' }}>
+        <span style={{ margin: '0px 10px' }}>
+          {`${this.scene.players[socketId].displayName}:`}
+        </span>
+        <p
+          style={{
+            overflowWrap: 'break-word',
+            wordWrap: 'break-word',
+            hyphens: 'auto',
+            maxWidth: '200px',
+            textAlign: 'left',
+            margin: '0px'
+          }}
+        >
+          {message}
+        </p>
+      </li>
+    );
+
+    messagesUnorderedList.appendChild(<MessageElement />);
+    this.scrollChatToBottom();
+  }
+
+  scrollChatToBottom() {
+    const chatContainer = document.getElementById('messages-ul');
+    console.log(
+      'scrollChatToBottom',
+      chatContainer.scrollTop,
+      chatContainer.scrollHeight
+    );
+    chatContainer.scrollTop = chatContainer.scrollHeight;
   }
 
   createMenuButtons(myPlayer) {

@@ -106,6 +106,15 @@ function InCallButtons() {
     }
   };
 
+  const toggleMessage = () => {
+    const chatContainer = document.getElementById('chat-container');
+    if (chatContainer.style.display === 'none') {
+      chatContainer.style.display = 'inline';
+    } else {
+      chatContainer.style.display = 'none';
+    }
+  };
+
   const endCall = () => {
     this.logger.log('click end call');
     this.removeInCallInterface();
@@ -123,6 +132,9 @@ function InCallButtons() {
       </button>
       <button id="toggle-audio-button" onClick={() => toggleAudio()}>
         <i id="audio-icon" className="fas fa-microphone fa-xs"></i>
+      </button>
+      <button id="toggle-message-button" onClick={() => toggleMessage()}>
+        <i className="fas fa-comments"></i>
       </button>
       <button id="toggle-background-button" onClick={() => toggleBackground()}>
         <i id="background-icon" className="fas fa-eye fa-xs"></i>

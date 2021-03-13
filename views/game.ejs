@@ -30,6 +30,7 @@
       position: fixed;
       bottom: 50px;
       left: 50%;
+      padding: 0 10px;
       margin-left: -150px;
       width: 300px;
       height: 60px;
@@ -377,11 +378,21 @@
     .menu-button:focus {
       outline: none;
     }
+
+    /* Hide scrollbar while still allowing scroll. Only works on chrome */
+    /* https://stackoverflow.com/a/30680994/4808481 */
+    ::-webkit-scrollbar {
+      width: 0;  /* Remove scrollbar space */
+      background: transparent;  /* Optional: just make scrollbar invisible */
+    }
+
+    input:focus {
+      outline: none;
+    }
   </style>
 </head>
 
 <body>
-  <!-- <div id='caller-card-container' class="background-overlay"></div> -->
   <div id='game-wrapper'></div>
 
   <!-- firebase -->
