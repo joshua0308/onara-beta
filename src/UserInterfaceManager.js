@@ -182,10 +182,8 @@ class UserInterfaceManager {
   }
 
   addStreamToVideoElement(stream, socketId, isLocalStream) {
-    this.logger.log(
-      'addStreamToVideoElement',
-      this.scene.players[socketId].displayName
-    );
+    this.logger.log('addStreamToVideoElement', stream.getTracks());
+
     const videoElement = (
       <video
         className="video-element"
@@ -232,18 +230,36 @@ class UserInterfaceManager {
             '/public/assets/placeholder-profile-pic.png'
           }
         ></img>
-        <span
+        <div
           style={{
-            color: 'white',
-            marginTop: '5px',
-            fontSize: '20px',
-            padding: '0px 5px',
-            backgroundColor: 'rgba(123, 114, 114, 0.8)',
-            borderRadius: '10px'
+            display: 'flex',
+            alignItems: 'center'
           }}
         >
-          {this.scene.players[socketId].displayName}
-        </span>
+          <span
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              color: 'white',
+              marginTop: '5px',
+              fontSize: '20px',
+              padding: '0px 5px',
+              backgroundColor: 'rgba(123, 114, 114, 0.8)',
+              borderRadius: '10px'
+            }}
+          >
+            {this.scene.players[socketId].displayName}
+          </span>
+          {!isLocalStream && (
+            <button
+              id="toggle-remote-audio-button"
+              className="icon-button"
+              onClick={(e) => this.toggleRemoteAudio(e, `video-${socketId}`)}
+            >
+              <i className="fas fa-microphone fa-xs"></i>
+            </button>
+          )}
+        </div>
       </div>
     );
     videosWrapper.appendChild(<VideoContainer />);
@@ -251,6 +267,23 @@ class UserInterfaceManager {
     return videoElement;
   }
 
+  toggleRemoteAudio(e, elementId) {
+    console.log('toggleRemoteAudio', elementId, e.target);
+    const audioIcon = e.target;
+    const videoElement = document.getElementById(elementId);
+
+    if (videoElement.muted) {
+      audioIcon.classList.remove('fa-microphone-slash');
+      audioIcon.classList.add('fa-microphone');
+      audioIcon.style.color = 'grey';
+    } else {
+      audioIcon.classList.remove('fa-microphone');
+      audioIcon.classList.add('fa-microphone-slash');
+      audioIcon.style.color = 'red';
+    }
+    console.log('debug: , videoElement.muted', videoElement.muted);
+    videoElement.muted = !videoElement.muted;
+  }
   addPlayerToOnlineList(playerInfo, playerSocketId, isCurrentPlayer = false) {
     this.logger.log('playerInfo', playerInfo);
     const playerName = playerInfo.displayName;
