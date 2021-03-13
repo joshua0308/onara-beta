@@ -36,8 +36,102 @@ class UserInterfaceManager {
     this.socket = socket;
   }
 
-  createMessage(socketId, message) {
-    const messagesUnorderedList = document.getElementById('messages-ul');
+  removeGeneralChat() {
+    const generalChatContainer = document.getElementById(
+      'general-chat-container'
+    );
+    if (generalChatContainer) {
+      generalChatContainer.remove();
+    }
+  }
+
+  createGeneralChat(barId) {
+    const keyDownHandler = (e) => {
+      if (e.key === 'Enter' && e.target.value) {
+        console.log('key pressed', e.key, e.target.value, e);
+
+        const message = e.target.value;
+        this.socket.emit('general-chat-message', { barId, message });
+        e.target.value = '';
+      }
+    };
+
+    const ChatContainer = () => (
+      <div
+        id="general-chat-container"
+        style={{
+          position: 'fixed',
+          bottom: '0px',
+          left: '0px',
+          margin: '40px',
+          backgroundColor: '#000000a8',
+          borderRadius: '10px',
+          color: 'white',
+          padding: '10px',
+          width: '300px'
+        }}
+      >
+        <button
+          className="icon-button"
+          style={{ position: 'absolute', top: '0px', right: '0px' }}
+          onClick={() => {
+            const messageContainer = document.getElementById(
+              'general-message-container'
+            );
+            const messageToggleIcon = document.getElementById(
+              'general-chat-toggle-icon'
+            );
+
+            if (messageContainer.style.display === 'none') {
+              messageContainer.style.display = 'flex';
+              messageToggleIcon.classList.add('fa-times');
+              messageToggleIcon.classList.remove('fa-chevron-up');
+            } else {
+              messageToggleIcon.classList.add('fa-chevron-up');
+              messageToggleIcon.classList.remove('fa-times');
+              messageContainer.style.display = 'none';
+            }
+          }}
+        >
+          <i id="general-chat-toggle-icon" className="fas fa-times"></i>
+        </button>
+        <div id="general-message-container" className="chat-window">
+          <ul
+            id="general-messages-ul"
+            className="messages"
+            style={{
+              overflow: 'scroll',
+              maxHeight: '30vh',
+              margin: '0px'
+            }}
+          ></ul>
+        </div>
+        <div id="general-chat-input-container">
+          <input
+            type="text"
+            style={{
+              width: '100%',
+              backgroundColor: 'transparent',
+              border: 'none',
+              color: 'white'
+            }}
+            placeholder="Type message here..."
+            onKeyDown={keyDownHandler}
+          />
+        </div>
+      </div>
+    );
+
+    document.body.appendChild(<ChatContainer />);
+  }
+
+  createMessage(socketId, message, isGeneralChat = false) {
+    let elementId = 'messages-ul';
+
+    if (isGeneralChat) {
+      elementId = 'general-messages-ul';
+    }
+    const messagesUnorderedList = document.getElementById(elementId);
     console.log(this.scene.players[socketId]);
     const MessageElement = () => (
       <li className="message" style={{ display: 'flex', margin: '0 0 2px 0' }}>
@@ -60,11 +154,11 @@ class UserInterfaceManager {
     );
 
     messagesUnorderedList.appendChild(<MessageElement />);
-    this.scrollChatToBottom();
+    this.scrollChatToBottom(elementId);
   }
 
-  scrollChatToBottom() {
-    const chatContainer = document.getElementById('messages-ul');
+  scrollChatToBottom(elementId) {
+    const chatContainer = document.getElementById(elementId);
     console.log(
       'scrollChatToBottom',
       chatContainer.scrollTop,

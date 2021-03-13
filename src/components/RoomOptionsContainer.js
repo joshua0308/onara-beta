@@ -122,6 +122,7 @@ function RoomOptionsContainer({ props }) {
       this.scene.socket.close();
 
       this.removeOnlineList();
+      this.removeGeneralChat();
       this.scene.scene.restart({ barId: undefined });
     }
     this.removeBarQuestionnaireInterface();

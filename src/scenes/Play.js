@@ -71,6 +71,7 @@ class Play extends Phaser.Scene {
     }
 
     this.userInterfaceManager.createOnlineList(barId);
+    this.userInterfaceManager.createGeneralChat(barId);
     this.userInterfaceManager.createMenuButtons(this.myPlayer);
 
     this.barId = barId;
@@ -150,6 +151,11 @@ class Play extends Phaser.Scene {
         playerInfo: this.myPlayer,
         barId: this.barId
       });
+    });
+
+    this.socket.on('general-chat-message', ({ from, message }) => {
+      console.log('genera-chat-message', from, message);
+      this.userInterfaceManager.createMessage(from, message, true);
     });
 
     this.socket.on('accept-call', ({ roomHash }) => {

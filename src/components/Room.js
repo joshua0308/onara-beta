@@ -8,6 +8,7 @@ function LevelThreeOption({ props }) {
     this.scene.socket.close();
     this.scene.registry.set('map', 'bar');
     this.removeOnlineList();
+    this.removeGeneralChat();
     this.removeBarQuestionnaireInterface();
     this.scene.scene.restart({ barId: roomName });
   };
