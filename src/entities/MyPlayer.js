@@ -76,10 +76,10 @@ class MyPlayer extends Phaser.GameObjects.Container {
         id="player-sprite"
         style={{
           fontSize: '15px',
-          backgroundColor: '#ffffff54',
           color: 'white',
-          borderRadius: '10px',
           padding: '0px 5px'
+          // backgroundColor: '#ffffff54',
+          // borderRadius: '10px',
         }}
       >
         {name}
@@ -92,6 +92,14 @@ class MyPlayer extends Phaser.GameObjects.Container {
   }
 
   createMessage(message) {
+    console.log('this.messageChild', this.messageChild);
+    if (this.messageChild) {
+      clearTimeout(this.messageTimeout);
+      this.remove(this.messageChild, true);
+      this.messageChild = null;
+      this.messageTimeout = null;
+    }
+
     const messageElement = (
       <div
         id="player-message"
@@ -99,11 +107,11 @@ class MyPlayer extends Phaser.GameObjects.Container {
           fontSize: '15px',
           width: '100px',
           height: '70px',
-          color: 'black',
-          backgroundColor: 'white',
+          backgroundColor: '#ffffff54',
           borderRadius: '15px',
           padding: '5px',
-          overflow: 'auto'
+          overflow: 'auto',
+          color: 'black'
         }}
       >
         <p
@@ -125,9 +133,12 @@ class MyPlayer extends Phaser.GameObjects.Container {
     const messageChild = this.scene.add.dom(0, 0, messageElement);
     messageChild.setOrigin(0.55, 3);
     this.add(messageChild);
+    this.messageChild = messageChild;
 
-    setTimeout(() => {
+    this.messageTimeout = setTimeout(() => {
       this.remove(messageChild, true);
+      this.messageChild = null;
+      this.messageTimeout = null;
     }, 3000);
   }
 

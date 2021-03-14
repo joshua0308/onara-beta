@@ -133,9 +133,9 @@ function InCallButtons() {
       <button id="toggle-audio-button" onClick={() => toggleAudio()}>
         <i id="audio-icon" className="fas fa-microphone fa-xs"></i>
       </button>
-      <button id="toggle-message-button" onClick={() => toggleMessage()}>
+      {/* <button id="toggle-message-button" onClick={() => toggleMessage()}>
         <i className="fas fa-comments"></i>
-      </button>
+      </button> */}
       <button id="toggle-background-button" onClick={() => toggleBackground()}>
         <i id="background-icon" className="fas fa-eye fa-xs"></i>
       </button>

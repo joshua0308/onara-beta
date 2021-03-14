@@ -57,17 +57,33 @@ class OtherPlayer extends Phaser.GameObjects.Container {
 
   createPlayerName(name) {
     const NameElement = (
-      <div id="player-sprite" style={{ fontSize: '20px' }}>
+      <div
+        id="player-sprite"
+        style={{
+          fontSize: '15px',
+          color: 'white',
+          padding: '0px 5px'
+          // backgroundColor: '#ffffff54',
+          // borderRadius: '10px',
+        }}
+      >
         {name}
       </div>
     );
     this.nameChild = this.scene.add.dom(0, 0, NameElement);
-    this.nameChild.setOrigin(0.5, -3.4);
+    this.nameChild.setOrigin(0.6, 6.2);
     this.add(this.nameChild);
   }
 
   createMessage(message) {
     console.log('createmessage', message);
+    if (this.messageChild) {
+      clearTimeout(this.messageTimeout);
+      this.remove(this.messageChild, true);
+      this.messageChild = null;
+      this.messageTimeout = null;
+    }
+
     const messageElement = (
       <div
         id="player-message"
@@ -75,11 +91,11 @@ class OtherPlayer extends Phaser.GameObjects.Container {
           fontSize: '15px',
           width: '100px',
           height: '70px',
-          color: 'black',
-          backgroundColor: 'white',
+          backgroundColor: '#ffffff54',
           borderRadius: '15px',
           padding: '5px',
-          overflow: 'auto'
+          overflow: 'auto',
+          color: 'black'
         }}
       >
         <p
@@ -99,11 +115,14 @@ class OtherPlayer extends Phaser.GameObjects.Container {
     );
 
     const messageChild = this.scene.add.dom(0, 0, messageElement);
-    messageChild.setOrigin(0.5, 2.8);
+    messageChild.setOrigin(0.55, 3);
     this.add(messageChild);
+    this.messageChild = messageChild;
 
-    setTimeout(() => {
+    this.messageTimeout = setTimeout(() => {
       this.remove(messageChild, true);
+      this.messageChild = null;
+      this.messageTimeout = null;
     }, 3000);
   }
 

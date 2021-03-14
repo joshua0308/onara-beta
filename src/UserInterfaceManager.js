@@ -64,16 +64,35 @@ class UserInterfaceManager {
           bottom: '0px',
           left: '0px',
           margin: '40px',
-          backgroundColor: '#000000a8',
+          // backgroundColor: '#000000a8',
+          backgroundColor: '#8585858f',
           borderRadius: '10px',
           color: 'white',
           padding: '10px',
-          width: '300px'
+          width: '400px',
+          zIndex: 30
         }}
       >
+        <div
+          style={{
+            backgroundColor: '#8585858f',
+            borderRadius: '10px',
+            color: 'black',
+            padding: '5px',
+            position: 'absolute',
+            top: '-38px'
+          }}
+        >
+          Chat to Everyone
+        </div>
         <button
           className="icon-button"
-          style={{ position: 'absolute', top: '0px', right: '0px' }}
+          style={{
+            position: 'absolute',
+            bottom: '0px',
+            right: '0px',
+            color: '#313131'
+          }}
           onClick={() => {
             const messageContainer = document.getElementById(
               'general-message-container'
@@ -101,7 +120,7 @@ class UserInterfaceManager {
             className="messages"
             style={{
               overflow: 'scroll',
-              maxHeight: '30vh',
+              maxHeight: '15vh',
               margin: '0px'
             }}
           ></ul>
@@ -113,7 +132,7 @@ class UserInterfaceManager {
               width: '100%',
               backgroundColor: 'transparent',
               border: 'none',
-              color: 'white'
+              color: 'black'
             }}
             placeholder="Type message here..."
             onKeyDown={keyDownHandler}
@@ -134,13 +153,20 @@ class UserInterfaceManager {
     const messagesUnorderedList = document.getElementById(elementId);
     console.log(this.scene.players[socketId]);
     const MessageElement = () => (
-      <li className="message" style={{ display: 'flex', margin: '0 0 2px 0' }}>
-        <span style={{ margin: '0px 10px' }}>
+      <li
+        className="message"
+        style={{
+          display: 'flex',
+          margin: '0 0 2px 0',
+          color: isGeneralChat ? 'black' : 'white'
+        }}
+      >
+        <span style={{ margin: '0px 10px', fontWeight: 600 }}>
           {`${this.scene.players[socketId].displayName}`}
         </span>
         <p
           style={{
-            color: '#b8b8b8',
+            color: isGeneralChat ? 'black' : '#b8b8b8',
             overflowWrap: 'break-word',
             wordWrap: 'break-word',
             hyphens: 'auto',
