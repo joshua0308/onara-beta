@@ -8,6 +8,7 @@ class Play extends Phaser.Scene {
   constructor(config) {
     super('PlayScene');
     this.player = {};
+    this.playersSprite = {};
     this.config = config;
     this.logger = new Logger('Phaser');
 
@@ -156,6 +157,18 @@ class Play extends Phaser.Scene {
     this.socket.on('general-chat-message', ({ from, message }) => {
       console.log('genera-chat-message', from, message);
       this.userInterfaceManager.createMessage(from, message, true);
+      if (from === this.socket.id) {
+        this.myPlayerSprite.createMessage(message);
+      } else {
+        console.log(
+          'genera-chat-message other',
+          from,
+          message,
+          this.playersSprite[from]
+        );
+
+        this.playersSprite[from].createMessage(message);
+      }
     });
 
     this.socket.on('accept-call', ({ roomHash }) => {
@@ -201,7 +214,7 @@ class Play extends Phaser.Scene {
       Object.keys(players).forEach((id) => {
         if (this.socket.id === id) return;
 
-        new OtherPlayer(
+        this.playersSprite[id] = new OtherPlayer(
           this,
           this.players[id].x,
           this.players[id].y,
@@ -223,7 +236,7 @@ class Play extends Phaser.Scene {
     this.socket.on('new-player', (player) => {
       this.logger.log('socket on new-player', { player });
       this.players[player.socketId] = player;
-      new OtherPlayer(
+      this.playersSprite[player.socketId] = new OtherPlayer(
         this,
         this.playerZones.x,
         this.playerZones.y,

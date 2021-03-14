@@ -1,3 +1,5 @@
+import React from 'jsx-dom';
+
 class OtherPlayer extends Phaser.GameObjects.Container {
   constructor(
     scene,
@@ -54,13 +56,55 @@ class OtherPlayer extends Phaser.GameObjects.Container {
   }
 
   createPlayerName(name) {
-    const nameElement = document.createElement('div');
-    nameElement.setAttribute('id', 'player-sprite');
-    nameElement.innerText = name;
-    nameElement.style.fontSize = '20px';
-    this.nameChild = this.scene.add.dom(0, 0, nameElement);
-    this.nameChild.setOrigin(0.5, 5);
+    const NameElement = (
+      <div id="player-sprite" style={{ fontSize: '20px' }}>
+        {name}
+      </div>
+    );
+    this.nameChild = this.scene.add.dom(0, 0, NameElement);
+    this.nameChild.setOrigin(0.5, -3.4);
     this.add(this.nameChild);
+  }
+
+  createMessage(message) {
+    console.log('createmessage', message);
+    const messageElement = (
+      <div
+        id="player-message"
+        style={{
+          fontSize: '15px',
+          width: '100px',
+          height: '70px',
+          color: 'black',
+          backgroundColor: 'white',
+          borderRadius: '15px',
+          padding: '5px',
+          overflow: 'auto'
+        }}
+      >
+        <p
+          style={{
+            textAlign: 'center',
+            overflowWrap: 'break-word',
+            wordWrap: 'break-word',
+            hyphens: 'auto',
+            maxWidth: '100px',
+            overflow: 'auto',
+            margin: '0px'
+          }}
+        >
+          {message}
+        </p>
+      </div>
+    );
+
+    const messageChild = this.scene.add.dom(0, 0, messageElement);
+    messageChild.setOrigin(0.5, 2.8);
+    this.add(messageChild);
+
+    setTimeout(() => {
+      this.remove(messageChild, true);
+    }, 2000);
   }
 
   removePlayerName() {
