@@ -72,13 +72,22 @@ class MyPlayer extends Phaser.GameObjects.Container {
   createPlayerName(name) {
     // ADD TEXT
     const NameElement = (
-      <div id="player-sprite" style={{ fontSize: '20px' }}>
+      <div
+        id="player-sprite"
+        style={{
+          fontSize: '15px',
+          backgroundColor: '#ffffff54',
+          color: 'white',
+          borderRadius: '10px',
+          padding: '0px 5px'
+        }}
+      >
         {name}
       </div>
     );
 
     this.nameChild = this.scene.add.dom(0, 0, NameElement);
-    this.nameChild.setOrigin(0.5, -3.4);
+    this.nameChild.setOrigin(0.6, 6.2);
     this.add(this.nameChild);
   }
 
@@ -114,12 +123,12 @@ class MyPlayer extends Phaser.GameObjects.Container {
     );
 
     const messageChild = this.scene.add.dom(0, 0, messageElement);
-    messageChild.setOrigin(0.5, 2.8);
+    messageChild.setOrigin(0.55, 3);
     this.add(messageChild);
 
     setTimeout(() => {
       this.remove(messageChild, true);
-    }, 2000);
+    }, 3000);
   }
 
   removePlayerName() {
@@ -139,7 +148,6 @@ class MyPlayer extends Phaser.GameObjects.Container {
     if (!this.body) return;
 
     const { left, right, up, space } = this.cursors;
-    const isSpaceJustDown = Phaser.Input.Keyboard.JustDown(space);
     const isUpJustDown = Phaser.Input.Keyboard.JustDown(up);
     const onFloor = this.body.onFloor();
     const sprite = this.getByName('sprite');
@@ -163,21 +171,9 @@ class MyPlayer extends Phaser.GameObjects.Container {
       this.jumpCount = 0;
     }
 
-    if (
-      (isSpaceJustDown || isUpJustDown) &&
-      (onFloor || this.jumpCount < this.consecutiveJumps)
-    ) {
+    if (isUpJustDown && (onFloor || this.jumpCount < this.consecutiveJumps)) {
       this.body.setVelocityY(-this.playerSpeed * 2.1);
-      // this.startJumpMotion = false;
-      // setTimeout(() => {
-      //   // need to bend the knees before jumping
-      //   // as soon as sprite is off the ground
-      //   // set the startJumpMotion property to false
-      //   this.body.setVelocityY(-this.playerSpeed * 1.3);
-      //   this.startJumpMotion = false;
-      // }, 310);
       this.jumpCount += 1;
-      // this.startJumpMotion = true;
     }
 
     if (onFloor) {

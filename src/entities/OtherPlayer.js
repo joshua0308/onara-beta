@@ -104,7 +104,7 @@ class OtherPlayer extends Phaser.GameObjects.Container {
 
     setTimeout(() => {
       this.remove(messageChild, true);
-    }, 2000);
+    }, 3000);
   }
 
   removePlayerName() {

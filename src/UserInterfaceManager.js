@@ -136,10 +136,11 @@ class UserInterfaceManager {
     const MessageElement = () => (
       <li className="message" style={{ display: 'flex', margin: '0 0 2px 0' }}>
         <span style={{ margin: '0px 10px' }}>
-          {`${this.scene.players[socketId].displayName}:`}
+          {`${this.scene.players[socketId].displayName}`}
         </span>
         <p
           style={{
+            color: '#b8b8b8',
             overflowWrap: 'break-word',
             wordWrap: 'break-word',
             hyphens: 'auto',
@@ -476,8 +477,8 @@ class UserInterfaceManager {
         screenshareElement = (
           <video
             style={{
-              width: '70vw',
-              marginLeft: '300px'
+              width: '70vw'
+              // marginLeft: '300px'
             }}
             id="screenshare-element"
             poster="https://media.giphy.com/media/VseXvvxwowwCc/giphy.gif"
@@ -487,14 +488,14 @@ class UserInterfaceManager {
         screenshareElement = (
           <div
             style={{
-              width: '70vw',
-              marginLeft: '300px',
+              width: '42vw',
+              // marginLeft: '300px',
               backgroundColor: '#8585858f',
               height: '40vh',
               display: 'flex',
               justifyContent: 'center',
               alignItems: 'center',
-              fontSize: '40px',
+              fontSize: '30px',
               borderRadius: '40px',
               boxShadow: ' 3px 3px 16px #23262b, -3px -3px 16px #1c1d23'
             }}
@@ -521,11 +522,11 @@ class UserInterfaceManager {
             zIndex: 1,
             left: 0,
             top: 0,
-            width: '100%',
             height: '90%',
             display: 'flex',
             justifyContent: 'center',
-            alignItems: 'center'
+            alignItems: 'center',
+            marginLeft: '400px'
           }}
         >
           <ScreenshareElement />
