@@ -64,8 +64,7 @@ class UserInterfaceManager {
           bottom: '0px',
           left: '0px',
           margin: '40px',
-          // backgroundColor: '#000000a8',
-          backgroundColor: '#8585858f',
+          backgroundColor: 'rgb(133 133 133 / 78%)',
           borderRadius: '10px',
           color: 'white',
           padding: '10px',
@@ -75,7 +74,7 @@ class UserInterfaceManager {
       >
         <div
           style={{
-            backgroundColor: '#8585858f',
+            backgroundColor: 'rgb(133 133 133 / 78%)',
             borderRadius: '10px',
             color: 'black',
             padding: '5px',

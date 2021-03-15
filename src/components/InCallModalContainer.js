@@ -36,7 +36,7 @@ function InCallContainer() {
           style={{
             backgroundColor: '#000000a8',
             borderRadius: '10px',
-            color: 'white',
+            color: 'rgb(162,162,162)',
             padding: '5px',
             position: 'absolute',
             top: '-38px'

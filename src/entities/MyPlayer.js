@@ -105,33 +105,41 @@ class MyPlayer extends Phaser.GameObjects.Container {
         id="player-message"
         style={{
           fontSize: '15px',
-          width: '100px',
-          height: '70px',
-          backgroundColor: '#ffffff54',
+          minWidth: '120px',
+          minHeight: '50px',
+          backgroundColor: 'rgb(133 133 133 / 78%)',
           borderRadius: '15px',
           padding: '5px',
-          overflow: 'auto',
           color: 'black'
         }}
       >
-        <p
+        <div
           style={{
-            textAlign: 'center',
-            overflowWrap: 'break-word',
-            wordWrap: 'break-word',
-            hyphens: 'auto',
-            maxWidth: '100px',
-            overflow: 'auto',
-            margin: '0px'
+            minWidth: '120px',
+            minHeight: '50px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
           }}
         >
-          {message}
-        </p>
+          <p
+            style={{
+              textAlign: 'center',
+              overflowWrap: 'break-word',
+              wordWrap: 'break-word',
+              hyphens: 'auto',
+              maxWidth: '100px',
+              overflow: 'auto',
+              margin: '0px'
+            }}
+          >
+            {message}
+          </p>
+        </div>
       </div>
     );
 
-    const messageChild = this.scene.add.dom(0, 0, messageElement);
-    messageChild.setOrigin(0.55, 3);
+    const messageChild = this.scene.add.dom(0, -180, messageElement);
     this.add(messageChild);
     this.messageChild = messageChild;
 
@@ -139,7 +147,7 @@ class MyPlayer extends Phaser.GameObjects.Container {
       this.remove(messageChild, true);
       this.messageChild = null;
       this.messageTimeout = null;
-    }, 3000);
+    }, 4000);
   }
 
   removePlayerName() {
