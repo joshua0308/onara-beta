@@ -166,7 +166,7 @@ class MyPlayer extends Phaser.GameObjects.Container {
   update() {
     if (!this.body) return;
 
-    const { left, right, up, space } = this.cursors;
+    const { left, right, up, down } = this.cursors;
     const isUpJustDown = Phaser.Input.Keyboard.JustDown(up);
     const onFloor = this.body.onFloor();
     const sprite = this.getByName('sprite');
@@ -179,6 +179,9 @@ class MyPlayer extends Phaser.GameObjects.Container {
       this.body.setVelocityX(this.playerSpeed);
       sprite.setFlipX(false);
       this.motion = 'walk';
+    } else if (down.isDown) {
+      this.body.setVelocityX(0);
+      this.motion = 'duck';
     } else if (!onFloor) {
       this.motion = 'jump';
     } else {
@@ -199,12 +202,7 @@ class MyPlayer extends Phaser.GameObjects.Container {
       this.jumpCount = 0;
     }
 
-    // set animation based on movement
-    if (onFloor && this.body.velocity.x !== 0) {
-      this.motion = 'walk';
-    } else if (onFloor && this.body.velocity.x === 0) {
-      this.motion = 'idle';
-    } else if (!onFloor) {
+    if (!onFloor) {
       this.motion = 'jump';
     }
 
@@ -212,8 +210,9 @@ class MyPlayer extends Phaser.GameObjects.Container {
 
     // if the player is moving, emit position and motion to the server
     const isMoving =
-      this.oldPosition &&
-      (this.x !== this.oldPosition.x || this.y !== this.oldPosition.y);
+      (this.oldPosition &&
+        (this.x !== this.oldPosition.x || this.y !== this.oldPosition.y)) ||
+      this.oldMotion !== this.motion;
 
     if (isMoving) {
       this.socket.emit('player-movement', {
@@ -229,6 +228,8 @@ class MyPlayer extends Phaser.GameObjects.Container {
       y: this.y,
       flipX: sprite.flipX
     };
+
+    this.oldMotion = this.motion;
   }
 }
 

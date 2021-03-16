@@ -43,6 +43,12 @@ class Preload extends Phaser.Scene {
       spacing: 111
     });
 
+    this.load.spritesheet('boy-duck', 'assets/new-player/boy-duck.png', {
+      frameWidth: 482,
+      frameHeight: 1080,
+      spacing: 111
+    });
+
     this.load.spritesheet('girl-idle', 'assets/new-player/girl-idle.png', {
       frameWidth: 382,
       frameHeight: 1080,
@@ -56,6 +62,12 @@ class Preload extends Phaser.Scene {
     });
 
     this.load.spritesheet('girl-jump', 'assets/new-player/girl-jump.png', {
+      frameWidth: 482,
+      frameHeight: 1080,
+      spacing: 111
+    });
+
+    this.load.spritesheet('girl-duck', 'assets/new-player/girl-duck.png', {
       frameWidth: 482,
       frameHeight: 1080,
       spacing: 111

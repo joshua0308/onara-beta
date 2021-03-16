@@ -30,6 +30,16 @@ export default (anims) => {
   });
 
   anims.create({
+    key: 'boy-duck',
+    frames: anims.generateFrameNumbers('boy-duck', {
+      start: 3,
+      end: 3
+    }),
+    frameRate: 4,
+    repeat: -1
+  });
+
+  anims.create({
     key: 'girl-idle',
     frames: anims.generateFrameNumbers('girl-idle', {
       start: 0,
@@ -54,6 +64,16 @@ export default (anims) => {
     frames: anims.generateFrameNumbers('girl-jump', {
       start: 2,
       end: 6
+    }),
+    frameRate: 4,
+    repeat: -1
+  });
+
+  anims.create({
+    key: 'girl-duck',
+    frames: anims.generateFrameNumbers('girl-duck', {
+      start: 3,
+      end: 3
     }),
     frameRate: 4,
     repeat: -1
