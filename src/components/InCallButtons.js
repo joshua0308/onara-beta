@@ -126,7 +126,7 @@ function InCallButtons() {
   };
 
   return (
-    <div id="in-call-buttons-wrapper">
+    <div id="in-call-buttons-wrapper" style={{ zIndex: 100 }}>
       <button id="toggle-video-button" onClick={() => toggleVideo()}>
         <i id="video-icon" className="fas fa-video fa-xs"></i>
       </button>

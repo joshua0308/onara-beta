@@ -559,15 +559,14 @@ class UserInterfaceManager {
         <div
           id="screenshare-container"
           style={{
-            position: 'fixed',
+            position: 'absolute',
             zIndex: 1,
-            left: 0,
-            top: 0,
-            height: '90%',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
             display: 'flex',
             justifyContent: 'center',
-            alignItems: 'center',
-            marginLeft: '400px'
+            alignItems: 'center'
           }}
         >
           <ScreenshareElement />

@@ -152,7 +152,7 @@ function PlayerProfileContainer({ props }) {
               borderStyle: 'none',
               borderRadius: '15px',
               padding: '3px 10px',
-              marginRight: '10px'
+              marginRight: '5px'
             }}
           >
             Buy a drink!

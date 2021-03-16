@@ -16,7 +16,7 @@ function InCallContainer() {
 
   return (
     <div id="in-call-modal-container" className="background-overlay visible">
-      <div id="videos-wrapper"></div>
+      <div id="videos-wrapper" style={{ zIndex: 40 }}></div>
       <IncallButtonsBinded />
       <div
         id="chat-container"
