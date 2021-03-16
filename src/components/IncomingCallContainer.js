@@ -3,6 +3,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 function IncomingCallContainer({ props }) {
   const { callerData, callerId } = props;
+  const playerData = callerData;
   let { roomHash } = props;
   const declineButtonCallback = (callerId) => {
     console.log('call declined', this);
@@ -15,15 +16,18 @@ function IncomingCallContainer({ props }) {
     return (
       <div
         style={{
-          backgroundColor: 'white',
-          boxShadow: 'rgb(132 138 150) 2px 2px 3px',
-          position: 'inline-block',
+          backgroundColor: 'transparent',
           display: 'inline-block',
-          padding: '4px',
+          padding: '2px 4px',
+          borderStyle: 'solid',
+          borderWidth: '1px',
+          borderColor: '#3333a9',
+          color: '#3333a9',
           borderRadius: '5px',
           fontSize: '13px',
           marginLeft: '5px',
-          marginTop: '5px'
+          marginTop: '5px',
+          cursor: 'default'
         }}
       >
         {props.message}
@@ -37,62 +41,88 @@ function IncomingCallContainer({ props }) {
         <img
           id="player-image"
           src={
-            callerData.profilePicURL ||
+            playerData.profilePicURL ||
             'public/assets/placeholder-profile-pic.png'
           }
         />
         <div id="player-name" className="font-bold">
-          @{callerData.displayName}
+          @{playerData.displayName}
         </div>
-        <div id="player-name">{callerData.displayName}</div>
+        <div id="player-name">{playerData.displayName}</div>
         <div style={{ margin: '20px 0' }}>
-          <div style={{ textAlign: 'center' }}>
+          <div style={{ textAlign: 'center', color: '#464646' }}>
             #followers #following #rating
           </div>
-          <div style={{ textAlign: 'center' }}>#mutual followers</div>
+          <div style={{ textAlign: 'center', color: '#464646' }}>
+            #mutual followers
+          </div>
         </div>
-        <div id="player-bio">
-          <div className="profile-p">
-            <span className=" profile-subheader">📍Location</span>
-            <BubbleText message={`${callerData.city}, ${callerData.country}`} />
+        <div id="player-bio" style={{ fontSize: '15px', color: '#717171' }}>
+          <div style={{ margin: '2px', display: 'flex' }}>
+            <span style={{ marginRight: '5px' }}>💼</span>
+            <span>Currently {playerData.currently}</span>
           </div>
-          <div className="profile-p">
-            <span className=" profile-subheader">🗣 Language</span>
-            <BubbleText message="Korean" />
-            <BubbleText message="English" />
-            <BubbleText message="Chinese" />
+          <div style={{ margin: '2px', display: 'flex' }}>
+            <span style={{ marginRight: '5px' }}>📄</span>
+            <span>Previously {playerData.previously}</span>
           </div>
-          <div className="profile-p">
-            <span className=" profile-subheader">💯 I&apos;m good at</span>
-            <BubbleText message="Resume building" />
-            <BubbleText message="Investing" />
-            <BubbleText message="Hiring" />
-            <BubbleText message="Skiing" />
-            <BubbleText message="TV shows" />
+          <div style={{ margin: '2px', display: 'flex' }}>
+            <span style={{ marginRight: '5px' }}>🎓</span>
+            <span>{playerData.education}</span>
           </div>
-          <div className="profile-p">
-            <span className=" profile-subheader">
-              🔖 I&apos;m interested in
+          <div style={{ margin: '2px', display: 'flex' }}>
+            <span style={{ marginRight: '5px' }}>📍</span>
+            <span>{`${playerData.city}, ${playerData.country}`}</span>
+          </div>
+          <div style={{ margin: '2px', display: 'flex' }}>
+            <span style={{ marginRight: '5px' }}>🌐</span>
+            <span>{playerData.language}</span>
+          </div>
+          <hr style={{ border: '1px solid #cdcdcd', width: '90%' }} />
+          <div
+            className="profile-p"
+            style={{
+              marginBottom: '15px'
+            }}
+          >
+            <span
+              className="profile-subheader"
+              style={{
+                fontWeight: '600',
+                color: '#565656'
+              }}
+            >
+              💯 I&apos;m good at
             </span>
-            {/* <br /> */}
-            <BubbleText message="Startups" />
-            <BubbleText message="Golf" />
-            <BubbleText message="Travel" />
-            <BubbleText message="Eat/Drink" />
+            <br />
+            <div style={{ marginLeft: '15px' }}>
+              {playerData.goodAt &&
+                playerData.goodAt
+                  .split(',')
+                  .map((goodAt, index) => (
+                    <BubbleText key={`good-${index}`} message={goodAt} />
+                  ))}
+            </div>
           </div>
           <div className="profile-p">
-            <span className=" profile-subheader">🎓 Education</span>
-            <BubbleText message={callerData.education} />
-          </div>
-          <div className="profile-p">
-            <span className=" profile-subheader">💼 Currently</span>
-            <BubbleText message="Co-founder at Clink" />
-          </div>
-          <div className="profile-p">
-            <span className=" profile-subheader">⏪ Previously</span>
-            <BubbleText message="McKinsey & Co" />
-            <BubbleText message="Bain & Co" />
-            <BubbleText message="Google" />
+            <span
+              className=" profile-subheader"
+              style={{ fontWeight: '600', color: '#565656' }}
+            >
+              ❤️ I want to meet people who like
+            </span>
+            <br />
+            <div style={{ marginLeft: '15px' }}>
+              {playerData.interestedIn &&
+                playerData.interestedIn
+                  .split(',')
+                  .map((interestedIn, index) => (
+                    <BubbleText
+                      key={`interested-${index}`}
+                      message={interestedIn}
+                    />
+                  ))}
+            </div>
           </div>
         </div>
         <div id="caller-buttons-wrapper">
