@@ -5,8 +5,10 @@ function OnlineList({ props }) {
 
   return (
     <div id="online-list-wrapper">
-      <div>{barId === 'town' ? 'Town' : barId}</div>
-      <ul id="online-list"></ul>
+      <div style={{ fontSize: '23px' }}>
+        People in {barId === 'town' ? 'Town' : barId}
+      </div>
+      <ul id="online-list" style={{ marginTop: '15px' }}></ul>
     </div>
   );
 }

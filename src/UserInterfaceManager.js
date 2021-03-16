@@ -64,7 +64,7 @@ class UserInterfaceManager {
           bottom: '0px',
           left: '0px',
           margin: '40px',
-          backgroundColor: 'rgb(133 133 133 / 78%)',
+          backgroundColor: 'rgb(200 200 200 / 85%)',
           borderRadius: '10px',
           color: 'white',
           padding: '10px',
@@ -74,7 +74,7 @@ class UserInterfaceManager {
       >
         <div
           style={{
-            backgroundColor: 'rgb(133 133 133 / 78%)',
+            backgroundColor: 'rgb(200 200 200 / 85%)',
             borderRadius: '10px',
             color: 'black',
             padding: '5px',
@@ -82,7 +82,7 @@ class UserInterfaceManager {
             top: '-38px'
           }}
         >
-          Chat to Everyone
+          Chat to Everyone in {barId === 'town' ? 'Town' : barId}
         </div>
         <button
           className="icon-button"
@@ -452,8 +452,23 @@ class UserInterfaceManager {
         onClick={() => {
           this.createPlayerProfileInterface(playerInfo, isCurrentPlayer);
         }}
+        style={{
+          fontSize: '18px',
+          textAlign: 'left',
+          marginLeft: '15px',
+          color: '#ececec'
+        }}
       >
-        {playerName}
+        <img
+          style={{
+            width: '30px',
+            height: '30px',
+            borderRadius: '15px',
+            marginRight: '5px'
+          }}
+          src={playerInfo.profilePicURL}
+        />
+        <span>{playerName}</span>
       </li>
     );
     const onlineList = document.getElementById('online-list');
@@ -502,7 +517,8 @@ class UserInterfaceManager {
         screenshareElement = (
           <video
             style={{
-              width: '70vw'
+              width: '70vw',
+              borderRadius: '40px'
               // marginLeft: '300px'
             }}
             id="screenshare-element"

@@ -91,7 +91,7 @@ class OtherPlayer extends Phaser.GameObjects.Container {
           fontSize: '15px',
           minWidth: '120px',
           minHeight: '50px',
-          backgroundColor: 'rgb(133 133 133 / 78%)',
+          backgroundColor: 'rgb(200 200 200 / 85%)',
           borderRadius: '15px',
           padding: '5px',
           color: 'black'

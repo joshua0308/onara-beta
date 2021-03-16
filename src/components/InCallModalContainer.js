@@ -29,7 +29,7 @@ function InCallContainer() {
           borderRadius: '10px',
           color: 'white',
           padding: '10px',
-          width: '300px'
+          width: '350px'
         }}
       >
         <div
