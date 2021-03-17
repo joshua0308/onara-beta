@@ -155,7 +155,7 @@ function PlayerProfileContainer({ props }) {
               marginRight: '5px'
             }}
           >
-            Buy a drink!
+            Grab a drink!
           </button>
         )}
         <button

@@ -102,16 +102,16 @@ class UserInterfaceManager {
 
             if (messageContainer.style.display === 'none') {
               messageContainer.style.display = 'flex';
-              messageToggleIcon.classList.add('fa-times');
+              messageToggleIcon.classList.add('fa-chevron-down');
               messageToggleIcon.classList.remove('fa-chevron-up');
             } else {
               messageToggleIcon.classList.add('fa-chevron-up');
-              messageToggleIcon.classList.remove('fa-times');
+              messageToggleIcon.classList.remove('fa-chevron-down');
               messageContainer.style.display = 'none';
             }
           }}
         >
-          <i id="general-chat-toggle-icon" className="fas fa-times"></i>
+          <i id="general-chat-toggle-icon" className="fas fa-chevron-down"></i>
         </button>
         <div id="general-message-container" className="chat-window">
           <ul
@@ -464,7 +464,7 @@ class UserInterfaceManager {
             width: '30px',
             height: '30px',
             borderRadius: '15px',
-            marginRight: '5px'
+            marginRight: '10px'
           }}
           src={playerInfo.profilePicURL}
         />

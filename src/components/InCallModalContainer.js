@@ -46,7 +46,7 @@ function InCallContainer() {
         </div>
         <button
           className="icon-button"
-          style={{ position: 'absolute', top: '0px', right: '0px' }}
+          style={{ position: 'absolute', bottom: '0px', right: '0px' }}
           onClick={() => {
             const messageContainer = document.getElementById(
               'message-container'
@@ -57,16 +57,16 @@ function InCallContainer() {
 
             if (messageContainer.style.display === 'none') {
               messageContainer.style.display = 'flex';
-              messageToggleIcon.classList.add('fa-times');
+              messageToggleIcon.classList.add('fa-chevron-down');
               messageToggleIcon.classList.remove('fa-chevron-up');
             } else {
               messageToggleIcon.classList.add('fa-chevron-up');
-              messageToggleIcon.classList.remove('fa-times');
+              messageToggleIcon.classList.remove('fa-chevron-down');
               messageContainer.style.display = 'none';
             }
           }}
         >
-          <i id="chat-toggle-icon" className="fas fa-times"></i>
+          <i id="chat-toggle-icon" className="fas fa-chevron-down"></i>
         </button>
         <div id="message-container" className="chat-window">
           <ul
