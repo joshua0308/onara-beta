@@ -33,45 +33,113 @@ const config = {
 const firebaseAuth = firebase.auth();
 const firebaseDb = firebase.firestore();
 
-// initiate game only when user is logged in
-firebaseAuth.onAuthStateChanged((playerAuth) => {
-  if (playerAuth) {
-    console.log('debug: player logged in');
-    const playerDocRef = firebaseDb.collection('players').doc(playerAuth.uid);
-
-    playerDocRef
-      .get()
-      .then((doc) => {
-        const playerData = doc.data();
-
-        if (playerData) {
-          console.log('debug: player found in DB');
-          new AronaGame(config, playerData, false);
-        } else {
-          console.log('debug: player not found in DB');
-
-          const now = firebase.firestore.Timestamp.now();
-
-          const newPlayerData = {
-            displayName: playerAuth.displayName,
-            email: playerAuth.email,
-            profilePicURL: playerAuth.photoURL || '',
-            uid: playerAuth.uid,
-            createdAt: now,
-            updatedAt: now
-          };
-
-          playerDocRef.set(newPlayerData).then(() => {
-            new AronaGame(config, newPlayerData, true);
-          });
-        }
-      })
-      .catch(console.error);
-  } else {
-    console.log('debug: player not logged in');
-    window.location.replace('/login');
+if (firebase.auth().isSignInWithEmailLink(window.location.href)) {
+  // Additional state parameters can also be passed via URL.
+  // This can be used to continue the user's intended action before triggering
+  // the sign-in operation.
+  // Get the email if available. This should be available if the user completes
+  // the flow on the same device where they started it.
+  var email = window.localStorage.getItem('emailForSignIn');
+  if (!email) {
+    // User opened the link on a different device. To prevent session fixation
+    // attacks, ask the user to provide the associated email again. For example:
+    email = window.prompt('Please provide your email for confirmation');
   }
-});
+  // The client SDK will parse the code from the link for you.
+  firebase
+    .auth()
+    .signInWithEmailLink(email, window.location.href)
+    .then(({ user }) => {
+      const playerAuth = user;
+      console.log('playerAuth', playerAuth);
+      // Clear email from storage.
+      // window.localStorage.removeItem('emailForSignIn');
+
+      const playerDocRef = firebaseDb.collection('players').doc(playerAuth.uid);
+
+      playerDocRef
+        .get()
+        .then((doc) => {
+          const playerData = doc.data();
+
+          if (playerData) {
+            console.log('debug: player found in DB');
+            new AronaGame(config, playerData, false);
+          } else {
+            console.log('debug: player not found in DB');
+
+            const now = firebase.firestore.Timestamp.now();
+
+            const newPlayerData = {
+              displayName: '',
+              email: '',
+              profilePicURL: '',
+              uid: playerAuth.uid,
+              createdAt: now,
+              updatedAt: now
+            };
+
+            playerDocRef.set(newPlayerData).then(() => {
+              new AronaGame(config, newPlayerData, true);
+            });
+          }
+        })
+        .catch((e) => {
+          console.log(e);
+          window.location.replace('/');
+        });
+      // You can access the new user via result.user
+      // Additional user info profile not available via:
+      // result.additionalUserInfo.profile == null
+      // You can check if the user is new or existing:
+      // result.additionalUserInfo.isNewUser
+    })
+    .catch((error) => {
+      // Some error occurred, you can inspect the code: error.code
+      // Common errors could be invalid email and invalid or expired OTPs.
+      console.log(error);
+    });
+} else {
+  // initiate game only when user is logged in
+  firebaseAuth.onAuthStateChanged((playerAuth) => {
+    if (playerAuth) {
+      console.log('debug: player logged in');
+      const playerDocRef = firebaseDb.collection('players').doc(playerAuth.uid);
+
+      playerDocRef
+        .get()
+        .then((doc) => {
+          const playerData = doc.data();
+
+          if (playerData) {
+            console.log('debug: player found in DB');
+            new AronaGame(config, playerData, false);
+          } else {
+            console.log('debug: player not found in DB');
+
+            const now = firebase.firestore.Timestamp.now();
+
+            const newPlayerData = {
+              displayName: playerAuth.displayName,
+              email: playerAuth.email,
+              profilePicURL: playerAuth.photoURL || '',
+              uid: playerAuth.uid,
+              createdAt: now,
+              updatedAt: now
+            };
+
+            playerDocRef.set(newPlayerData).then(() => {
+              new AronaGame(config, newPlayerData, true);
+            });
+          }
+        })
+        .catch(console.error);
+    } else {
+      console.log('debug: player not logged in');
+      window.location.replace('/');
+    }
+  });
+}
 
 class AronaGame extends Phaser.Game {
   constructor(config, playerInfo, isNew = false) {

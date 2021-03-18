@@ -466,7 +466,10 @@ class UserInterfaceManager {
             borderRadius: '15px',
             marginRight: '10px'
           }}
-          src={playerInfo.profilePicURL}
+          src={
+            playerInfo.profilePicURL ||
+            '/public/assets/placeholder-profile-pic.png'
+          }
         />
         <span>{playerName}</span>
       </li>

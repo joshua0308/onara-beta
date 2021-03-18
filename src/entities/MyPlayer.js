@@ -87,7 +87,7 @@ class MyPlayer extends Phaser.GameObjects.Container {
     );
 
     this.nameChild = this.scene.add.dom(0, 0, NameElement);
-    this.nameChild.setOrigin(0.6, 6.2);
+    this.nameChild.setOrigin(0.5, 6.2);
     this.add(this.nameChild);
   }
 

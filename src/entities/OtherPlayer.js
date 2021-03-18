@@ -63,15 +63,13 @@ class OtherPlayer extends Phaser.GameObjects.Container {
           fontSize: '15px',
           color: 'white',
           padding: '0px 5px'
-          // backgroundColor: '#ffffff54',
-          // borderRadius: '10px',
         }}
       >
         {name}
       </div>
     );
     this.nameChild = this.scene.add.dom(0, 0, NameElement);
-    this.nameChild.setOrigin(0.6, 6.2);
+    this.nameChild.setOrigin(0.5, 6.2);
     this.add(this.nameChild);
   }
 

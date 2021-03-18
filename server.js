@@ -5,6 +5,7 @@ const express = require('express');
 const app = express();
 const server = require('http').Server(app);
 const io = require('socket.io')(server);
+const path = require('path');
 
 const PORT = process.env.PORT || 3000;
 const players = {};
@@ -348,17 +349,19 @@ app.get('/game', (req, res) => {
   res.render('game', { BUNDLE_PATH });
 });
 
-app.get('/login', (req, res) => {
-  res.render('login');
+app.get('/', (req, res) => {
+  var publicPath = path.join(__dirname, 'public');
+  res.sendFile(path.join(publicPath, 'index.html'));
+  // res.render('login');
 });
 
 app.get('/playground', (req, res) => {
   res.render('playground', { PLAYGROUND_PATH });
 });
 
-app.get('/', (req, res) => {
-  res.redirect('/login');
-});
+// app.get('/', (req, res) => {
+//   res.redirect('/login');
+// });
 
 app.use('/assets', express.static(__dirname + '/assets'));
 app.use('/public', express.static(__dirname + '/public'));

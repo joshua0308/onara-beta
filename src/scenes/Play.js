@@ -38,6 +38,7 @@ class Play extends Phaser.Scene {
   }
 
   updateCameraZoom() {
+    // zooms in if window is bigger than map size
     if (window.innerHeight > this.map.heightInPixels || this.isMobile) {
       this.cameras.main.setZoom(window.innerHeight / this.map.heightInPixels);
     }

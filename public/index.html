@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html data-wf-page="603cda19e4f273b5474cba8d" data-wf-site="603cda19e4f273ac2b4cba8a">
+
+<head>
+  <meta charset="utf-8">
+  <title>Onara</title>
+  <meta content="width=device-width, initial-scale=1" name="viewport">
+  <meta content="Webflow" name="generator">
+
+  <script src="https://www.gstatic.com/firebasejs/ui/4.6.1/firebase-ui-auth.js"></script>
+  <link type="text/css" rel="stylesheet" href="https://www.gstatic.com/firebasejs/ui/4.6.1/firebase-ui-auth.css" />
+
+  <link href="public/css/normalize.css" rel="stylesheet" type="text/css">
+  <link href="public/css/webflow.css" rel="stylesheet" type="text/css">
+  <link href="public/css/wons-initial-project-103f6f.webflow.css" rel="stylesheet" type="text/css">
+  <script src="https://ajax.googleapis.com/ajax/libs/webfont/1.6.26/webfont.js" type="text/javascript"></script>
+  <script
+    type="text/javascript">WebFont.load({ google: { families: ["Lato:100,100italic,300,300italic,400,400italic,700,700italic,900,900italic", "DM Sans:regular,500,700"] } });</script>
+  <script
+    type="text/javascript">!function(o, c) { var n = c.documentElement, t = " w-mod-"; n.className += t + "js", ("ontouchstart" in o || o.DocumentTouch && c instanceof DocumentTouch) && (n.className += t + "touch") }(window, document);</script>
+  <link href="public/images/favicon.ico" rel="shortcut icon" type="image/x-icon">
+  <style>
+    #google-auth-button {
+      background-color: transparent;
+      width: 200px;
+      height: 40px;
+      line-height: 40px;
+      border-radius: 5px;
+      color: rgb(145, 145, 145);
+      border-color: rgb(145, 145, 145);
+      font-size: 15px;
+      border-style: solid;
+      border-width: thin;
+      text-align: center;
+      cursor: pointer;
+      transition: 0.5s;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    #google-logo {
+      width: 20px;
+      height: 20px;
+      margin-right: 10px;
+    }
+
+    #google-auth-button:hover {
+      background-color: rgb(242, 221, 199);
+      /* transition: ease-in; */
+    }
+  </style>
+</head>
+
+<body class="body">
+  <div>
+    <div data-collapse="medium" data-animation="default" data-duration="400" role="banner" class="navbar w-nav">
+      <div class="container-flex wide w-container">
+        <a href="#" class="brand w-nav-brand"><img src="public/images/Onara_Logo_Haelee_v1.png" loading="lazy"
+            width="50" alt="Onara logo temp"></a>
+        <nav role="navigation" class="nav-menu w-nav-menu">
+        </nav>
+        <div class="menu-button w-nav-button">
+          <div class="icon w-icon-nav-menu"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <section id="hero-layout" data-w-id="390c9858-96a6-4cd4-2c95-514dacddc4e3" class="section hero">
+    <div class="w-container">
+      <div class="columns w-row">
+        <div class="w-col w-col-6">
+          <h1 class="heading">onara</h1>
+          <p class="paragraph">Meet friends based on interest, real time.<br>Video chat immediately.</p>
+          <div>
+            <div class="w-form">
+              <form id="email-form" name="email-form" data-name="Email Form">
+                <input type="email" class="text-field w-input" maxlength="256" name="email" data-name="Email"
+                  placeholder="Email address" id="email" required="">
+                <input type="submit" value="Get started" data-wait="Please wait..." class="submit-button w-button">
+              </form>
+            </div>
+            <!-- <div>Already have an account? <a>Log in here.</a></div> -->
+          </div>
+          <div id='google-auth-button'>
+            <!-- <img src='public/images/btn_google_signin_light_normal_web.png'> -->
+            <img id='google-logo' src='public/images/google-logo.png'>
+            Sign up with Google
+          </div>
+        </div>
+        <div class="w-col w-col-6"><img src="public/images/Onara_example_capture.png" loading="lazy" width="440"
+            sizes="(max-width: 479px) 92vw, (max-width: 767px) 88vw, (max-width: 991px) 354px, 440px"
+            srcset="public/images/Onara_example_capture-p-500.png 500w, public/images/Onara_example_capture.png 682w"
+            alt="Onara screenshot temp"></div>
+      </div>
+    </div>
+  </section>
+  <div class="w-container">
+    <h1 class="heading-3"><br>Easiest, quickest, and safest way to meet new friends<br></h1>
+    <p class="paragraph-2">Meet real people, real time - on a secure, fast, decentralized video chat.</p>
+  </div>
+  <section id="Scrolled" class="section bg-dark">
+    <div class="container w-container">
+      <div class="grid-3-columns">
+        <div id="w-node-_15b6f4d8-64db-4765-fd98-e69d73dfaa18-474cba8d" class="card"><img
+            src="public/images/icon_hobbies.png" alt="" height="70" loading="lazy" sizes="100vw"
+            srcset="public/images/icon_hobbies-p-500.png 500w, public/images/icon_hobbies.png 512w">
+          <div class="card-title">Interest-based</div>
+          <div class="div-block"></div>
+          <div class="card-description">Join rooms with small groups who share your point-in-time interest</div>
+        </div>
+        <div id="w-node-_22754de9-f8c7-f7cd-a757-d60cd7993e10-474cba8d" class="card"><img
+            src="public/images/icon_intimate.png" alt="" height="70" loading="lazy" sizes="100vw"
+            srcset="public/images/icon_intimate-p-500.png 500w, public/images/icon_intimate-p-800.png 800w, public/images/icon_intimate-p-1080.png 1080w, public/images/icon_intimate.png 1600w">
+          <div class="card-title">Intimate</div>
+          <div class="card-description">Get matched with small (&lt;10) group of people and choose your best match to
+            video chat with</div>
+        </div>
+        <div id="w-node-e9b0531c-0783-00ac-0fdb-c310dafe6645-474cba8d" class="card"><img
+            src="public/images/icon_immediate.png" alt="" height="70" loading="lazy" sizes="100vw"
+            srcset="public/images/icon_immediate-p-500.png 500w, public/images/icon_immediate-p-800.png 800w, public/images/icon_immediate-p-1080.png 1080w, public/images/icon_immediate.png 1356w">
+          <div class="card-title">Immediate</div>
+          <div class="card-description">Video chat immediately with who you find interesting. No more waiting after
+            sending your &quot;like&quot;</div>
+        </div>
+        <div id="w-node-_03a41cf0-dbb0-1983-e56b-30c74061f343-474cba8d" class="card"><img
+            src="public/images/icon_highquality.png" alt="" height="70" loading="lazy">
+          <div class="card-title">Highest Video Quality</div>
+          <div class="div-block"></div>
+          <div class="card-description">We provide lowest latency through our peer-to-peer WebRTC technology, combined
+            with our most sophisticated video compression and scaling optimization</div>
+        </div>
+        <div id="w-node-e8417a6a-2e7f-b12f-a468-0babcb9bd0f2-474cba8d" class="card"><img
+            src="public/images/icon_secure2.png" sizes="100vw" height="70" loading="lazy" alt=""
+            srcset="public/images/icon_secure2-p-500.png 500w, public/images/icon_secure2-p-800.png 800w, public/images/icon_secure2-p-1080.png 1080w, public/images/icon_secure2.png 1088w">
+          <div class="card-title">Highest Security</div>
+          <div class="div-block"></div>
+          <div class="card-description">Our decentralized video chat skips the servers. Call data remains only within
+            you and your friends. Coupled with our end-to-end encryption, we ensure your total privacy and security.
+          </div>
+        </div>
+        <div id="w-node-_42734162-f9d2-d945-a6f9-cffa05ef6c39-474cba8d" class="card"><img
+            src="public/images/icon_diversity.png" alt="" height="70" loading="lazy">
+          <div class="card-title">For Everyone</div>
+          <div class="div-block"></div>
+          <div class="card-description"> Introverted? Replace video chats with your avatar. Want to hang with existing
+            friends? Invite them to your secret room. We&#x27;ve designed to accommodate everyone.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <section class="cta bg-dark">
+    <div class="container-flex call-to-action w-container">
+      <div class="call-to-action-wrapper">
+        <h2 class="heading-10">Are you ready?</h2>
+        <div class="text-block-2">Make new friends and connect with your existing friends without leaving your room.
+          Immediately and safely.</div>
+      </div>
+      <!-- <a href="#" class="primary-button w-button">GET STARTED</a> -->
+    </div>
+  </section>
+  <footer class="section footer">
+    <div class="container w-container">
+      <div class="subfooter">
+        <div class="text-block-3">Ⓒ 2021 Onara, all rights reserved</div>
+      </div>
+    </div>
+  </footer>
+  <div class="w-embed">
+    <style type="text/css">
+      .feature-link {
+        text-underline-position: under;
+      }
+    </style>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/8.2.3/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.2.3/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.2.3/firebase-firestore.js"></script>
+  <script src="public/firebase.js"></script>
+  <script src="public/login.js"></script>
+</body>
+
+</html>
