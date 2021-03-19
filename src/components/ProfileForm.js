@@ -46,14 +46,9 @@ function ProfileForm({ props }) {
     this.removeProfileFormInterface();
   };
 
-  // const closeButtonCallback = () => {
-  //   this.logger.log('close profile');
-  //   this.removeProfileFormInterface();
-  // };
-
   return (
     <div id="profile-form-wrapper" className="background-overlay">
-      <div className="container rounded bg-white mt-5 mb-5 w-50">
+      <div className="container rounded bg-white w-50">
         <div className="row">
           <div className="col-md-3 border-right d-flex flex-column align-items-center text-center justify-content-center">
             <div
@@ -72,8 +67,8 @@ function ProfileForm({ props }) {
             </div>
           </div>
           <div className="col-md-9">
-            <div className="p-3 py-5">
-              <div className="d-flex flex-column align-items-center text-center justify-content-center">
+            <div>
+              <div className="mt-5 d-flex flex-column align-items-center text-center justify-content-center">
                 <img
                   id="profile-image"
                   className="rounded-circle"
@@ -179,14 +174,6 @@ function ProfileForm({ props }) {
                   >
                     Save Profile
                   </button>
-                  {/* <button
-                    className="btn btn-danger"
-                    id="close-profile-button"
-                    type="button"
-                    onClick={closeButtonCallback}
-                  >
-                    Close
-                  </button> */}
                 </div>
                 <div
                   className="text-center mt-2 alert-success"
