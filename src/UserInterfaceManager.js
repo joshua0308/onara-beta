@@ -68,8 +68,10 @@ class UserInterfaceManager {
           borderRadius: '10px',
           color: 'white',
           padding: '10px',
-          width: '400px',
-          zIndex: 30
+          zIndex: 30,
+          width: '30%',
+          maxWidth: '400px',
+          minWidth: '250px'
         }}
       >
         <div
@@ -79,10 +81,10 @@ class UserInterfaceManager {
             color: 'black',
             padding: '5px',
             position: 'absolute',
-            top: '-38px'
+            top: '-3em'
           }}
         >
-          Chat to Everyone in {barId === 'town' ? 'Town' : barId}
+          Chat to everyone in {barId === 'town' ? 'Town' : barId}
         </div>
         <button
           className="icon-button"
@@ -453,7 +455,7 @@ class UserInterfaceManager {
           this.createPlayerProfileInterface(playerInfo, isCurrentPlayer);
         }}
         style={{
-          fontSize: '18px',
+          fontSize: '1.3rem',
           textAlign: 'left',
           marginLeft: '15px',
           color: '#ececec'

@@ -33,15 +33,15 @@ function PlayerProfileContainer({ props }) {
     return (
       <div
         style={{
+          fontSize: '1rem',
           backgroundColor: 'transparent',
           display: 'inline-block',
-          padding: '2px 4px',
+          padding: '1px 2px',
           borderStyle: 'solid',
           borderWidth: '1px',
           borderColor: '#3333a9',
           color: '#3333a9',
           borderRadius: '5px',
-          fontSize: '13px',
           marginLeft: '5px',
           marginTop: '5px',
           cursor: 'default'
@@ -50,6 +50,12 @@ function PlayerProfileContainer({ props }) {
         {props.message}
       </div>
     );
+  };
+
+  const listStyle = {
+    margin: '0',
+    display: 'flex',
+    fontSize: '1rem'
   };
 
   return (
@@ -74,23 +80,23 @@ function PlayerProfileContainer({ props }) {
         </div>
       </div>
       <div id="player-bio" style={{ fontSize: '15px', color: '#717171' }}>
-        <div style={{ margin: '2px', display: 'flex' }}>
+        <div style={listStyle}>
           <span style={{ marginRight: '5px' }}>💼</span>
           <span>Currently {playerData.currently}</span>
         </div>
-        <div style={{ margin: '2px', display: 'flex' }}>
+        <div style={listStyle}>
           <span style={{ marginRight: '5px' }}>📄</span>
           <span>Previously {playerData.previously}</span>
         </div>
-        <div style={{ margin: '2px', display: 'flex' }}>
+        <div style={listStyle}>
           <span style={{ marginRight: '5px' }}>🎓</span>
           <span>{playerData.education}</span>
         </div>
-        <div style={{ margin: '2px', display: 'flex' }}>
+        <div style={listStyle}>
           <span style={{ marginRight: '5px' }}>📍</span>
           <span>{`${playerData.city}, ${playerData.country}`}</span>
         </div>
-        <div style={{ margin: '2px', display: 'flex' }}>
+        <div style={listStyle}>
           <span style={{ marginRight: '5px' }}>🌐</span>
           <span>{playerData.language}</span>
         </div>
