@@ -12,6 +12,10 @@ class NativePeerManager {
     this.localStream = null;
     // this.localVideoElementStream = null;
     // this.localScreenshareStream = null;
+    this.localVideoTrack = null;
+    this.localAudioTrack = null;
+    this.localScreenshareTrack = null;
+
     this.localVideoElement = null;
     this.roomHash = null;
     this.mode = null;
@@ -322,6 +326,14 @@ class NativePeerManager {
   onAddStream(remoteSocketId) {
     return (event) => {
       console.log('onAddStream', event.stream.getTracks());
+
+      // if only audio track
+      // create img element
+      // this.userInterfaceManager.addStreamToAudioElement()
+
+      // if both video and audio
+      // create video element
+
       this.userInterfaceManager.addStreamToVideoElement(
         event.stream,
         remoteSocketId,
@@ -398,9 +410,13 @@ class NativePeerManager {
   requestVideo() {
     console.log('requestVideo');
     // stop screenshare streams
-    this.localVideoElement.srcObject
-      .getTracks()
-      .forEach((track) => track.stop());
+    if (this.localVideoElement) {
+      this.localVideoElement.srcObject.getTracks().forEach((track) => {
+        if (track.kind === 'video') {
+          track.stop();
+        }
+      });
+    }
 
     // Get webcam input
     navigator.mediaDevices

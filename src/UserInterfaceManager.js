@@ -524,7 +524,6 @@ class UserInterfaceManager {
             style={{
               width: '70vw',
               borderRadius: '40px'
-              // marginLeft: '300px'
             }}
             id="screenshare-element"
             poster="https://media.giphy.com/media/VseXvvxwowwCc/giphy.gif"
@@ -535,7 +534,6 @@ class UserInterfaceManager {
           <div
             style={{
               width: '42vw',
-              // marginLeft: '300px',
               backgroundColor: '#8585858f',
               height: '40vh',
               display: 'flex',
