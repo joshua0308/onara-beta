@@ -19,12 +19,6 @@ class Preload extends Phaser.Scene {
       'assets/final-background-town.png'
     );
 
-    this.load.spritesheet('player', 'assets/player/move_sprite_1.png', {
-      frameWidth: 32,
-      frameHeight: 38,
-      spacing: 32
-    });
-
     this.load.spritesheet('boy-idle', 'assets/new-player/boy-idle.png', {
       frameWidth: 382,
       frameHeight: 1080,
