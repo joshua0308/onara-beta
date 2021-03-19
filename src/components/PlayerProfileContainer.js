@@ -33,15 +33,15 @@ function PlayerProfileContainer({ props }) {
     return (
       <div
         style={{
-          fontSize: '1rem',
           backgroundColor: 'transparent',
           display: 'inline-block',
-          padding: '1px 2px',
+          padding: '2px 4px',
           borderStyle: 'solid',
           borderWidth: '1px',
           borderColor: '#3333a9',
           color: '#3333a9',
           borderRadius: '5px',
+          fontSize: '13px',
           marginLeft: '5px',
           marginTop: '5px',
           cursor: 'default'

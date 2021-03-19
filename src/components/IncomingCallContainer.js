@@ -35,6 +35,12 @@ function IncomingCallContainer({ props }) {
     );
   };
 
+  const listStyle = {
+    margin: '0',
+    display: 'flex',
+    fontSize: '1rem'
+  };
+
   return (
     <div id="caller-card-container" className="background-overlay">
       <div id="caller-card">
@@ -58,23 +64,23 @@ function IncomingCallContainer({ props }) {
           </div>
         </div>
         <div id="player-bio" style={{ fontSize: '15px', color: '#717171' }}>
-          <div style={{ margin: '2px', display: 'flex' }}>
+          <div style={listStyle}>
             <span style={{ marginRight: '5px' }}>💼</span>
             <span>Currently {playerData.currently}</span>
           </div>
-          <div style={{ margin: '2px', display: 'flex' }}>
+          <div style={listStyle}>
             <span style={{ marginRight: '5px' }}>📄</span>
             <span>Previously {playerData.previously}</span>
           </div>
-          <div style={{ margin: '2px', display: 'flex' }}>
+          <div style={listStyle}>
             <span style={{ marginRight: '5px' }}>🎓</span>
             <span>{playerData.education}</span>
           </div>
-          <div style={{ margin: '2px', display: 'flex' }}>
+          <div style={listStyle}>
             <span style={{ marginRight: '5px' }}>📍</span>
             <span>{`${playerData.city}, ${playerData.country}`}</span>
           </div>
-          <div style={{ margin: '2px', display: 'flex' }}>
+          <div style={listStyle}>
             <span style={{ marginRight: '5px' }}>🌐</span>
             <span>{playerData.language}</span>
           </div>
