@@ -33,7 +33,7 @@ class NativePeerManager {
     this.createAnswer = this.createAnswer.bind(this);
     this.onAnswer = this.onAnswer.bind(this);
     this.onAddStream = this.onAddStream.bind(this);
-    this.onGetStream = this.onGetStream.bind(this);
+    this.onStream = this.onStream.bind(this);
   }
 
   async joinRoom(roomHash) {
@@ -130,10 +130,6 @@ class NativePeerManager {
       iceServers: this.token.iceServers
     });
 
-    this.localStream.getTracks().forEach((track) => {
-      this.peerConnections[remoteSocketId].addTrack(track, this.localStream);
-    });
-
     this.dataChannels[remoteSocketId] = this.peerConnections[
       remoteSocketId
     ].createDataChannel('chat', {
@@ -177,6 +173,12 @@ class NativePeerManager {
     };
   }
 
+  addTracksToPeerConnection(remoteSocketId) {
+    this.localStream.getTracks().forEach((track) => {
+      this.peerConnections[remoteSocketId].addTrack(track, this.localStream);
+    });
+  }
+
   getMediaConstraints() {
     return navigator.mediaDevices.enumerateDevices().then((devices) => {
       let audioExists = false;
@@ -203,14 +205,14 @@ class NativePeerManager {
 
     return navigator.mediaDevices
       .getUserMedia(constraints)
-      .then(this.onGetStream)
+      .then(this.onStream)
       .catch((err) => {
         console.log(err);
 
         // if video & audio doesn't work, try only audio
         return navigator.mediaDevices
           .getUserMedia({ video: false, audio: true })
-          .then(this.onGetStream)
+          .then(this.onStream)
           .catch((err) => {
             console.log(err);
             alert('Please allow camera and mic access in order join the call');
@@ -219,9 +221,30 @@ class NativePeerManager {
       });
   }
 
-  onGetStream(stream) {
+  onStream(stream) {
     this.setMode(MODE.VIDEO);
-    this.onMediaStream(stream);
+
+    console.log('onMediaStream', stream.getTracks());
+
+    if (!this.hasVideoTrack(stream)) {
+      this.addFakeVideoTrackToStream(stream);
+    }
+
+    this.localStream = stream;
+    this.userInterfaceManager.createInCallInterface();
+
+    // if no video, do not add a video element
+    this.localVideoElement = this.userInterfaceManager.addStreamToVideoElement(
+      stream,
+      this.socket.id,
+      true
+    );
+
+    if (this.isFakeVideo) {
+      document.getElementById(`image-${this.socket.id}`).style.display =
+        'inline';
+    }
+
     return;
   }
 
@@ -236,28 +259,6 @@ class NativePeerManager {
     const fakeVideoStream = canvas.captureStream();
     const videoTrack = fakeVideoStream.getVideoTracks()[0];
     stream.addTrack(videoTrack);
-  }
-
-  onMediaStream(stream) {
-    console.log('onMediaStream', stream.getTracks());
-
-    if (!this.hasVideoTrack(stream)) {
-      this.addFakeVideoTrackToStream(stream);
-    }
-
-    console.log('localStream', stream.getTracks());
-    this.localStream = stream;
-    this.userInterfaceManager.createInCallInterface();
-    this.localVideoElement = this.userInterfaceManager.addStreamToVideoElement(
-      stream,
-      this.socket.id,
-      true
-    );
-
-    if (this.isFakeVideo) {
-      document.getElementById(`image-${this.socket.id}`).style.display =
-        'inline';
-    }
   }
 
   onIceCandidate(remoteSocketId) {
@@ -289,24 +290,43 @@ class NativePeerManager {
 
   createOffer(remoteSocketId) {
     console.log('createOffer', remoteSocketId);
+    this.addTracksToPeerConnection(remoteSocketId);
+
     this.peerConnections[remoteSocketId]
       .createOffer()
       .then((offer) => {
-        this.peerConnections[remoteSocketId].setLocalDescription(offer);
-        this.socket.emit('offer', JSON.stringify(offer), remoteSocketId);
+        return this.peerConnections[remoteSocketId].setLocalDescription(offer);
+      })
+      .then(() => {
+        this.socket.emit(
+          'offer',
+          JSON.stringify(this.peerConnections[remoteSocketId].localDescription),
+          remoteSocketId
+        );
       })
       .catch((err) => console.log(err));
   }
 
   createAnswer(offer, remoteSocketId) {
-    console.log('createAnswer');
+    console.log('createAnswer', remoteSocketId);
     const rtcOffer = new RTCSessionDescription(JSON.parse(offer));
-    this.peerConnections[remoteSocketId].setRemoteDescription(rtcOffer);
+
     this.peerConnections[remoteSocketId]
-      .createAnswer()
+      .setRemoteDescription(rtcOffer)
+      .then(() => {
+        this.addTracksToPeerConnection(remoteSocketId);
+        return this.peerConnections[remoteSocketId].createAnswer();
+      })
       .then((answer) => {
-        this.peerConnections[remoteSocketId].setLocalDescription(answer);
-        this.socket.emit('answer', JSON.stringify(answer), remoteSocketId);
+        return this.peerConnections[remoteSocketId].setLocalDescription(answer);
+      })
+      .then(() => {
+        this.socket.emit(
+          'answer',
+          JSON.stringify(this.peerConnections[remoteSocketId].localDescription),
+          remoteSocketId
+        );
+        return;
       })
       .catch((err) => console.log(err));
   }
