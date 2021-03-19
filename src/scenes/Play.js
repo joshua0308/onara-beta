@@ -38,10 +38,12 @@ class Play extends Phaser.Scene {
   }
 
   updateCameraZoom() {
-    // zooms in if window is bigger than map size
-    if (window.innerHeight > this.map.heightInPixels || this.isMobile) {
-      this.cameras.main.setZoom(window.innerHeight / this.map.heightInPixels);
-    }
+    const zoom =
+      Math.floor((window.innerHeight / this.map.heightInPixels) * 100) / 100;
+
+    // set minimum zoom to 0.8
+    this.cameras.main.setZoom(Math.max(zoom, 0.8));
+    console.log('debug: zoom', zoom);
   }
 
   async create({ barId = 'town' }) {
