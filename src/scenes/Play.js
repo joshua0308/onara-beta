@@ -183,12 +183,7 @@ class Play extends Phaser.Scene {
       }
     });
 
-    // I can't tell if this event handler is working properly
     window.onbeforeunload = () => {
-      if (this.peer) {
-        this.socket.emit('end-call', { peerSocketId: this.peerSocketId });
-      }
-
       this.socket.close();
     };
 
@@ -264,7 +259,6 @@ class Play extends Phaser.Scene {
           displayName: this.players[callerId].displayName,
           socketIdsInRoom
         });
-        this.peerSocketId = callerId;
 
         this.userInterfaceManager.createIncomingCallInterface(
           this.players,
@@ -311,20 +305,26 @@ class Play extends Phaser.Scene {
       });
     });
 
-    this.socket.on('player-disconnected', (otherPlayerSocketId) => {
-      this.userInterfaceManager.removePlayerFromOnlineList(otherPlayerSocketId);
+    this.socket.on('player-disconnected', (socketId) => {
+      this.logger.log('player-disconnected', { socketId });
 
-      this.logger.log('player-disconnected', { otherPlayerSocketId });
-      delete this.players[otherPlayerSocketId];
+      this.userInterfaceManager.removePlayerFromOnlineList(socketId);
 
-      if (this.peerSocketId === otherPlayerSocketId) {
-        this.logger.log('chat peer disconnected');
-        this.socket.emit('end-call', { peerSocketId: this.peerSocketId });
-        this.userInterfaceManager.removeInCallInterface();
+      delete this.players[socketId];
+
+      if (
+        Object.keys(this.nativePeerManager.peerConnections).includes(socketId)
+      ) {
+        if (Object.keys(this.nativePeerManager.peerConnections).length === 1) {
+          this.userInterfaceManager.removeInCallInterface();
+          this.nativePeerManager.endCall();
+        } else {
+          this.nativePeerManager.removeConnection(socketId);
+        }
       }
 
       this.otherPlayersGroup.getChildren().forEach((otherPlayer) => {
-        if (otherPlayerSocketId === otherPlayer.socketId) {
+        if (socketId === otherPlayer.socketId) {
           otherPlayer.destroy();
         }
       });
