@@ -341,20 +341,90 @@ class UserInterfaceManager {
     }
   }
 
-  addStreamToVideoElement(stream, socketId, isLocalStream) {
-    this.logger.log('addStreamToVideoElement', stream.getTracks());
+  hasVideoTrack(stream) {
+    return stream.getVideoTracks().length > 0;
+  }
 
-    function hasVideoTrack(stream) {
-      return stream.getVideoTracks().length > 0;
+  addStream(stream, socketId, isLocalStream) {
+    if (this.hasVideoTrack(stream)) {
+      return this.addStreamToVideoElement(stream, socketId, isLocalStream);
+    } else {
+      return this.addStreamToAudioElement(stream, socketId, isLocalStream);
     }
+  }
 
+  addStreamToAudioElement(stream, socketId, isLocalStream) {
     const audioElement = <audio autoPlay id={`audio-${socketId}`}></audio>;
-
-    if (!hasVideoTrack(stream)) {
-      audioElement.srcObject = stream;
+    audioElement.srcObject = stream;
+    if (isLocalStream) {
+      audioElement.muted = 'true';
     }
 
     const AudioElement = () => audioElement;
+
+    const mediaWrapper = document.getElementById('videos-wrapper');
+    const AudioContainer = () => (
+      <div
+        id="video-container"
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center'
+        }}
+      >
+        <AudioElement />
+        <img
+          id={`image-${socketId}`}
+          style={{
+            position: 'inherit',
+            display: 'inline'
+          }}
+          className="video-element"
+          src={
+            this.scene.players[socketId].profilePicURL ||
+            '/public/assets/placeholder-profile-pic.png'
+          }
+        ></img>
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center'
+          }}
+        >
+          <span
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              color: 'white',
+              marginTop: '5px',
+              fontSize: '20px',
+              padding: '0px 5px',
+              backgroundColor: 'rgba(123, 114, 114, 0.8)',
+              borderRadius: '10px'
+            }}
+          >
+            {this.scene.players[socketId].displayName}
+          </span>
+          {!isLocalStream && (
+            <button
+              id="toggle-remote-audio-button"
+              className="icon-button"
+              onClick={(e) => this.toggleRemoteAudio(e, `audio-${socketId}`)}
+            >
+              <i className="fas fa-microphone fa-xs"></i>
+            </button>
+          )}
+        </div>
+      </div>
+    );
+
+    mediaWrapper.appendChild(<AudioContainer />);
+
+    return audioElement;
+  }
+
+  addStreamToVideoElement(stream, socketId, isLocalStream) {
+    this.logger.log('addStreamToVideoElement', stream.getTracks());
 
     const videoElement = (
       <video
@@ -377,12 +447,7 @@ class UserInterfaceManager {
 
     const VideoElement = () => videoElement;
 
-    console.log(
-      'debug: this.scene.players[socketId]',
-      this.scene.players[socketId]
-    );
-
-    const videosWrapper = document.getElementById('videos-wrapper');
+    const mediaWrapper = document.getElementById('videos-wrapper');
     const VideoContainer = () => (
       <div
         id="video-container"
@@ -392,12 +457,12 @@ class UserInterfaceManager {
           alignItems: 'center'
         }}
       >
-        {hasVideoTrack(stream) ? <VideoElement /> : <AudioElement />}
+        <VideoElement />
         <img
           id={`image-${socketId}`}
           style={{
-            position: hasVideoTrack(stream) ? 'absolute' : 'inherit',
-            display: hasVideoTrack(stream) ? 'none' : 'inline'
+            position: 'absolute',
+            display: 'none'
           }}
           className="video-element"
           src={
@@ -437,7 +502,8 @@ class UserInterfaceManager {
         </div>
       </div>
     );
-    videosWrapper.appendChild(<VideoContainer />);
+
+    mediaWrapper.appendChild(<VideoContainer />);
 
     return videoElement;
   }

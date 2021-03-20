@@ -92,6 +92,16 @@ function InCallButtons() {
   const toggleScreenshare = () => {
     this.logger.log('toggleScreenshare');
 
+    if (
+      !this.scene.nativePeerManager.hasVideoTrack(
+        this.scene.nativePeerManager.localStream
+      )
+    ) {
+      return alert(
+        'Currently you can only share your screen when your camera is enabled. We are working on a fix.'
+      );
+    }
+
     const screenshareIcon = document.getElementById('screenshare-icon');
     if (screenshareIcon.classList.contains('fa-desktop')) {
       if (this.scene.nativePeerManager.mode === 'screenshare') {
@@ -108,7 +118,7 @@ function InCallButtons() {
       screenshareIcon.classList.remove('fa-camera');
       screenshareIcon.classList.add('fa-desktop');
 
-      this.scene.nativePeerManager.requestVideo();
+      this.scene.nativePeerManager.switchToCameraTrack();
     }
   };
 

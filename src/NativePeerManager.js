@@ -22,7 +22,6 @@ class NativePeerManager {
     this.mode = null;
     this.connected = {};
     this.token = null;
-    this.isFakeVideo = false;
 
     this.dataChannels = {};
     this.peerConnections = {};
@@ -149,9 +148,13 @@ class NativePeerManager {
       console.log('dataChannel onmessage', receivedData);
     };
 
+    this.peerConnections[remoteSocketId].negotiationneeded = (event) =>
+      console.log('negotiationneeded', event);
+
     this.peerConnections[remoteSocketId].onicecandidate = this.onIceCandidate(
       remoteSocketId
     );
+
     this.peerConnections[remoteSocketId].onaddstream = this.onAddStream(
       remoteSocketId
     );
@@ -161,16 +164,16 @@ class NativePeerManager {
     ) => {
       switch (this.peerConnections[remoteSocketId].iceConnectionState) {
         case 'connected':
-          console.log('connected');
+          console.log('iceConnectionState: connected', event);
           break;
         case 'disconnected':
-          console.log('disconnected');
+          console.log('iceConnectionState: disconnected', event);
           break;
         case 'failed':
-          console.log('failed');
+          console.log('iceConnectionState: failed', event);
           break;
         case 'closed':
-          console.log('closed');
+          console.log('iceConnectionState: closed', event);
           break;
       }
     };
@@ -237,31 +240,16 @@ class NativePeerManager {
     this.userInterfaceManager.createInCallInterface();
 
     // if no video, do not add a video element
-    this.localVideoElement = this.userInterfaceManager.addStreamToVideoElement(
+    this.localVideoElement = this.userInterfaceManager.addStream(
       stream,
       this.socket.id,
       true
     );
-
-    if (this.isFakeVideo) {
-      document.getElementById(`image-${this.socket.id}`).style.display =
-        'inline';
-    }
-
     return;
   }
 
   setMode(mode) {
     this.mode = mode;
-  }
-
-  addFakeVideoTrackToStream(stream) {
-    let canvas = document.createElement('canvas');
-
-    this.isFakeVideo = true;
-    const fakeVideoStream = canvas.captureStream();
-    const videoTrack = fakeVideoStream.getVideoTracks()[0];
-    stream.addTrack(videoTrack);
   }
 
   onIceCandidate(remoteSocketId) {
@@ -291,47 +279,41 @@ class NativePeerManager {
     this.peerConnections[remoteSocketId].addIceCandidate(rtcCandidate);
   }
 
-  createOffer(remoteSocketId) {
+  async createOffer(remoteSocketId) {
     console.log('createOffer', remoteSocketId);
     this.addTracksToPeerConnection(remoteSocketId);
 
-    this.peerConnections[remoteSocketId]
-      .createOffer()
-      .then((offer) => {
-        return this.peerConnections[remoteSocketId].setLocalDescription(offer);
-      })
-      .then(() => {
-        this.socket.emit(
-          'offer',
-          JSON.stringify(this.peerConnections[remoteSocketId].localDescription),
-          remoteSocketId
-        );
-      })
-      .catch((err) => console.log(err));
+    try {
+      const offer = await this.peerConnections[remoteSocketId].createOffer();
+      await this.peerConnections[remoteSocketId].setLocalDescription(offer);
+      this.socket.emit(
+        'offer',
+        JSON.stringify(this.peerConnections[remoteSocketId].localDescription),
+        remoteSocketId
+      );
+    } catch (e) {
+      console.log(e);
+    }
   }
 
-  createAnswer(offer, remoteSocketId) {
+  async createAnswer(offer, remoteSocketId) {
     console.log('createAnswer', remoteSocketId);
     const rtcOffer = new RTCSessionDescription(JSON.parse(offer));
 
-    this.peerConnections[remoteSocketId]
-      .setRemoteDescription(rtcOffer)
-      .then(() => {
-        this.addTracksToPeerConnection(remoteSocketId);
-        return this.peerConnections[remoteSocketId].createAnswer();
-      })
-      .then((answer) => {
-        return this.peerConnections[remoteSocketId].setLocalDescription(answer);
-      })
-      .then(() => {
-        this.socket.emit(
-          'answer',
-          JSON.stringify(this.peerConnections[remoteSocketId].localDescription),
-          remoteSocketId
-        );
-        return;
-      })
-      .catch((err) => console.log(err));
+    try {
+      await this.peerConnections[remoteSocketId].setRemoteDescription(rtcOffer);
+      this.addTracksToPeerConnection(remoteSocketId);
+      const answer = await this.peerConnections[remoteSocketId].createAnswer();
+      await this.peerConnections[remoteSocketId].setLocalDescription(answer);
+      this.socket.emit(
+        'answer',
+        JSON.stringify(this.peerConnections[remoteSocketId].localDescription),
+        remoteSocketId
+      );
+      return;
+    } catch (e) {
+      console.log(e);
+    }
   }
 
   onAnswer(answer, remoteSocketId) {
@@ -349,25 +331,7 @@ class NativePeerManager {
   onAddStream(remoteSocketId) {
     return (event) => {
       console.log('onAddStream', event.stream.getTracks());
-
-      // if only audio track
-      // create img element
-      // this.userInterfaceManager.addStreamToAudioElement()
-
-      // if both video and audio
-      // create video element
-
-      this.userInterfaceManager.addStreamToVideoElement(
-        event.stream,
-        remoteSocketId,
-        false
-      );
-
-      if (this.isFakeVideo) {
-        document.getElementById(`image-${remoteSocketId}`).style.display =
-          'inline';
-      }
-
+      this.userInterfaceManager.addStream(event.stream, remoteSocketId, false);
       this.connected[remoteSocketId] = true;
     };
   }
@@ -384,41 +348,49 @@ class NativePeerManager {
     };
 
     // Find sender
-    const senders = Object.values(this.peerConnections).map((peerConnection) =>
-      peerConnection.getSenders().find(function (sender) {
-        return sender.track.kind === videoTrack.kind; // make sure track types match
-      })
-    );
-
     // Replace sender track
-    senders.forEach((sender) => sender.replaceTrack(videoTrack));
+    if (this.hasVideoTrack(this.localStream)) {
+      console.log('debug: replaceTrack');
+
+      const senders = Object.values(this.peerConnections).map(
+        (peerConnection) =>
+          peerConnection.getSenders().find(function (sender) {
+            return sender.track.kind === videoTrack.kind; // make sure track types match
+          })
+      );
+
+      senders.forEach((sender) => sender.replaceTrack(videoTrack));
+    } else {
+      console.log('debug: addTrack');
+      Object.values(this.peerConnections).forEach((peerConnection) => {
+        peerConnection.addTrack(videoTrack, this.localStream);
+      });
+    }
   }
 
-  requestScreenshare() {
-    navigator.mediaDevices
-      .getDisplayMedia({
+  async requestScreenshare() {
+    try {
+      const stream = await navigator.mediaDevices.getDisplayMedia({
         video: true,
         audio: false
-      })
-      .then((stream) => {
-        this.setMode('screenshare');
-        this.localScreenshareStream = stream;
-        const screenshareVideoTrack = stream
-          .getTracks()
-          .find((track) => track.kind === 'video');
-
-        this.replacePeerConnectionVideoTrack(screenshareVideoTrack);
-        this.userInterfaceManager.setDisplayMode(this.mode, stream, true);
-
-        this.socket.emit('set-display-mode', {
-          roomHash: this.roomHash,
-          mode: this.mode
-        });
-      })
-      .catch((err) => {
-        console.log(err);
-        console.log('Error sharing screen');
       });
+      this.setMode('screenshare');
+      this.localScreenshareStream = stream;
+      const screenshareVideoTrack = stream
+        .getTracks()
+        .find((track) => track.kind === 'video');
+
+      this.replacePeerConnectionVideoTrack(screenshareVideoTrack);
+      this.userInterfaceManager.setDisplayMode(this.mode, stream, true);
+
+      this.socket.emit('set-display-mode', {
+        roomHash: this.roomHash,
+        mode: this.mode
+      });
+    } catch (e) {
+      console.log(e);
+      console.log('Error sharing screen');
+    }
   }
 
   switchToCameraTrack() {
@@ -433,8 +405,11 @@ class NativePeerManager {
       .getTracks()
       .find((track) => track.kind === 'video');
 
+    if (cameraTrack) {
+      this.replacePeerConnectionVideoTrack(cameraTrack);
+    }
+
     this.setMode('video');
-    this.replacePeerConnectionVideoTrack(cameraTrack);
     this.userInterfaceManager.setDisplayMode(this.mode, this.localStream);
     this.socket.emit('set-display-mode', {
       roomHash: this.roomHash,
@@ -483,7 +458,6 @@ class NativePeerManager {
     this.connected = {};
     this.localICECandidates = {};
     this.token = null;
-    this.isFakeVideo = false;
 
     this.socket.removeAllListeners('join');
     this.socket.removeAllListeners('ready');
