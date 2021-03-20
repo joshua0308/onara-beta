@@ -67,6 +67,26 @@ function ProfileForm({ props }) {
             </div>
           </div>
           <div className="col-md-9">
+            <button
+              style={{
+                position: 'absolute',
+                left: '0px',
+                margin: '10px',
+                borderStyle: 'none',
+                width: '40px',
+                height: '40px',
+                borderRadius: '20px',
+                cursor: 'pointer'
+              }}
+              title="Logout"
+              alt="Logout"
+              onClick={() => {
+                this.firebaseAuth.signOut();
+                window.location.replace('/');
+              }}
+            >
+              <i className="fas fa-sign-out-alt"></i>
+            </button>
             <div>
               <div className="mt-5 d-flex flex-column align-items-center text-center justify-content-center">
                 <img
@@ -172,7 +192,7 @@ function ProfileForm({ props }) {
                     type="submit"
                     onClick={saveButtonCallback}
                   >
-                    Save Profile
+                    Save and Close
                   </button>
                 </div>
                 <div

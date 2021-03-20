@@ -344,6 +344,18 @@ class UserInterfaceManager {
   addStreamToVideoElement(stream, socketId, isLocalStream) {
     this.logger.log('addStreamToVideoElement', stream.getTracks());
 
+    function hasVideoTrack(stream) {
+      return stream.getVideoTracks().length > 0;
+    }
+
+    const audioElement = <audio autoPlay id={`audio-${socketId}`}></audio>;
+
+    if (!hasVideoTrack(stream)) {
+      audioElement.srcObject = stream;
+    }
+
+    const AudioElement = () => audioElement;
+
     const videoElement = (
       <video
         className="video-element"
@@ -380,10 +392,13 @@ class UserInterfaceManager {
           alignItems: 'center'
         }}
       >
-        <VideoElement />
+        {hasVideoTrack(stream) ? <VideoElement /> : <AudioElement />}
         <img
           id={`image-${socketId}`}
-          style={{ position: 'absolute', display: 'none' }}
+          style={{
+            position: hasVideoTrack(stream) ? 'absolute' : 'inherit',
+            display: hasVideoTrack(stream) ? 'none' : 'inline'
+          }}
           className="video-element"
           src={
             this.scene.players[socketId].profilePicURL ||

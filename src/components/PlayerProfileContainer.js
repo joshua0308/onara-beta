@@ -161,7 +161,7 @@ function PlayerProfileContainer({ props }) {
               marginRight: '5px'
             }}
           >
-            Grab a drink!
+            Video Call
           </button>
         )}
         <button

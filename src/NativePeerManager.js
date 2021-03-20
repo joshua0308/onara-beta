@@ -13,9 +13,9 @@ class NativePeerManager {
     this.localScreenshareStream = null;
     // this.localVideoElementStream = null;
     // this.localScreenshareStream = null;
-    this.localVideoTrack = null;
-    this.localAudioTrack = null;
-    this.localScreenshareTrack = null;
+    // this.localVideoTrack = null;
+    // this.localAudioTrack = null;
+    // this.localScreenshareTrack = null;
 
     this.localVideoElement = null;
     this.roomHash = null;
@@ -35,6 +35,7 @@ class NativePeerManager {
     this.onAnswer = this.onAnswer.bind(this);
     this.onAddStream = this.onAddStream.bind(this);
     this.onStream = this.onStream.bind(this);
+    this.hasVideoTrack = this.hasVideoTrack.bind(this);
   }
 
   async joinRoom(roomHash) {
@@ -200,9 +201,9 @@ class NativePeerManager {
       };
     });
   }
+
   async requestMediaStream() {
     console.log('requestMediaStream');
-
     const constraints = await this.getMediaConstraints();
 
     return navigator.mediaDevices
@@ -228,8 +229,8 @@ class NativePeerManager {
 
     console.log('onMediaStream', stream.getTracks());
 
-    if (!this.hasVideoTrack(stream)) {
-      this.addFakeVideoTrackToStream(stream);
+    if (this.hasVideoTrack(stream)) {
+      // this.hasVideoTrack = true;
     }
 
     this.localStream = stream;
@@ -472,10 +473,11 @@ class NativePeerManager {
       Object.values(this.peerConnections).forEach((pc) => pc.close());
     }
 
+    this.localStream = null;
+    this.localScreenshareStream = null;
     this.localVideoElement = null;
     this.remoteSocketId = null;
     this.peerConnections = {};
-    this.localStream = null;
     this.dataChannels = {};
     this.roomHash = null;
     this.connected = {};
@@ -483,13 +485,15 @@ class NativePeerManager {
     this.token = null;
     this.isFakeVideo = false;
 
-    this.socket.removeAllListeners('offer');
+    this.socket.removeAllListeners('join');
     this.socket.removeAllListeners('ready');
     this.socket.removeAllListeners('token');
-    this.socket.removeAllListeners('candidate');
+    this.socket.removeAllListeners('offer');
     this.socket.removeAllListeners('answer');
-    this.socket.removeAllListeners('join');
+    this.socket.removeAllListeners('candidate');
     this.socket.removeAllListeners('chat-message');
+    this.socket.removeAllListeners('toggle-video');
+    this.socket.removeAllListeners('set-display-mode');
   }
 }
 
