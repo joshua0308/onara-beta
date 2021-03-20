@@ -392,11 +392,7 @@ class UserInterfaceManager {
           alignItems: 'center'
         }}
       >
-        {hasVideoTrack(stream) && !isLocalStream ? (
-          <VideoElement />
-        ) : (
-          <AudioElement />
-        )}
+        {hasVideoTrack(stream) ? <VideoElement /> : <AudioElement />}
         <img
           id={`image-${socketId}`}
           style={{
