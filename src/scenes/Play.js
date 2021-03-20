@@ -7,11 +7,18 @@ import NativePeerManager from '../NativePeerManager';
 class Play extends Phaser.Scene {
   constructor(config) {
     super('PlayScene');
+    this.myPlayer = null;
     this.player = {};
+    this.players = {};
     this.playersSprite = {};
+    this.otherPlayersGroup = null;
     this.config = config;
-    this.logger = new Logger('Phaser');
 
+    this.socket = null;
+    this.nativePeerManager = null;
+    this.userInterfaceManager = null;
+
+    this.logger = new Logger('Phaser');
     this.updateMyPlayerInfo = this.updateMyPlayerInfo.bind(this);
   }
 
@@ -385,36 +392,6 @@ class Play extends Phaser.Scene {
 
     this.cameras.main.startFollow(player);
   }
-
-  setPlayerInfoInteraction(container, element) {
-    container
-      .setInteractive()
-      .on(Phaser.Input.Events.GAMEOBJECT_POINTER_DOWN, () => {
-        this.logger.log('down');
-        element.setVisible(!element.visible);
-      });
-  }
-
-  setMediaConstraints(devices) {
-    const mediaConstraints = { video: false, audio: false };
-    devices.forEach((device) => {
-      if (device.kind === 'audioinput') {
-        mediaConstraints.audio = true;
-      } else if (device.kind === 'videoinput') {
-        mediaConstraints.video = true;
-      }
-    });
-
-    this.logger.log('mediaConstraints', { mediaConstraints });
-    return navigator.mediaDevices.getUserMedia(mediaConstraints);
-  }
-
-  // stopStream() {
-  //   this.logger.log('stop stream');
-  //   // if (this.myStream) {
-  //   // const tracks = this.myStream.getTracks();
-  //   tracks.forEach((track) => track.stop());
-  // }
 }
 
 export default Play;

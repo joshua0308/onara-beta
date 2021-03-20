@@ -11,12 +11,6 @@ class NativePeerManager {
 
     this.localStream = null;
     this.localScreenshareStream = null;
-    // this.localVideoElementStream = null;
-    // this.localScreenshareStream = null;
-    // this.localVideoTrack = null;
-    // this.localAudioTrack = null;
-    // this.localScreenshareTrack = null;
-
     this.localVideoElement = null;
     this.roomHash = null;
     this.mode = null;

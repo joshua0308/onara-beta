@@ -321,8 +321,16 @@ class UserInterfaceManager {
       `video-${remoteSocketId}`
     );
 
-    if (remoteVideoElement) {
-      remoteVideoElement.remove();
+    const remoteAudioElement = document.getElementById(
+      `audio-${remoteSocketId}`
+    );
+
+    if (remoteVideoElement && remoteVideoElement.parentNode) {
+      remoteVideoElement.parentNode.remove();
+    }
+
+    if (remoteAudioElement && remoteAudioElement.parentNode) {
+      remoteAudioElement.parentNode.remove();
     }
   }
 
