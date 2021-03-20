@@ -422,7 +422,7 @@ class NativePeerManager {
   }
 
   switchToCameraTrack() {
-    console.log('switchToVideoTrack');
+    console.log('switchToCameraTrack');
 
     // end screenshare stream
     if (this.localScreenshareStream) {
