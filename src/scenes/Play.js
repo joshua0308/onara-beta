@@ -50,12 +50,14 @@ class Play extends Phaser.Scene {
   }
 
   updateCameraZoom() {
-    const zoom =
-      Math.floor((window.innerHeight / this.map.heightInPixels) * 100) / 100;
+    if (this.map) {
+      const zoom =
+        Math.floor((window.innerHeight / this.map.heightInPixels) * 100) / 100;
 
-    // set minimum zoom to 0.8
-    this.cameras.main.setZoom(Math.max(zoom, 0.8));
-    console.log('debug: zoom', zoom);
+      // set minimum zoom to 0.8
+      this.cameras.main.setZoom(Math.max(zoom, 0.8));
+      console.log('debug: zoom', zoom);
+    }
   }
 
   async create({ barId = 'town' }) {
@@ -346,10 +348,7 @@ class Play extends Phaser.Scene {
 
       this.otherPlayersGroup.getChildren().forEach((otherPlayer) => {
         if (socketId === otherPlayer.socketId) {
-          this.otherPlayersGroup.remove(
-            this.otherPlayersGroup.children[index],
-            true
-          );
+          this.otherPlayersGroup.remove(otherPlayer, true, true);
         }
       });
     });
@@ -358,15 +357,11 @@ class Play extends Phaser.Scene {
       this.logger.log('room-change', { socketId });
 
       this.userInterfaceManager.removePlayerFromOnlineList(socketId);
-
       delete this.players[socketId];
 
-      this.otherPlayersGroup.getChildren().forEach((otherPlayer, index) => {
+      this.otherPlayersGroup.getChildren().forEach((otherPlayer) => {
         if (socketId === otherPlayer.socketId) {
-          this.otherPlayersGroup.remove(
-            this.otherPlayersGroup.children[index],
-            true
-          );
+          this.otherPlayersGroup.remove(otherPlayer, true, true);
         }
       });
     });
