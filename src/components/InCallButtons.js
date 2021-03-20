@@ -93,7 +93,13 @@ function InCallButtons() {
     this.logger.log('toggleScreenshare');
 
     const screenshareIcon = document.getElementById('screenshare-icon');
-    if (this.scene.nativePeerManager.mode === 'video') {
+    if (screenshareIcon.classList.contains('fa-desktop')) {
+      if (this.scene.nativePeerManager.mode === 'screenshare') {
+        return alert(
+          'You cannot share your screen when someone else is presenting.'
+        );
+      }
+
       screenshareIcon.classList.remove('fa-desktop');
       screenshareIcon.classList.add('fa-camera');
 

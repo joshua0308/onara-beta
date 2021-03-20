@@ -594,7 +594,13 @@ class UserInterfaceManager {
         element.style.width = '500px';
       });
 
-      document.getElementById('screenshare-container').remove();
+      const screenshareContainer = document.getElementById(
+        'screenshare-container'
+      );
+
+      if (screenshareContainer) {
+        screenshareContainer.remove();
+      }
     }
   }
 }

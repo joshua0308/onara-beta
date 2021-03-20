@@ -101,8 +101,9 @@ class NativePeerManager {
     this.socket.on('set-display-mode', (socketId, mode) => {
       console.log('debug: set display mode', socketId, mode);
       const remoteVideoElement = document.getElementById(`video-${socketId}`);
-
       console.log('debug: remoteVideoElement', remoteVideoElement);
+
+      this.setMode(mode);
       this.userInterfaceManager.setDisplayMode(
         mode,
         remoteVideoElement.srcObject
@@ -374,37 +375,22 @@ class NativePeerManager {
     return stream.getVideoTracks().length > 0;
   }
 
-  // Swap current video track with passed in stream
-  switchStreamHelper(stream) {
-    console.log('switchStreamHelper', stream.getTracks());
-
-    // Get current video track
-    let videoTrack = stream.getVideoTracks()[0];
-    // Add listen for if the current track swaps, swap back
-    if (videoTrack) {
-      videoTrack.onended = () => {
-        console.log('videoTrack onended');
-        this.requestVideo();
-      };
-    }
+  replacePeerConnectionVideoTrack(videoTrack) {
+    // If stop screenshare button is clicked, it fires the end event
+    videoTrack.onended = () => {
+      console.log('videoTrack onended');
+      this.switchToCameraTrack();
+    };
 
     // Find sender
     const senders = Object.values(this.peerConnections).map((peerConnection) =>
-      peerConnection.getSenders().find(function (s) {
-        console.log('s.track', s.track);
-        // make sure track types match
-        return s.track.kind === videoTrack.kind;
+      peerConnection.getSenders().find(function (sender) {
+        return sender.track.kind === videoTrack.kind; // make sure track types match
       })
     );
 
     // Replace sender track
     senders.forEach((sender) => sender.replaceTrack(videoTrack));
-    // }
-
-    // Update local video object
-    if (this.mode !== 'screenshare') {
-      this.localVideoElement.srcObject = stream;
-    }
   }
 
   requestScreenshare() {
@@ -416,7 +402,11 @@ class NativePeerManager {
       .then((stream) => {
         this.setMode('screenshare');
         this.localScreenshareStream = stream;
-        this.switchStreamHelper(stream);
+        const screenshareVideoTrack = stream
+          .getTracks()
+          .find((track) => track.kind === 'video');
+
+        this.replacePeerConnectionVideoTrack(screenshareVideoTrack);
         this.userInterfaceManager.setDisplayMode(this.mode, stream, true);
 
         this.socket.emit('set-display-mode', {
@@ -430,50 +420,25 @@ class NativePeerManager {
       });
   }
 
-  requestVideo() {
-    console.log('requestVideo');
+  switchToCameraTrack() {
+    console.log('switchToVideoTrack');
 
+    // end screenshare stream
     if (this.localScreenshareStream) {
       this.localScreenshareStream.getTracks().forEach((track) => track.stop());
     }
-    // Get webcam input
-    navigator.mediaDevices
-      .getUserMedia({
-        video: true,
-        audio: true
-      })
-      .then((stream) => {
-        this.setMode('video');
-        this.switchStreamHelper(stream);
 
-        console.log('debug: this.mode', this.mode);
-        this.userInterfaceManager.setDisplayMode(this.mode, stream);
-        this.socket.emit('set-display-mode', {
-          roomHash: this.roomHash,
-          mode: this.mode
-        });
-        return;
-      })
-      .catch((err) => {
-        console.log(err);
-        navigator.mediaDevices
-          .getUserMedia({
-            video: false,
-            audio: true
-          })
-          .then((stream) => {
-            this.setMode('video');
-            this.addFakeVideoTrackToStream(stream);
-            this.switchStreamHelper(stream);
+    const cameraTrack = this.localStream
+      .getTracks()
+      .find((track) => track.kind === 'video');
 
-            console.log('debug: this.mode', this.mode);
-            this.userInterfaceManager.setDisplayMode(this.mode, stream);
-            this.socket.emit('set-display-mode', {
-              roomHash: this.roomHash,
-              mode: this.mode
-            });
-          });
-      });
+    this.setMode('video');
+    this.replacePeerConnectionVideoTrack(cameraTrack);
+    this.userInterfaceManager.setDisplayMode(this.mode, this.localStream);
+    this.socket.emit('set-display-mode', {
+      roomHash: this.roomHash,
+      mode: this.mode
+    });
   }
 
   removeConnection(remoteSocketId) {
