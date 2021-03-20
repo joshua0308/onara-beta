@@ -226,43 +226,14 @@ gameIO.on('connection', (socket) => {
     console.log('debug: request-call', new Date().toISOString());
     console.log('caller -', socket.id);
     console.log('receiver -', receiverId);
-    // console.log('socketIdsInRoom', socketIdsInRoom);
-
-    // if (players[socket.id].status === PLAYER_STATUS.AVAILABLE && players[receiverId].status === PLAYER_STATUS.AVAILABLE) {
-    //   players[receiverId].status = PLAYER_STATUS.INCOMING_CALL;
-    //   players[socket.id].status = PLAYER_STATUS.OUTGOING_CALL;
-
-    // if (socketIdsInRoom.length === 0) {
-    //   socketIdsInRoom = [socket.id];
-    // }
 
     return socket
       .to(receiverId)
       .emit('request-call', { callerId: socket.id, roomHash });
-    // }
-
-    // if (players[receiverId].status === PLAYER_STATUS.INCOMING_CALL) {
-    //   return socket.emit('call-request-declined', { receiverId, message: `${players[receiverId].displayName} just got a drink from someone else. Let's wait to see if ${players[receiverId].displayName} accepts 🤞` })
-    // }
-
-    // if (players[receiverId].status === PLAYER_STATUS.OUTGOING_CALL) {
-    //   return socket.emit('call-request-declined', { receiverId, message: `${players[receiverId].displayName} just got a drink for someone else. Let's wait to see if the other person accepts 🤞` })
-    // }
-
-    // if (players[receiverId].status === PLAYER_STATUS.IN_CALL) {
-    //   return socket.emit('call-request-declined', { receiverId, message: `${players[receiverId].displayName} is already having a drink with someone else 😢` })
-    // }
-
-    // if (players[socket.id].status === PLAYER_STATUS.OUTGOING_CALL
-    //   || players[socket.id].status === PLAYER_STATUS.IN_CALL) {
-    //   return socket.emit('call-request-declined', { receiverId, message: 'Hey there! You cannot buy more than one drink at once 😬' })
-    // }
   });
 
   socket.on('cancel-call', ({ receiverId }) => {
     console.log('debug: cancel-call');
-    // if (players[receiverId]) players[receiverId].status = PLAYER_STATUS.AVAILABLE;
-    // if (players[socket.id]) players[socket.id].status = PLAYER_STATUS.AVAILABLE;
 
     socket.to(receiverId).emit('call-cancelled');
   });
@@ -272,48 +243,14 @@ gameIO.on('connection', (socket) => {
     console.log('caller -', callerId);
     console.log('receiver -', socket.id);
 
-    // if (players[socket.id]) players[socket.id].status = PLAYER_STATUS.AVAILABLE;
-    // if (players[callerId]) players[callerId].status = PLAYER_STATUS.AVAILABLE;
-
     socket.to(callerId).emit('call-request-declined', {
       receiverId: socket.id,
       message: `${players[socket.id].displayName} wants to pass this round 😢`
     });
   });
 
-  socket.on('send-peer-offer', ({ receiverSignalData, callerSocketId }) => {
-    console.log('debug: send-peer-offer', new Date().toISOString());
-    socket.to(callerSocketId).emit('peer-offer-received', {
-      receiverSignalData,
-      receiverSocketId: socket.id
-    });
-
-    // players[socket.id].status = PLAYER_STATUS.IN_CALL;
-  });
-
-  socket.on('send-peer-answer', ({ callerSignalData, receiverSocketId }) => {
-    console.log('debug: send-peer-answer', new Date().toISOString());
-    socket
-      .to(receiverSocketId)
-      .emit('peer-answer-received', { callerSignalData });
-
-    // players[socket.id].status = PLAYER_STATUS.IN_CALL;
-  });
-
-  socket.on('peer-offer', ({ receiverSignalData, callerSocketId }) => {
-    socket
-      .to(callerSocketId)
-      .emit('peer-offer', { receiverSignalData, receiverSocketId: socket.id });
-  });
-
-  socket.on('peer-answer', ({ callerSignalData, receiverSocketId }) => {
-    socket.to(receiverSocketId).emit('peer-answer', { callerSignalData });
-  });
-
   socket.on('end-call', async ({ roomHash }) => {
     console.log('debug: end-call', roomHash);
-    // if (players[socket.id]) players[socket.id].status = PLAYER_STATUS.AVAILABLE;
-    // if (players[peerSocketId]) players[peerSocketId].status = PLAYER_STATUS.AVAILABLE;
 
     socket.leave(roomHash);
 
