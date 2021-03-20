@@ -5,7 +5,7 @@ function LevelThreeOption({ props }) {
 
   const clickHandler = (e) => {
     e.preventDefault();
-    this.scene.socket.close();
+    this.scene.socket.emit('leave-room', this.scene.barId);
     this.scene.registry.set('map', 'bar');
     this.removeOnlineList();
     this.removeGeneralChat();

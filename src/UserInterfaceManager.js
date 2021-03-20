@@ -145,21 +145,17 @@ class UserInterfaceManager {
     document.body.appendChild(<ChatContainer />);
   }
 
-  createMessage(socketId, message, isGeneralChat = false) {
-    let elementId = 'messages-ul';
+  createGeneralMessage(socketId, message) {
+    elementId = 'general-messages-ul';
 
-    if (isGeneralChat) {
-      elementId = 'general-messages-ul';
-    }
     const messagesUnorderedList = document.getElementById(elementId);
-    console.log(this.scene.players[socketId]);
     const MessageElement = () => (
       <li
         className="message"
         style={{
           display: 'flex',
           margin: '0 0 2px 0',
-          color: isGeneralChat ? 'black' : 'white'
+          color: 'black'
         }}
       >
         <span style={{ margin: '0px 10px', fontWeight: 600 }}>
@@ -167,7 +163,7 @@ class UserInterfaceManager {
         </span>
         <p
           style={{
-            color: isGeneralChat ? 'black' : '#b8b8b8',
+            color: 'black',
             overflowWrap: 'break-word',
             wordWrap: 'break-word',
             hyphens: 'auto',
@@ -183,6 +179,46 @@ class UserInterfaceManager {
 
     messagesUnorderedList.appendChild(<MessageElement />);
     this.scrollChatToBottom(elementId);
+  }
+
+  createPrivateMessage(displayName, message) {
+    let elementId = 'messages-ul';
+    const messagesUnorderedList = document.getElementById(elementId);
+    const MessageElement = () => (
+      <li
+        className="message"
+        style={{
+          display: 'flex',
+          margin: '0 0 2px 0',
+          color: 'white'
+        }}
+      >
+        <span style={{ margin: '0px 10px', fontWeight: 600 }}>
+          {`${displayName}`}
+        </span>
+        <p
+          style={{
+            color: '#b8b8b8',
+            overflowWrap: 'break-word',
+            wordWrap: 'break-word',
+            hyphens: 'auto',
+            maxWidth: '200px',
+            textAlign: 'left',
+            margin: '0px'
+          }}
+        >
+          {message}
+        </p>
+      </li>
+    );
+
+    messagesUnorderedList.appendChild(<MessageElement />);
+    this.scrollChatToBottom(elementId);
+  }
+
+  createMessage(socketId, message, isGeneralChat = false) {
+    if (isGeneralChat) return this.createGeneralMessage(socketId, message);
+    else return this.createPrivateMessage(socketId, message);
   }
 
   scrollChatToBottom(elementId) {
@@ -534,7 +570,7 @@ class UserInterfaceManager {
     videoElement.muted = !videoElement.muted;
   }
   addPlayerToOnlineList(playerInfo, playerSocketId, isCurrentPlayer = false) {
-    this.logger.log('playerInfo', playerInfo);
+    this.logger.log('addPlayerToOnlineList', playerInfo);
     const playerName = playerInfo.displayName;
     if (document.getElementById(playerSocketId)) return;
 

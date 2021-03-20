@@ -114,7 +114,9 @@ gameIO.on('connection', (socket) => {
 
   socket.on('chat-message', ({ roomHash, message }) => {
     console.log('chat-message', message);
-    gameIO.to(roomHash).emit('chat-message', { from: socket.id, message });
+
+    const displayName = players[socket.id].displayName;
+    gameIO.to(roomHash).emit('chat-message', { displayName, message });
   });
 
   socket.on('general-chat-message', ({ barId, message }) => {
@@ -196,6 +198,13 @@ gameIO.on('connection', (socket) => {
 
     socket.emit('current-players', playersInBar);
     socket.to(barId).emit('new-player', players[socket.id]);
+  });
+
+  socket.on('leave-room', (barId) => {
+    console.log('debug: leave-room', barId);
+
+    socket.leave(barId);
+    socket.broadcast.to(barId).emit('room-change', socket.id);
   });
 
   socket.on('update-player', (playerInfo) => {

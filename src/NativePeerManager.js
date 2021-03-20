@@ -83,9 +83,9 @@ class NativePeerManager {
 
     this.socket.on('candidate', this.onCandidate);
 
-    this.socket.on('chat-message', ({ from, message }) => {
-      console.log('chat-message', from, message);
-      this.userInterfaceManager.createMessage(from, message);
+    this.socket.on('chat-message', ({ displayName, message }) => {
+      console.log('chat-message', displayName, message);
+      this.userInterfaceManager.createMessage(displayName, message);
     });
 
     this.socket.on('toggle-video', (socketId, shouldDisplayVideo) => {
@@ -162,6 +162,8 @@ class NativePeerManager {
           break;
         case 'disconnected':
           console.log('iceConnectionState: disconnected', event);
+          this.endCall();
+          alert('call disconnected');
           break;
         case 'failed':
           console.log('iceConnectionState: failed', event);
@@ -418,6 +420,10 @@ class NativePeerManager {
 
   endCall() {
     console.log('endCall');
+    this.socket.emit('end-call', {
+      roomHash: this.roomHash
+    });
+
     if (this.localStream) {
       this.localStream.getTracks().forEach((track) => track.stop());
     }
@@ -429,7 +435,7 @@ class NativePeerManager {
     // when call is ended during screenshare, localVideo is set to the screenshare stream
     // while the localStream is set to the video and audio streams
     // so we need to stop both
-    if (this.localVideoElement.srcObject) {
+    if (this.localVideoElement && this.localVideoElement.srcObject) {
       this.localVideoElement.srcObject
         .getTracks()
         .forEach((track) => track.stop());

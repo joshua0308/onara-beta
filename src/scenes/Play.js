@@ -13,6 +13,7 @@ class Play extends Phaser.Scene {
     this.playersSprite = {};
     this.otherPlayersGroup = null;
     this.config = config;
+    this.socketConfigured = false;
 
     this.socket = null;
     this.nativePeerManager = null;
@@ -20,6 +21,10 @@ class Play extends Phaser.Scene {
 
     this.logger = new Logger('Phaser');
     this.updateMyPlayerInfo = this.updateMyPlayerInfo.bind(this);
+
+    window.onresize = () => {
+      this.updateCameraZoom();
+    };
   }
 
   updateMyPlayerInfo(updatedPlayerInfo) {
@@ -54,12 +59,6 @@ class Play extends Phaser.Scene {
   }
 
   async create({ barId = 'town' }) {
-    // barId = this.testDevEnv(barId);
-
-    window.onresize = () => {
-      this.updateCameraZoom();
-    };
-
     this.isMobile = this.game.isMobile;
     this.firebase = this.game.firebase;
     this.firebaseAuth = this.game.firebaseAuth;
@@ -86,13 +85,27 @@ class Play extends Phaser.Scene {
     this.userInterfaceManager.createMenuButtons(this.myPlayer);
 
     this.barId = barId;
-    this.socket = io('/game');
-    this.userInterfaceManager.addSocket(this.socket);
 
-    this.nativePeerManager = new NativePeerManager(
-      this.socket,
-      this.userInterfaceManager
-    );
+    if (!this.socketConfigured) {
+      this.socket = io('/game');
+      this.nativePeerManager = new NativePeerManager(
+        this.socket,
+        this.userInterfaceManager
+      );
+    } else {
+      this.userInterfaceManager.addPlayerToOnlineList(
+        this.myPlayer,
+        this.myPlayer.socketId,
+        true
+      );
+
+      this.socket.emit('join-room', {
+        playerInfo: this.myPlayer,
+        barId: this.barId
+      });
+    }
+
+    this.userInterfaceManager.addSocket(this.socket);
 
     this.otherPlayersGroup = this.physics.add.group();
     this.callButtonPressedDown = false;
@@ -117,7 +130,10 @@ class Play extends Phaser.Scene {
     this.physics.add.overlap(this.myPlayerSprite, this.door);
 
     this.setupFollowupCameraOn(this.myPlayerSprite);
-    this.setupSocket();
+
+    if (!this.socketConfigured) {
+      this.setupSocket();
+    }
 
     this.barQuestionnaireDisplayed = false;
     this.physics.add.overlap(this.myPlayerSprite, this.door, () => {
@@ -145,6 +161,7 @@ class Play extends Phaser.Scene {
   }
 
   setupSocket() {
+    this.socketConfigured = true;
     this.socket.on('connect', () => {
       this.myPlayer.socketId = this.socket.id;
 
@@ -154,10 +171,6 @@ class Play extends Phaser.Scene {
         true
       );
 
-      // tell the server it's ready to listen
-      this.logger.log('socket on connect', {
-        socketId: this.myPlayer.socketId
-      });
       this.socket.emit('join-room', {
         playerInfo: this.myPlayer,
         barId: this.barId
@@ -250,6 +263,7 @@ class Play extends Phaser.Scene {
         this.otherPlayersGroup,
         this.userInterfaceManager
       );
+
       this.userInterfaceManager.addPlayerToOnlineList(
         player,
         player.socketId,
@@ -306,7 +320,7 @@ class Play extends Phaser.Scene {
     // player movement
     this.socket.on('player-moved', (otherPlayerInfo) => {
       this.otherPlayersGroup.getChildren().forEach((otherPlayer) => {
-        if (otherPlayerInfo.socketId === otherPlayer.socketId) {
+        if (otherPlayer.socketId === otherPlayerInfo.socketId) {
           otherPlayer.updateMovement(otherPlayerInfo);
         }
       });
@@ -332,7 +346,27 @@ class Play extends Phaser.Scene {
 
       this.otherPlayersGroup.getChildren().forEach((otherPlayer) => {
         if (socketId === otherPlayer.socketId) {
-          otherPlayer.destroy();
+          this.otherPlayersGroup.remove(
+            this.otherPlayersGroup.children[index],
+            true
+          );
+        }
+      });
+    });
+
+    this.socket.on('room-change', (socketId) => {
+      this.logger.log('room-change', { socketId });
+
+      this.userInterfaceManager.removePlayerFromOnlineList(socketId);
+
+      delete this.players[socketId];
+
+      this.otherPlayersGroup.getChildren().forEach((otherPlayer, index) => {
+        if (socketId === otherPlayer.socketId) {
+          this.otherPlayersGroup.remove(
+            this.otherPlayersGroup.children[index],
+            true
+          );
         }
       });
     });

@@ -134,10 +134,6 @@ function InCallButtons() {
   const endCall = () => {
     this.logger.log('click end call');
     this.removeInCallInterface();
-
-    this.socket.emit('end-call', {
-      roomHash: this.scene.nativePeerManager.roomHash
-    });
     this.scene.nativePeerManager.endCall();
   };
 
