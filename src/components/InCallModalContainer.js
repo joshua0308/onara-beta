@@ -81,6 +81,7 @@ function InCallContainer() {
         </div>
         <div id="chat-input-container">
           <input
+            id="private-chat-input"
             type="text"
             style={{
               width: '100%',

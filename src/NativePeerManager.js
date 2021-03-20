@@ -10,6 +10,7 @@ class NativePeerManager {
     this.userInterfaceManager = userInterfaceManager;
 
     this.localStream = null;
+    this.localScreenshareStream = null;
     // this.localVideoElementStream = null;
     // this.localScreenshareStream = null;
     this.localVideoTrack = null;
@@ -414,8 +415,10 @@ class NativePeerManager {
       })
       .then((stream) => {
         this.setMode('screenshare');
+        this.localScreenshareStream = stream;
         this.switchStreamHelper(stream);
         this.userInterfaceManager.setDisplayMode(this.mode, stream, true);
+
         this.socket.emit('set-display-mode', {
           roomHash: this.roomHash,
           mode: this.mode
@@ -429,15 +432,10 @@ class NativePeerManager {
 
   requestVideo() {
     console.log('requestVideo');
-    // stop screenshare streams
-    if (this.localVideoElement) {
-      this.localVideoElement.srcObject.getTracks().forEach((track) => {
-        if (track.kind === 'video') {
-          track.stop();
-        }
-      });
-    }
 
+    if (this.localScreenshareStream) {
+      this.localScreenshareStream.getTracks().forEach((track) => track.stop());
+    }
     // Get webcam input
     navigator.mediaDevices
       .getUserMedia({
@@ -489,6 +487,10 @@ class NativePeerManager {
       this.localStream.getTracks().forEach((track) => track.stop());
     }
 
+    if (this.localScreenshareStream) {
+      this.localScreenshareStream.getTracks().forEach((track) => track.stop());
+    }
+
     // when call is ended during screenshare, localVideo is set to the screenshare stream
     // while the localStream is set to the video and audio streams
     // so we need to stop both
@@ -496,6 +498,9 @@ class NativePeerManager {
       this.localVideoElement.srcObject
         .getTracks()
         .forEach((track) => track.stop());
+
+      this.localVideoElement.removeAttribute('src');
+      this.localVideoElement.removeAttribute('srcObject');
     }
 
     if (Object.values(this.peerConnections).length) {
@@ -519,6 +524,7 @@ class NativePeerManager {
     this.socket.removeAllListeners('candidate');
     this.socket.removeAllListeners('answer');
     this.socket.removeAllListeners('join');
+    this.socket.removeAllListeners('chat-message');
   }
 }
 

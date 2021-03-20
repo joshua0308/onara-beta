@@ -242,6 +242,7 @@ class UserInterfaceManager {
 
   removeInCallInterface() {
     const modalWrapper = document.getElementById('in-call-modal-container');
+
     if (modalWrapper) {
       modalWrapper.remove();
     }
