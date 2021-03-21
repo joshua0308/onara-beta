@@ -2,7 +2,7 @@ import React from 'jsx-dom';
 import { v4 as uuidv4 } from 'uuid';
 
 function IncomingCallContainer({ props }) {
-  const { callerData, callerId } = props;
+  const { callerData, callerId, type } = props;
   const playerData = callerData;
   let { roomHash } = props;
   const declineButtonCallback = (callerId) => {
@@ -149,7 +149,8 @@ function IncomingCallContainer({ props }) {
 
               this.socket.emit('accept-call', {
                 to: callerId,
-                roomHash
+                roomHash,
+                type
               });
             }}
           >

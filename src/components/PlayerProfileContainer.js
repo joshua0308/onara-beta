@@ -4,9 +4,9 @@ function PlayerProfileContainer({ props }) {
   const { playerData, isCurrentPlayer, player } = props;
   console.log('playerData', playerData);
 
-  const handleBuyADrinkButton = () => {
-    console.log('request-call', this.scene.nativePeerManager.roomHash);
-    const buyADrinkButton = document.getElementById('buy-drink-button');
+  const handleAudioCallButton = (e) => {
+    console.log('request-call', e);
+    const buyADrinkButton = document.getElementById('audio-call-button');
     const closeButton = document.getElementById('close-profile-button');
 
     buyADrinkButton.innerText = 'Calling...';
@@ -15,9 +15,31 @@ function PlayerProfileContainer({ props }) {
     this.socket.emit('request-call', {
       receiverId: player.socketId,
       roomHash: this.scene.nativePeerManager.roomHash,
-      socketIdsInRoom: Object.keys(this.scene.nativePeerManager.peerConnections)
+      socketIdsInRoom: Object.keys(
+        this.scene.nativePeerManager.peerConnections
+      ),
+      type: 'audio'
     });
-    buyADrinkButton.removeEventListener('click', handleBuyADrinkButton);
+    buyADrinkButton.removeEventListener('click', handleAudioCallButton);
+  };
+
+  const handleVideoCallButton = (e) => {
+    console.log('request-call', e);
+    const buyADrinkButton = document.getElementById('video-call-button');
+    const closeButton = document.getElementById('close-profile-button');
+
+    buyADrinkButton.innerText = 'Calling...';
+    closeButton.innerText = 'Cancel call';
+    buyADrinkButton.style.backgroundColor = '#c9a747';
+    this.socket.emit('request-call', {
+      receiverId: player.socketId,
+      roomHash: this.scene.nativePeerManager.roomHash,
+      socketIdsInRoom: Object.keys(
+        this.scene.nativePeerManager.peerConnections
+      ),
+      type: 'video'
+    });
+    buyADrinkButton.removeEventListener('click', handleVideoCallButton);
   };
 
   const handleCloseButton = () => {
@@ -149,20 +171,38 @@ function PlayerProfileContainer({ props }) {
       </div>
       <div style={{ display: 'flex', justifyContent: 'center' }}>
         {!isCurrentPlayer && (
-          <button
-            id="buy-drink-button"
-            onClick={handleBuyADrinkButton}
-            style={{
-              backgroundColor: '#2929e0',
-              color: 'white',
-              borderStyle: 'none',
-              borderRadius: '15px',
-              padding: '3px 10px',
-              marginRight: '5px'
-            }}
-          >
-            Video Call
-          </button>
+          <>
+            <button
+              id="audio-call-button"
+              onClick={handleAudioCallButton}
+              style={{
+                backgroundColor: '#3ea656',
+                color: 'white',
+                borderStyle: 'none',
+                borderRadius: '15px',
+                padding: '3px 10px',
+                marginRight: '5px'
+              }}
+            >
+              <i className="fas fa-phone"></i>
+              <div>Audio</div>
+            </button>
+            <button
+              id="video-call-button"
+              onClick={handleVideoCallButton}
+              style={{
+                backgroundColor: '#2880df',
+                color: 'white',
+                borderStyle: 'none',
+                borderRadius: '15px',
+                padding: '3px 10px',
+                marginRight: '5px'
+              }}
+            >
+              <i className="fas fa-video"></i>
+              <div>Video</div>
+            </button>
+          </>
         )}
         <button
           id="close-profile-button"

@@ -175,7 +175,7 @@ class NativePeerManager {
     };
   }
 
-  addTracksToPeerConnection(remoteSocketId) {
+  addTracksToPeerConnections(remoteSocketId) {
     this.localStream.getTracks().forEach((track) => {
       this.peerConnections[remoteSocketId].addTrack(track, this.localStream);
     });
@@ -236,6 +236,8 @@ class NativePeerManager {
     this.userInterfaceManager.createInCallInterface();
 
     // if no video, do not add a video element
+    // socket id doesn't work anymore to get user information
+    // need to transmit it through server
     this.localVideoElement = this.userInterfaceManager.addStream(
       stream,
       this.socket.id,
@@ -277,7 +279,7 @@ class NativePeerManager {
 
   async createOffer(remoteSocketId) {
     console.log('createOffer', remoteSocketId);
-    this.addTracksToPeerConnection(remoteSocketId);
+    this.addTracksToPeerConnections(remoteSocketId);
 
     try {
       const offer = await this.peerConnections[remoteSocketId].createOffer();
@@ -298,7 +300,7 @@ class NativePeerManager {
 
     try {
       await this.peerConnections[remoteSocketId].setRemoteDescription(rtcOffer);
-      this.addTracksToPeerConnection(remoteSocketId);
+      this.addTracksToPeerConnections(remoteSocketId);
       const answer = await this.peerConnections[remoteSocketId].createAnswer();
       await this.peerConnections[remoteSocketId].setLocalDescription(answer);
       this.socket.emit(

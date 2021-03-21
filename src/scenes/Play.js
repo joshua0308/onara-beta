@@ -276,7 +276,7 @@ class Play extends Phaser.Scene {
     // receiver - when caller requests a call
     this.socket.on(
       'request-call',
-      ({ callerId, roomHash, socketIdsInRoom }) => {
+      ({ callerId, roomHash, socketIdsInRoom, type }) => {
         this.logger.log('request-call', {
           callerId,
           displayName: this.players[callerId].displayName,
@@ -286,7 +286,8 @@ class Play extends Phaser.Scene {
         this.userInterfaceManager.createIncomingCallInterface(
           this.players,
           callerId,
-          roomHash
+          roomHash,
+          type
         );
       }
     );

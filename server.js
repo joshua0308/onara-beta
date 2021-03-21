@@ -73,8 +73,8 @@ class Player {
 }
 
 gameIO.on('connection', (socket) => {
-  socket.on('accept-call', ({ to, roomHash }) => {
-    console.log('debug: accept-call', roomHash);
+  socket.on('accept-call', ({ to, roomHash, type }) => {
+    console.log('debug: accept-call', roomHash, type);
 
     socket.to(to).emit('accept-call', { roomHash });
   });
@@ -231,15 +231,18 @@ gameIO.on('connection', (socket) => {
     }
   });
 
-  socket.on('request-call', ({ receiverId, roomHash, socketIdsInRoom }) => {
-    console.log('debug: request-call', new Date().toISOString());
-    console.log('caller -', socket.id);
-    console.log('receiver -', receiverId);
+  socket.on(
+    'request-call',
+    ({ receiverId, roomHash, socketIdsInRoom, type }) => {
+      console.log('debug: request-call', new Date().toISOString());
+      console.log('caller -', socket.id);
+      console.log('receiver -', receiverId);
 
-    return socket
-      .to(receiverId)
-      .emit('request-call', { callerId: socket.id, roomHash });
-  });
+      return socket
+        .to(receiverId)
+        .emit('request-call', { callerId: socket.id, roomHash, type });
+    }
+  );
 
   socket.on('cancel-call', ({ receiverId }) => {
     console.log('debug: cancel-call');
