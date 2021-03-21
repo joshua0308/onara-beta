@@ -146,7 +146,7 @@ class UserInterfaceManager {
   }
 
   createGeneralMessage(socketId, message) {
-    elementId = 'general-messages-ul';
+    const elementId = 'general-messages-ul';
 
     const messagesUnorderedList = document.getElementById(elementId);
     const MessageElement = () => (
@@ -182,7 +182,7 @@ class UserInterfaceManager {
   }
 
   createPrivateMessage(displayName, message) {
-    let elementId = 'messages-ul';
+    const elementId = 'messages-ul';
     const messagesUnorderedList = document.getElementById(elementId);
     const MessageElement = () => (
       <li

@@ -54,7 +54,7 @@ function OnlineList({ props }) {
         ></i>
       </div>
       <div style={{ fontSize: '1.5rem' }}>
-        People in {barId === 'town' ? 'Town' : barId}
+        {barId === 'town' ? 'My Friends' : `People in ${barId}`}
       </div>
       <ul id="online-list" style={{ marginTop: '15px' }}></ul>
     </div>

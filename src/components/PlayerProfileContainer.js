@@ -173,34 +173,36 @@ function PlayerProfileContainer({ props }) {
         {!isCurrentPlayer && (
           <>
             <button
-              id="audio-call-button"
-              onClick={handleAudioCallButton}
-              style={{
-                backgroundColor: '#3ea656',
-                color: 'white',
-                borderStyle: 'none',
-                borderRadius: '15px',
-                padding: '3px 10px',
-                marginRight: '5px'
-              }}
-            >
-              <i className="fas fa-phone"></i>
-              <div>Audio</div>
-            </button>
-            <button
               id="video-call-button"
               onClick={handleVideoCallButton}
               style={{
-                backgroundColor: '#2880df',
+                backgroundColor: '#2cda54',
                 color: 'white',
                 borderStyle: 'none',
                 borderRadius: '15px',
-                padding: '3px 10px',
-                marginRight: '5px'
+                padding: '3px 12px',
+                marginRight: '10px',
+                boxShadow: '#bcbdbd 3px 3px 3px'
               }}
             >
               <i className="fas fa-video"></i>
               <div>Video</div>
+            </button>
+            <button
+              id="audio-call-button"
+              onClick={handleAudioCallButton}
+              style={{
+                backgroundColor: 'rgb(91 207 117)',
+                color: 'white',
+                borderStyle: 'none',
+                borderRadius: '15px',
+                padding: '3px 12px',
+                marginRight: '10px',
+                boxShadow: '#bcbdbd 3px 3px 3px'
+              }}
+            >
+              <i className="fas fa-phone"></i>
+              <div>Audio</div>
             </button>
           </>
         )}
@@ -208,12 +210,13 @@ function PlayerProfileContainer({ props }) {
           id="close-profile-button"
           onClick={handleCloseButton}
           style={{
-            backgroundColor: 'rgb(102 102 139)',
+            backgroundColor: 'rgb(181 181 181)',
             color: 'white',
             borderStyle: 'none',
             borderRadius: '15px',
-            padding: '3px 10px',
-            cursor: 'pointer'
+            padding: '3px 12px',
+            cursor: 'pointer',
+            boxShadow: '#bcbdbd 3px 3px 3px'
           }}
         >
           Close
