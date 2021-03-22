@@ -163,7 +163,8 @@ class NativePeerManager {
         case 'disconnected':
           console.log('iceConnectionState: disconnected', event);
           this.endCall();
-          alert('call disconnected');
+          this.userInterfaceManager.removeInCallInterface();
+          alert('The call ended unexpectedly. Please refresh.');
           break;
         case 'failed':
           console.log('iceConnectionState: failed', event);
@@ -234,6 +235,7 @@ class NativePeerManager {
 
     this.localStream = stream;
     this.userInterfaceManager.createInCallInterface();
+    this.userInterfaceManager.hideOnlineList();
 
     // if no video, do not add a video element
     // socket id doesn't work anymore to get user information

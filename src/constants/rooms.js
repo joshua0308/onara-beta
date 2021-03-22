@@ -64,7 +64,7 @@ export const rooms = [
     levelTwo: 'Physical fitness'
   },
   { name: '👩‍❤️‍👨 Serious relationship', levelOne: 'Fun', levelTwo: 'Dating' },
-  { name: '🍆 Casual dating', levelOne: 'Fun', levelTwo: 'Dating' },
+  { name: '💕 Casual dating', levelOne: 'Fun', levelTwo: 'Dating' },
   { name: '📺 Watch something', levelOne: 'Fun', levelTwo: 'Do an activity' },
   { name: '🎸 Listen / Sing', levelOne: 'Fun', levelTwo: 'Do an activity' },
   { name: '🍕 Eat / Drink', levelOne: 'Fun', levelTwo: 'Do an activity' },

@@ -115,8 +115,8 @@ function initEmailAuth(e) {
 
 document.getElementById('google-auth-button').onclick = initGoogleAuth;
 document.getElementById('fb-auth-button').onclick = initFacebookAuth;
-document.getElementById('email-form').onsubmit = function (e) {
-  e.preventDefault();
-  console.log('clicked');
-  initEmailAuth(e);
-};
+// document.getElementById('email-form').onsubmit = function (e) {
+//   e.preventDefault();
+//   console.log('clicked');
+//   initEmailAuth(e);
+// };

@@ -45,7 +45,7 @@ function OnlineList({ props }) {
           transform: 'translateX(20px)',
           backgroundColor: 'transparent'
         }}
-        onClick={onClickHandler}
+        onClick={this.toggleOnlineList}
       >
         <i
           id="online-list-icon"
@@ -54,7 +54,7 @@ function OnlineList({ props }) {
         ></i>
       </div>
       <div style={{ fontSize: '1.5rem' }}>
-        {barId === 'town' ? 'My Friends' : `People in ${barId}`}
+        {barId === 'town' ? 'My Friends 👯‍♀️' : `People in ${barId}`}
       </div>
       <ul id="online-list" style={{ marginTop: '15px' }}></ul>
     </div>
