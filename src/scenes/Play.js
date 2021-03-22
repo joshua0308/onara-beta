@@ -83,6 +83,50 @@ class Play extends Phaser.Scene {
     }
 
     this.userInterfaceManager.createOnlineList(barId);
+
+    this.firebaseDb
+      .collection('players')
+      .doc(this.myPlayer.uid)
+      .get()
+      .then((doc) => {
+        const myPlayerData = doc.data();
+        const friends = myPlayerData.friends;
+
+        // if (barId !== 'town') {
+        if (friends.length) {
+          console.log('friends', friends);
+          fetch('/players')
+            .then((res) => res.json())
+            .then((data) => {
+              console.log('fetch', data);
+              const { players } = data;
+
+              Object.values(players).forEach((player) => {
+                if (friends.includes(player.uid)) {
+                  if (barId !== 'town') {
+                    this.userInterfaceManager.addPlayerToFriendList(
+                      player,
+                      player.socketId
+                    );
+                  } else {
+                    this.userInterfaceManager.addPlayerToOnlineList(
+                      player,
+                      player.socketId
+                    );
+                  }
+                }
+              });
+            });
+        }
+        // } else {
+        //   // this.userInterfaceManager.addPlayerToOnlineList();
+        // }
+      });
+
+    // const doc = await playerDocRef.get();
+    // const myPlayerData = doc.data();
+    // const friends = myPlayerData.friends;
+
     this.userInterfaceManager.createGeneralChat(barId);
     this.userInterfaceManager.createMenuButtons(this.myPlayer);
 

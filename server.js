@@ -291,7 +291,11 @@ app.get('/users', (req, res) => {
 });
 
 app.get('/ping', (req, res) => {
-  res.send('pong');
+  res.json({ yo: 'pong' });
+});
+
+app.get('/players', (req, res) => {
+  res.json({ players });
 });
 
 app.get('/game', (req, res) => {

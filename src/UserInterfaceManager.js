@@ -512,7 +512,7 @@ class UserInterfaceManager {
     return audioElement;
   }
 
-  addStreamToVideoElement(stream, socketId, isLocalStream) {
+  async addStreamToVideoElement(stream, socketId, isLocalStream) {
     this.logger.log('addStreamToVideoElement', stream.getTracks());
 
     const videoElement = (
@@ -537,6 +537,22 @@ class UserInterfaceManager {
     const VideoElement = () => videoElement;
 
     const mediaWrapper = document.getElementById('videos-wrapper');
+
+    const playerDocRef = this.firebaseDb
+      .collection('players')
+      .doc(this.scene.myPlayer.uid);
+
+    const doc = await playerDocRef.get();
+    const myPlayerData = doc.data();
+    const friends = myPlayerData.friends;
+
+    let isAlreadyFriend = false;
+    if (friends) {
+      isAlreadyFriend = friends.includes(this.scene.players[socketId].uid);
+    }
+
+    console.log('debug: myPlayerData', myPlayerData);
+
     const VideoContainer = () => (
       <div
         id="video-container"
@@ -546,6 +562,69 @@ class UserInterfaceManager {
           alignItems: 'center'
         }}
       >
+        {!isLocalStream && (
+          <div
+            className="add-friend-button"
+            style={{
+              position: 'relative',
+              backgroundColor: '#00000080',
+              height: '40px',
+              width: '40px',
+              borderStyle: 'none',
+              borderRadius: '20px',
+              top: '20px',
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              zIndex: '200',
+              cursor: 'pointer'
+            }}
+            onClick={async (e) => {
+              console.log('add friend clicked', e.target);
+              const icon = document.getElementById(`add-friend-${socketId}`);
+
+              if (icon.classList.contains('fa-user-friends')) {
+                icon.classList.remove('fa-user-friends');
+                icon.classList.add('fa-user-plus');
+              } else {
+                icon.classList.add('fa-user-friends');
+                icon.classList.remove('fa-user-plus');
+
+                console.log(
+                  'debug: this.scene.players[socketId],',
+                  this.scene.players,
+                  this.scene.myPlayer
+                );
+
+                const playerDocRef = this.firebaseDb
+                  .collection('players')
+                  .doc(this.scene.myPlayer.uid);
+
+                playerDocRef.update({
+                  friends: firebase.firestore.FieldValue.arrayUnion(
+                    this.scene.players[socketId].uid
+                  )
+                });
+
+                this.addPlayerToFriendList(
+                  this.scene.players[socketId],
+                  socketId
+                );
+              }
+            }}
+          >
+            <i
+              id={`add-friend-${socketId}`}
+              className={
+                isAlreadyFriend ? 'fas fa-user-friends' : 'fas fa-user-plus'
+              }
+              style={{
+                fontSize: '15px',
+                color: 'white'
+              }}
+            ></i>
+          </div>
+        )}
         <VideoElement />
         <img
           id={`image-${socketId}`}
@@ -614,24 +693,33 @@ class UserInterfaceManager {
     console.log('debug: , videoElement.muted', videoElement.muted);
     videoElement.muted = !videoElement.muted;
   }
-  addPlayerToOnlineList(playerInfo, playerSocketId, isCurrentPlayer = false) {
-    this.logger.log('addPlayerToOnlineList', playerInfo);
+
+  addPlayerToFriendList(playerInfo, playerSocketId) {
+    this.logger.log('addPlayerToFriendList', playerInfo);
     const playerName = playerInfo.displayName;
-    if (document.getElementById(playerSocketId)) return;
+    if (document.getElementById(`friend-${playerSocketId}`)) return;
 
     const playerListItem = (
       <li
-        id={playerSocketId}
-        onClick={() => {
-          this.createPlayerProfileInterface(playerInfo, isCurrentPlayer);
-        }}
+        id={`friend-${playerInfo.uid}}`}
         style={{
           fontSize: '1.3rem',
           textAlign: 'left',
           marginLeft: '15px',
-          color: '#ececec'
+          color: '#ececec',
+          display: 'flex',
+          alignItems: 'center'
         }}
       >
+        <div
+          style={{
+            height: '10px',
+            width: '10px',
+            borderRadius: '5px',
+            backgroundColor: '#00c200',
+            marginRight: '10px'
+          }}
+        ></div>
         <img
           style={{
             width: '30px',
@@ -644,7 +732,73 @@ class UserInterfaceManager {
             '/public/assets/placeholder-profile-pic.png'
           }
         />
-        <span>{playerName}</span>
+        <div>
+          <div>{playerName}</div>
+          <div style={{ fontSize: '1rem', fontWeight: 'normal' }}>Online</div>
+        </div>
+      </li>
+    );
+
+    const friendList = document.getElementById('friend-list');
+
+    if (!friendList) return;
+
+    friendList.appendChild(playerListItem);
+  }
+
+  addPlayerToOnlineList(playerInfo, playerSocketId, isCurrentPlayer = false) {
+    this.logger.log('addPlayerToOnlineList', playerInfo);
+    const playerName = playerInfo.displayName;
+    if (document.getElementById(`player-${playerInfo.uid}`)) return;
+
+    const playerListItem = (
+      <li
+        id={`player-${playerInfo.uid}`}
+        onClick={() => {
+          this.createPlayerProfileInterface(playerInfo, isCurrentPlayer);
+        }}
+        style={{
+          fontSize: '1.3rem',
+          textAlign: 'left',
+          marginLeft: '15px',
+          color: '#ececec',
+          display: 'flex',
+          alignItems: 'center'
+        }}
+      >
+        <div
+          style={{
+            height: '10px',
+            width: '10px',
+            borderRadius: '5px',
+            backgroundColor: '#00c200',
+            marginRight: '10px'
+          }}
+        ></div>
+        <img
+          style={{
+            width: '30px',
+            height: '30px',
+            borderRadius: '15px',
+            marginRight: '10px'
+          }}
+          src={
+            playerInfo.profilePicURL ||
+            '/public/assets/placeholder-profile-pic.png'
+          }
+        />
+        <div>
+          <div>{playerName}</div>
+          <div
+            style={{
+              fontSize: '1rem',
+              fontWeight: 'normal',
+              marginTop: '-3px'
+            }}
+          >
+            Online
+          </div>
+        </div>
       </li>
     );
     const onlineList = document.getElementById('online-list');
@@ -658,8 +812,14 @@ class UserInterfaceManager {
   }
 
   removePlayerFromOnlineList(playerSocketId) {
-    if (document.getElementById(playerSocketId)) {
-      document.getElementById(playerSocketId).remove();
+    if (
+      document.getElementById(
+        `player-${this.scene.players[playerSocketId].uid}`
+      )
+    ) {
+      document
+        .getElementById(`player-${this.scene.players[playerSocketId].uid}`)
+        .remove();
     }
   }
 

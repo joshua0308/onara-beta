@@ -56,7 +56,13 @@ function OnlineList({ props }) {
       <div style={{ fontSize: '1.5rem' }}>
         {barId === 'town' ? 'My Friends 👯‍♀️' : `People in ${barId}`}
       </div>
-      <ul id="online-list" style={{ marginTop: '15px' }}></ul>
+      <ul id="online-list" style={{ marginTop: '15px', height: '40%' }}></ul>
+      {barId !== 'town' && (
+        <>
+          <div style={{ fontSize: '1.5rem' }}>My Friends 👯‍♀️</div>
+          <ul id="friend-list" style={{ marginTop: '15px' }}></ul>
+        </>
+      )}
     </div>
   );
 }
