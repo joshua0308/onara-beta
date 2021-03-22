@@ -110,7 +110,7 @@ function ProfileForm({ props }) {
                       type="text"
                       name="name"
                       className="form-control"
-                      placeholder="Josh"
+                      placeholder="name"
                       value={myPlayerData.displayName}
                       required
                     />
@@ -144,7 +144,7 @@ function ProfileForm({ props }) {
                       type="text"
                       name="position"
                       className="form-control"
-                      placeholder="e.g. Software Engineer"
+                      placeholder="position"
                       value={myPlayerData.position}
                       required
                     />
@@ -155,7 +155,7 @@ function ProfileForm({ props }) {
                       type="text"
                       name="education"
                       className="form-control"
-                      placeholder="e.g. U of Michigan"
+                      placeholder="education"
                       value={myPlayerData.education}
                       required
                     />
@@ -168,7 +168,7 @@ function ProfileForm({ props }) {
                       type="text"
                       name="city"
                       className="form-control"
-                      placeholder="e.g. Montreal"
+                      placeholder="city"
                       value={myPlayerData.city}
                       required
                     />
@@ -179,7 +179,7 @@ function ProfileForm({ props }) {
                       type="text"
                       name="country"
                       className="form-control"
-                      placeholder="e.g. Canada"
+                      placeholder="country"
                       value={myPlayerData.country}
                       required
                     />

@@ -8,10 +8,17 @@ function PlayerProfileContainer({ props }) {
     console.log('request-call', e);
     const buyADrinkButton = document.getElementById('audio-call-button');
     const closeButton = document.getElementById('close-profile-button');
+    const closeIcon = document.getElementById('close-button-icon');
+    const closeText = document.getElementById('close-button-text');
 
     buyADrinkButton.innerText = 'Calling...';
-    closeButton.innerText = 'Cancel call';
     buyADrinkButton.style.backgroundColor = '#c9a747';
+
+    closeText.innerText = 'Cancel';
+    closeButton.style.backgroundColor = '#cb3838';
+    closeIcon.classList.remove('fa-times');
+    closeIcon.classList.add('fa-phone-slash');
+
     this.socket.emit('request-call', {
       receiverId: player.socketId,
       roomHash: this.scene.nativePeerManager.roomHash,
@@ -20,6 +27,7 @@ function PlayerProfileContainer({ props }) {
       ),
       type: 'audio'
     });
+
     buyADrinkButton.removeEventListener('click', handleAudioCallButton);
   };
 
@@ -27,10 +35,17 @@ function PlayerProfileContainer({ props }) {
     console.log('request-call', e);
     const buyADrinkButton = document.getElementById('video-call-button');
     const closeButton = document.getElementById('close-profile-button');
+    const closeIcon = document.getElementById('close-button-icon');
+    const closeText = document.getElementById('close-button-text');
 
     buyADrinkButton.innerText = 'Calling...';
-    closeButton.innerText = 'Cancel call';
     buyADrinkButton.style.backgroundColor = '#c9a747';
+
+    closeText.innerText = 'Cancel';
+    closeButton.style.backgroundColor = '#cb3838';
+    closeIcon.classList.remove('fa-times');
+    closeIcon.classList.add('fa-phone-slash');
+
     this.socket.emit('request-call', {
       receiverId: player.socketId,
       roomHash: this.scene.nativePeerManager.roomHash,
@@ -39,12 +54,14 @@ function PlayerProfileContainer({ props }) {
       ),
       type: 'video'
     });
+
     buyADrinkButton.removeEventListener('click', handleVideoCallButton);
   };
 
   const handleCloseButton = () => {
+    console.log('close clicked');
     const closeButton = document.getElementById('close-profile-button');
-    if (closeButton.innerText === 'Cancel call') {
+    if (closeButton.innerText === 'Cancel') {
       this.socket.emit('cancel-call', { receiverId: player.socketId });
     }
 
@@ -219,7 +236,8 @@ function PlayerProfileContainer({ props }) {
             boxShadow: '#bcbdbd 3px 3px 3px'
           }}
         >
-          Close
+          <i id="close-button-icon" className="fas fa-times"></i>
+          <div id="close-button-text">Close</div>
         </button>
       </div>
     </div>
