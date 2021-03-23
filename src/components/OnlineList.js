@@ -12,16 +12,16 @@ function OnlineList({ props }) {
     if (listWrapper.style.transform === 'translateX(200px)') {
       listWrapper.style.transform = 'translateX(0px)';
 
-      onlineListIconContainer.style.transform = 'translateX(20px)';
-      onlineListIconContainer.style.backgroundColor = 'transparent';
+      // onlineListIconContainer.style.transform = 'translateX(20px)';
+      // onlineListIconContainer.style.backgroundColor = 'transparent';
 
       onlineListIcon.classList.remove('fa-chevron-left');
       onlineListIcon.classList.add('fa-chevron-right');
     } else {
       listWrapper.style.transform = 'translateX(200px)';
 
-      onlineListIconContainer.style.transform = 'translateX(0px)';
-      onlineListIconContainer.style.backgroundColor = 'rgba(45, 45, 53, 0.8)';
+      // onlineListIconContainer.style.transform = 'translateX(0px)';
+      // onlineListIconContainer.style.backgroundColor = 'rgba(45, 45, 53, 0.8)';
 
       onlineListIcon.classList.remove('fa-chevron-right');
       onlineListIcon.classList.add('fa-chevron-left');
@@ -37,13 +37,14 @@ function OnlineList({ props }) {
           height: '100px',
           width: '20px',
           left: '-20px',
-          top: '45%',
+          top: '25%',
           borderRadius: '30px 0 0 30px',
           margin: 0,
           display: 'flex',
           alignItems: 'center',
-          transform: 'translateX(20px)',
-          backgroundColor: 'transparent'
+          backgroundColor: 'rgba(45, 45, 53, 0.8)'
+          // transform: 'translateX(20px)',
+          // backgroundColor: 'transparent'
         }}
         onClick={this.toggleOnlineList}
       >
