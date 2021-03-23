@@ -393,6 +393,7 @@ class Play extends Phaser.Scene {
 
       this.otherPlayersGroup.getChildren().forEach((otherPlayer) => {
         if (socketId === otherPlayer.socketId) {
+          otherPlayer.disableInteractive();
           this.otherPlayersGroup.remove(otherPlayer, true, true);
         }
       });
@@ -406,6 +407,7 @@ class Play extends Phaser.Scene {
 
       this.otherPlayersGroup.getChildren().forEach((otherPlayer) => {
         if (socketId === otherPlayer.socketId) {
+          otherPlayer.disableInteractive();
           this.otherPlayersGroup.remove(otherPlayer, true, true);
         }
       });
