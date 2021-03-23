@@ -42,7 +42,7 @@ function InCallContainer() {
             top: '-38px'
           }}
         >
-          Private chat
+          Chat in Call 📞
         </div>
         <button
           className="icon-button"
