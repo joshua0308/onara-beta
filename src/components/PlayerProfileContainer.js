@@ -112,10 +112,10 @@ function PlayerProfileContainer({ props }) {
       <div id="player-name">{playerData.displayName}</div>
       <div style={{ margin: '20px 0' }}>
         <div style={{ textAlign: 'center', color: '#464646' }}>
-          #followers #following #rating
+          #friends #rating
         </div>
         <div style={{ textAlign: 'center', color: '#464646' }}>
-          #mutual followers
+          #mutual friends
         </div>
       </div>
       <div id="player-bio" style={{ fontSize: '15px', color: '#717171' }}>
