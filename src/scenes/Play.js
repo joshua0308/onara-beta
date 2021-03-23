@@ -402,8 +402,10 @@ class Play extends Phaser.Scene {
     this.socket.on('room-change', (socketId) => {
       this.logger.log('room-change', { socketId });
 
-      this.userInterfaceManager.removePlayerFromOnlineList(socketId);
-      delete this.players[socketId];
+      if (this.barId !== 'town') {
+        this.userInterfaceManager.removePlayerFromOnlineList(socketId);
+        delete this.players[socketId];
+      }
 
       this.otherPlayersGroup.getChildren().forEach((otherPlayer) => {
         if (socketId === otherPlayer.socketId) {
