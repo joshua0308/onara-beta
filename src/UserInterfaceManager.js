@@ -344,7 +344,7 @@ class UserInterfaceManager {
   }
 
   async createPlayerProfileInterface(player, isCurrentPlayer = false) {
-    this.logger.log('createPlayerProfileInterface', player, isCurrentPlayer);
+    this.logger.log('createPlayerProfileInterface');
     this.removePlayerProfileInterface();
 
     const playerDocRef = this.firebaseDb.collection('players').doc(player.uid);
@@ -369,7 +369,7 @@ class UserInterfaceManager {
   }
 
   async createIncomingCallInterface(players, callerId, roomHash, type) {
-    this.logger.log('incoming call from', players[callerId]);
+    this.logger.log('incoming call from', players[callerId].displayName);
 
     const callerDocRef = this.firebaseDb
       .collection('players')
@@ -549,12 +549,10 @@ class UserInterfaceManager {
     const myPlayerData = doc.data();
     const friends = myPlayerData.friends;
 
-    let isAlreadyFriend = false;
+    let isFriend = false;
     if (friends) {
-      isAlreadyFriend = friends.includes(this.scene.players[socketId].uid);
+      isFriend = friends.includes(this.scene.players[socketId].uid);
     }
-
-    console.log('debug: myPlayerData', myPlayerData);
 
     const VideoContainer = () => (
       <div
@@ -618,9 +616,7 @@ class UserInterfaceManager {
           >
             <i
               id={`add-friend-${socketId}`}
-              className={
-                isAlreadyFriend ? 'fas fa-user-friends' : 'fas fa-user-plus'
-              }
+              className={isFriend ? 'fas fa-user-friends' : 'fas fa-user-plus'}
               style={{
                 fontSize: '15px',
                 color: 'white'
@@ -697,7 +693,7 @@ class UserInterfaceManager {
   }
 
   addPlayerToFriendList(playerInfo, playerSocketId) {
-    this.logger.log('addPlayerToFriendList', playerInfo);
+    this.logger.log('addPlayerToFriendList', playerInfo.displayName);
     const playerName = playerInfo.displayName;
     if (document.getElementById(`friend-${playerSocketId}`)) return;
 
@@ -749,7 +745,7 @@ class UserInterfaceManager {
   }
 
   addPlayerToOnlineList(playerInfo, playerSocketId, isCurrentPlayer = false) {
-    this.logger.log('addPlayerToOnlineList', playerInfo);
+    this.logger.log('addPlayerToOnlineList');
     const playerName = playerInfo.displayName;
     if (document.getElementById(`player-${playerInfo.uid}`)) return;
 

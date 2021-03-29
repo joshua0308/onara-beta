@@ -74,23 +74,31 @@ class Player {
 
 gameIO.on('connection', (socket) => {
   socket.on('accept-call', ({ to, roomHash, type }) => {
-    console.log('debug: accept-call', roomHash, type);
+    console.log(
+      `debug: accept-${type}-call...`,
+      'from',
+      players[socket.id].displayName,
+      'to',
+      players[to].displayName
+    );
 
     socket.to(to).emit('accept-call', { roomHash });
   });
 
   socket.on('join', async (roomHash) => {
-    console.log('debug: A client joined the room', socket.id, roomHash);
     socket.join(roomHash);
 
     const clients = [...(await gameIO.in(roomHash).allSockets())];
-    console.log('clients', clients);
+
+    console.log(
+      'debug: join-chat',
+      players[socket.id].displayName,
+      clients.map((client) => players[client].displayName)
+    );
 
     const numClients = typeof clients !== 'undefined' ? clients.length : 0;
-    console.log('debug: numClients', numClients);
 
     // if numClients === 1, do nothing. Call will be initiated by the people who join after.
-
     if (numClients > 1) {
       // tell the person who just joined that he is ready to establish peer connection as the initiator
       socket.emit(
@@ -106,64 +114,82 @@ gameIO.on('connection', (socket) => {
       if (err) {
         console.log(err);
       } else {
-        console.log('Token generated. Returning it to the browser client');
+        console.log('debug: token', players[socket.id].displayName);
         socket.emit('token', response);
       }
     });
   });
 
   socket.on('chat-message', ({ roomHash, message }) => {
-    console.log('chat-message', message);
+    console.log(
+      'debug: call-chat-message',
+      players[socket.id].displayName,
+      message
+    );
 
     const displayName = players[socket.id].displayName;
     gameIO.to(roomHash).emit('chat-message', { displayName, message });
   });
 
   socket.on('general-chat-message', ({ barId, message }) => {
-    console.log('general-chat-message', message);
+    console.log(
+      'general-chat-message',
+      players[socket.id].displayName,
+      message
+    );
     gameIO.to(barId).emit('general-chat-message', { from: socket.id, message });
   });
 
   socket.on('candidate', function (candidate, remoteSocketId) {
     console.log(
-      'Received candidate. Broadcasting...',
-      remoteSocketId,
-      socket.id
+      'debug: sending candidate...',
+      'from',
+      players[socket.id].displayName,
+      'to',
+      players[remoteSocketId].displayName
     );
     socket.to(remoteSocketId).emit('candidate', candidate, socket.id);
   });
 
   socket.on('offer', function (offer, remoteSocketId) {
     console.log(
-      'Received offer. Broadcasting...',
+      'debug: sending offer...',
       'from',
-      socket.id,
+      players[socket.id].displayName,
       'to',
-      remoteSocketId
+      players[remoteSocketId].displayName
     );
     socket.to(remoteSocketId).emit('offer', offer, socket.id);
   });
 
   socket.on('answer', function (answer, remoteSocketId) {
     console.log(
-      'Received answer. Broadcasting...',
+      'debug: sending answer...',
       'from',
-      socket.id,
+      players[socket.id].displayName,
       'to',
-      remoteSocketId
+      players[remoteSocketId].displayName
     );
     socket.to(remoteSocketId).emit('answer', answer, socket.id);
   });
 
   socket.on('toggle-video', ({ roomHash, shouldDisplayVideo }) => {
-    console.log('debug: shouldDisplayVideo', shouldDisplayVideo);
+    console.log(
+      'debug: toggle-video',
+      players[socket.id].displayName,
+      shouldDisplayVideo
+    );
     socket.broadcast
       .to(roomHash)
       .emit('toggle-video', socket.id, shouldDisplayVideo);
   });
 
   socket.on('set-display-mode', ({ roomHash, mode }) => {
-    console.log('debug: mode', mode);
+    console.log(
+      'debug: set-display-mode',
+      players[socket.id].displayName,
+      mode
+    );
     socket.broadcast.to(roomHash).emit('set-display-mode', socket.id, mode);
   });
 
@@ -172,7 +198,7 @@ gameIO.on('connection', (socket) => {
 
   // need to wait until socket listener is set up on the client side.
   socket.on('join-room', ({ playerInfo, barId }) => {
-    console.log('debug: user connected', playerInfo.displayName, socket.id);
+    console.log('debug: connected', playerInfo.displayName);
 
     players[socket.id] = new Player({
       barId,
@@ -185,7 +211,10 @@ gameIO.on('connection', (socket) => {
       profilePicURL: playerInfo.profilePicURL
     });
 
-    console.log('debug: current players', Object.keys(players));
+    console.log(
+      'debug: current players',
+      Object.values(players).map((player) => player.displayName)
+    );
 
     socket.join(barId);
 
@@ -201,19 +230,18 @@ gameIO.on('connection', (socket) => {
   });
 
   socket.on('leave-room', (barId) => {
-    console.log('debug: leave-room', barId);
+    console.log('debug: leave-room', players[socket.id].displayName, barId);
 
     socket.leave(barId);
     socket.broadcast.to(barId).emit('room-change', socket.id);
   });
 
   socket.on('update-player', (playerInfo) => {
-    console.log('debug: update-player', playerInfo);
+    console.log('debug: update-player', playerInfo.displayName);
     const player = players[socket.id];
     player.update(playerInfo);
 
     if (players[socket.id].barId) {
-      console.log('debug: update-player socket emit');
       socket.to(players[socket.id].barId).emit('player-updated', player);
     }
   });
@@ -234,9 +262,13 @@ gameIO.on('connection', (socket) => {
   socket.on(
     'request-call',
     ({ receiverId, roomHash, socketIdsInRoom, type }) => {
-      console.log('debug: request-call', new Date().toISOString());
-      console.log('caller -', socket.id);
-      console.log('receiver -', receiverId);
+      console.log(
+        `debug: request-${type}-call...`,
+        'from',
+        players[socket.id].displayName,
+        'to',
+        players[receiverId].displayName
+      );
 
       return socket
         .to(receiverId)
@@ -245,15 +277,25 @@ gameIO.on('connection', (socket) => {
   );
 
   socket.on('cancel-call', ({ receiverId }) => {
-    console.log('debug: cancel-call');
+    console.log(
+      'debug: cancel-call...',
+      'from',
+      players[socket.id].displayName,
+      'to',
+      players[receiverId].displayName
+    );
 
     socket.to(receiverId).emit('call-cancelled');
   });
 
   socket.on('call-declined', ({ callerId }) => {
-    console.log('debug: call declined');
-    console.log('caller -', callerId);
-    console.log('receiver -', socket.id);
+    console.log(
+      'debug: call-declined...',
+      'from',
+      players[socket.id].displayName,
+      'to',
+      players[callerId].displayName
+    );
 
     socket.to(callerId).emit('call-request-declined', {
       receiverId: socket.id,
@@ -262,12 +304,14 @@ gameIO.on('connection', (socket) => {
   });
 
   socket.on('end-call', async ({ roomHash }) => {
-    console.log('debug: end-call', roomHash);
-
     socket.leave(roomHash);
 
     const clients = [...(await gameIO.in(roomHash).allSockets())];
-    console.log('clients', clients);
+    console.log(
+      'debug: end-call',
+      players[socket.id].displayName,
+      clients.map((client) => players[client].displayName)
+    );
 
     if (clients.length) {
       socket.broadcast
@@ -277,7 +321,7 @@ gameIO.on('connection', (socket) => {
   });
 
   socket.on('disconnect', () => {
-    console.log('debug: user disconnected (game)', socket.id);
+    console.log('debug: disconnected', players[socket.id].displayName);
     delete players[socket.id];
 
     gameIO.emit('player-disconnected', socket.id);

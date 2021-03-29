@@ -2,7 +2,6 @@ import React from 'jsx-dom';
 
 function PlayerProfileContainer({ props }) {
   const { playerData, isCurrentPlayer, player } = props;
-  console.log('playerData', playerData);
 
   const handleAudioCallButton = (e) => {
     console.log('request-call', e);
@@ -32,7 +31,6 @@ function PlayerProfileContainer({ props }) {
   };
 
   const handleVideoCallButton = (e) => {
-    console.log('request-call', e);
     const buyADrinkButton = document.getElementById('video-call-button');
     const closeButton = document.getElementById('close-profile-button');
     const closeIcon = document.getElementById('close-button-icon');
@@ -59,7 +57,6 @@ function PlayerProfileContainer({ props }) {
   };
 
   const handleCloseButton = () => {
-    console.log('close clicked');
     const closeButton = document.getElementById('close-profile-button');
     if (closeButton.innerText === 'Cancel') {
       this.socket.emit('cancel-call', { receiverId: player.socketId });

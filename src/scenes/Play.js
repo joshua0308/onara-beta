@@ -56,7 +56,6 @@ class Play extends Phaser.Scene {
 
       // set minimum zoom to 0.8
       this.cameras.main.setZoom(Math.max(zoom, 0.8));
-      console.log('debug: zoom', zoom);
     }
   }
 
@@ -92,23 +91,22 @@ class Play extends Phaser.Scene {
         const myPlayerData = doc.data();
         const friends = myPlayerData.friends;
 
-        // if (barId !== 'town') {
         if (friends.length) {
-          console.log('friends', friends);
           fetch('/players')
             .then((res) => res.json())
             .then((data) => {
-              console.log('fetch', data);
               const { players } = data;
 
               Object.values(players).forEach((player) => {
                 if (friends && friends.includes(player.uid)) {
                   if (barId !== 'town') {
+                    // if player is in bar, add friends to the friend list
                     this.userInterfaceManager.addPlayerToFriendList(
                       player,
                       player.socketId
                     );
                   } else {
+                    // if player is in town, add friends to the online list
                     this.userInterfaceManager.addPlayerToOnlineList(
                       player,
                       player.socketId
@@ -118,14 +116,7 @@ class Play extends Phaser.Scene {
               });
             });
         }
-        // } else {
-        //   // this.userInterfaceManager.addPlayerToOnlineList();
-        // }
       });
-
-    // const doc = await playerDocRef.get();
-    // const myPlayerData = doc.data();
-    // const friends = myPlayerData.friends;
 
     this.userInterfaceManager.createGeneralChat(barId);
     this.userInterfaceManager.createMenuButtons(this.myPlayer);
@@ -254,7 +245,7 @@ class Play extends Phaser.Scene {
     };
 
     this.socket.on('player-updated', (player) => {
-      this.logger.log('socket on player-updated', player);
+      this.logger.log('socket on player-updated', player.displayName);
       this.userInterfaceManager.updateOnlineList(
         player.uid,
         player.displayName
@@ -272,7 +263,7 @@ class Play extends Phaser.Scene {
 
     // receive live players in the room
     this.socket.on('current-players', (players) => {
-      this.logger.log('socket on current players', { players });
+      this.logger.log('current-players');
       this.players = players;
 
       Object.keys(players).forEach((id) => {
@@ -298,7 +289,7 @@ class Play extends Phaser.Scene {
 
     // receive info about newly connected players
     this.socket.on('new-player', (player) => {
-      this.logger.log('socket on new-player', { player });
+      this.logger.log('new-player');
       this.players[player.socketId] = player;
       this.playersSprite[player.socketId] = new OtherPlayer(
         this,
