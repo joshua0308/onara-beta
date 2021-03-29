@@ -198,7 +198,7 @@ gameIO.on('connection', (socket) => {
 
   // need to wait until socket listener is set up on the client side.
   socket.on('join-room', ({ playerInfo, barId }) => {
-    console.log('debug: connected', playerInfo.displayName);
+    console.log('debug: join-room', barId, playerInfo.displayName);
 
     players[socket.id] = new Player({
       barId,
@@ -212,7 +212,7 @@ gameIO.on('connection', (socket) => {
     });
 
     console.log(
-      'debug: current players',
+      'debug: current-players',
       Object.values(players).map((player) => player.displayName)
     );
 
@@ -230,7 +230,7 @@ gameIO.on('connection', (socket) => {
   });
 
   socket.on('leave-room', (barId) => {
-    console.log('debug: leave-room', players[socket.id].displayName, barId);
+    console.log('debug: leave-room', barId, players[socket.id].displayName);
 
     socket.leave(barId);
     socket.broadcast.to(barId).emit('room-change', socket.id);
