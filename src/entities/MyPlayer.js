@@ -187,13 +187,11 @@ class MyPlayer extends Phaser.GameObjects.Container {
     } else {
       this.body.setVelocityX(0);
 
-      // enable once images are fixed
-      // if (this.scene.nativePeerManager.isConnected()) {
-      //   this.motion = 'drink';
-      // } else {
-      //   this.motion = 'idle';
-      // }
-      this.motion = 'idle';
+      if (this.scene.nativePeerManager.isConnected()) {
+        this.motion = 'drink';
+      } else {
+        this.motion = 'idle';
+      }
     }
 
     if (onFloor) {

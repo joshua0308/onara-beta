@@ -27,7 +27,7 @@ class Preload extends Phaser.Scene {
 
     this.load.spritesheet('boy-drink', 'assets/new-player/boy-drink.png', {
       frameWidth: 382,
-      frameHeight: 1080,
+      frameHeight: 920,
       spacing: 211
     });
 
@@ -57,7 +57,7 @@ class Preload extends Phaser.Scene {
 
     this.load.spritesheet('girl-drink', 'assets/new-player/girl-drink.png', {
       frameWidth: 382,
-      frameHeight: 1080,
+      frameHeight: 920,
       spacing: 211
     });
 
