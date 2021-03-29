@@ -102,7 +102,7 @@ class Play extends Phaser.Scene {
               const { players } = data;
 
               Object.values(players).forEach((player) => {
-                if (friends.includes(player.uid)) {
+                if (friends && friends.includes(player.uid)) {
                   if (barId !== 'town') {
                     this.userInterfaceManager.addPlayerToFriendList(
                       player,
@@ -256,7 +256,7 @@ class Play extends Phaser.Scene {
     this.socket.on('player-updated', (player) => {
       this.logger.log('socket on player-updated', player);
       this.userInterfaceManager.updateOnlineList(
-        player.socketId,
+        player.uid,
         player.displayName
       );
       const otherPlayer = this.otherPlayersGroup.getMatching(

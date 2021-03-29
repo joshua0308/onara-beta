@@ -339,8 +339,8 @@ class UserInterfaceManager {
     }
   }
 
-  updateOnlineList(playerSocketId, updatedName) {
-    document.getElementById(playerSocketId).innerText = updatedName;
+  updateOnlineList(uid, updatedName) {
+    document.getElementById(`player-name-${uid}`).innerText = updatedName;
   }
 
   async createPlayerProfileInterface(player, isCurrentPlayer = false) {
@@ -417,6 +417,7 @@ class UserInterfaceManager {
 
   toggleRemoteVideo(socketId, shouldDisplayVideo) {
     const imageElement = document.getElementById(`image-${socketId}`);
+    const videoElement = document.getElementById(`video-${socketId}`);
 
     console.log('debug: imageElement', imageElement, shouldDisplayVideo);
     if (!imageElement) return;
@@ -424,9 +425,11 @@ class UserInterfaceManager {
     if (shouldDisplayVideo) {
       // display video
       imageElement.style.display = 'none';
+      videoElement.style.display = 'inline';
     } else {
       // display image
       imageElement.style.display = 'inline';
+      videoElement.style.display = 'none';
     }
   }
 
@@ -629,7 +632,6 @@ class UserInterfaceManager {
         <img
           id={`image-${socketId}`}
           style={{
-            position: 'absolute',
             display: 'none'
           }}
           className="video-element"
@@ -788,7 +790,7 @@ class UserInterfaceManager {
           }
         />
         <div>
-          <div>{playerName}</div>
+          <div id={`player-name-${playerInfo.uid}`}>{playerName}</div>
           <div
             style={{
               fontSize: '1rem',

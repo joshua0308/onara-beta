@@ -473,6 +473,10 @@ class NativePeerManager {
     this.socket.removeAllListeners('toggle-video');
     this.socket.removeAllListeners('set-display-mode');
   }
+
+  isConnected() {
+    return !!this.roomHash;
+  }
 }
 
 export default NativePeerManager;

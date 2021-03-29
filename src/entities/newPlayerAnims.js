@@ -10,6 +10,16 @@ export default (anims) => {
   });
 
   anims.create({
+    key: 'boy-drink',
+    frames: anims.generateFrameNumbers('boy-drink', {
+      start: 0,
+      end: 6
+    }),
+    frameRate: 3,
+    repeat: -1
+  });
+
+  anims.create({
     key: 'boy-walk',
     frames: anims.generateFrameNumbers('boy-walk', {
       start: 0,
@@ -42,6 +52,16 @@ export default (anims) => {
   anims.create({
     key: 'girl-idle',
     frames: anims.generateFrameNumbers('girl-idle', {
+      start: 0,
+      end: 4
+    }),
+    frameRate: 4,
+    repeat: -1
+  });
+
+  anims.create({
+    key: 'girl-drink',
+    frames: anims.generateFrameNumbers('girl-drink', {
       start: 0,
       end: 4
     }),

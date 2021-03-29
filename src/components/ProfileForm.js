@@ -35,7 +35,7 @@ function ProfileForm({ props }) {
     myPlayerDocRef.set(formInputValues, { merge: true }).then(() => {
       this.scene.updateMyPlayerInfo(formInputValues);
       this.updateOnlineList(
-        this.scene.myPlayer.socketId,
+        this.scene.myPlayer.uid,
         formInputValues.displayName
       );
       this.scene.myPlayerSprite.updatePlayerName(formInputValues.displayName);
