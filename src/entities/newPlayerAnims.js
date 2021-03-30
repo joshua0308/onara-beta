@@ -63,7 +63,7 @@ export default (anims) => {
     key: 'girl-drink',
     frames: anims.generateFrameNumbers('girl-drink', {
       start: 0,
-      end: 1
+      end: 6
     }),
     frameRate: 3,
     repeat: -1
