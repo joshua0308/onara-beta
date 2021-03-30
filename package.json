@@ -13,7 +13,9 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "build": "rm -rf dist && webpack --config webpack.prod.js",
-    "build:dev": "webpack --config webpack.dev.js"
+    "build:dev": "webpack --config webpack.dev.js",
+    "heroku:logs": "heroku logs -a onara-prod -d web -t",
+    "heroku:acc": "heroku accounts:set personal"
   },
   "author": "",
   "license": "ISC",
