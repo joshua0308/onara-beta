@@ -350,6 +350,11 @@ app.get('/game', (req, res) => {
   res.render('game', { BUNDLE_PATH });
 });
 
+app.get('/signup', (req, res) => {
+  var publicPath = path.join(__dirname, 'public');
+  res.sendFile(path.join(publicPath, 'signup.html'));
+});
+
 app.get('/', (req, res) => {
   var publicPath = path.join(__dirname, 'public');
   res.sendFile(path.join(publicPath, 'index.html'));
