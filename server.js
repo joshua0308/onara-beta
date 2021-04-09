@@ -355,6 +355,11 @@ app.get('/signup', (req, res) => {
   res.sendFile(path.join(publicPath, 'signup.html'));
 });
 
+app.get('/signup2', (req, res) => {
+  var publicPath = path.join(__dirname, 'public');
+  res.sendFile(path.join(publicPath, 'additional-questions.html'));
+});
+
 app.get('/', (req, res) => {
   var publicPath = path.join(__dirname, 'public');
   res.sendFile(path.join(publicPath, 'index.html'));
