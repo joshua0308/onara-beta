@@ -1,48 +1,47 @@
-// const ui = new firebaseui.auth.AuthUI(firebase.auth());
-
-// const uiConfig = {
-//   callbacks: {
-//     signInSuccessWithAuthResult: function (authResult, redirectUrl) {
-//       // User successfully signed in.
-//       // Return type determines whether we continue the redirect automatically
-//       // or whether we leave that to developer to handle.
-//       return true;
-//     },
-//     uiShown: function () {
-//       // The widget is rendered.
-//       // Hide the loader.
-//       document.getElementById('loader').style.display = 'none';
-//     }
-//   },
-//   // domain: 'onara.io',
-//   // Will use popup for IDP Providers sign-in flow instead of the default, redirect.
-//   signInFlow: 'popup',
-//   signInSuccessUrl: '/game',
-//   signInOptions: [
-//     {
-//       provider: firebase.auth.GoogleAuthProvider.PROVIDER_ID,
-//       scopes: ['https://www.googleapis.com/auth/userinfo.profile']
-//     }
-//     // {
-//     //   provider: firebase.auth.FacebookAuthProvider.PROVIDER_ID,
-//     //   scopes: ['public_profile', 'email', 'user_likes', 'user_friends']
-//     // },
-//     // firebase.auth.EmailAuthProvider.PROVIDER_ID
-//   ],
-//   // Terms of service url.
-//   tosUrl: '/login',
-//   // Privacy policy url.
-//   privacyPolicyUrl: '/login'
-// };
-
-// The start method will wait until the DOM is loaded.
-// ui.start('#google-auth-button', uiConfig);
-
 // if the user is already logged in, move to the game page
 firebase.auth().onAuthStateChanged((user) => {
   if (user) {
-    console.log('debug: logged in', user.displayName, user.email);
-    window.location.replace('/game');
+    console.log('debug: logged in', user);
+
+    const uid = user.uid;
+    const firebaseDb = firebase.firestore();
+    const playerDocRef = firebaseDb.collection('players').doc(uid);
+
+    playerDocRef
+      .get()
+      .then((doc) => {
+        const playerData = doc.data();
+
+        if (playerData.email) {
+          console.log('debug: player found in DB');
+          window.location.replace('/game');
+        } else if (playerData) {
+          playerDocRef.delete().then(() => {
+            // window.location.replace('/');
+          });
+        } else {
+          console.log('debug: player not found in DB');
+          window.location.replace('/signup');
+          // const now = firebase.firestore.Timestamp.now();
+
+          // const newPlayerData = {
+          //   displayName: '',
+          //   email: '',
+          //   profilePicURL: '',
+          //   uid: uid,
+          //   createdAt: now,
+          //   updatedAt: now
+          // };
+
+          // playerDocRef.set(newPlayerData).then(() => {
+          //   window.location.replace('/signup');
+          // });
+        }
+      })
+      .catch((e) => {
+        console.log(e);
+        // window.location.replace('/');
+      });
   } else {
     console.log('debug: not logged in');
   }

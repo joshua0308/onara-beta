@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Onara</title>
+  <link href="public/images/favicon.ico" rel="shortcut icon" type="image/x-icon">
+
   <link
     href="https://fonts.googleapis.com/css?family=Raleway"
     rel="stylesheet"
@@ -177,7 +180,7 @@
 
     /* Mark the steps that are finished and valid: */
     .step.finish {
-      background-color: #4caf50;
+      background-color: rgb(69, 106, 221);
     }
 
     .input-container {
@@ -396,7 +399,7 @@
           <div class="input-container"></div>
           <div class="input-container">
             <i class="fas fa-birthday-cake"></i>
-            <input placeholder="Birthday" onfocus="(this.type='date')" />
+            <input placeholder="Date of birth" onfocus="(this.type='date')" />
           </div>
         </div>
 
@@ -412,6 +415,10 @@
           <div class="input-container">
             <i class="fas fa-flag"></i>
             <input placeholder="Country" />
+          </div>
+          <div class="input-container">
+            <i class="fas fa-flag"></i>
+            <input placeholder="Language" />
           </div>
         </div>
 
@@ -550,20 +557,19 @@
       }
 
       function validateForm() {
+        // short circuit for now
         return true;
         // This function deals with validation of the form fields
-        var x,
-          y,
-          i,
-          valid = true;
-        x = document.getElementsByClassName('tab');
-        y = x[currentTab].getElementsByTagName('input');
+        let valid = true;
+
+        let tabElement = document.getElementsByClassName('tab');
+        let inputElements = tabElement[currentTab].getElementsByTagName('input');
         // A loop that checks every input field in the current tab:
-        for (i = 0; i < y.length; i++) {
+        for (const i = 0; i < inputElements.length; i++) {
           // If a field is empty...
-          if (y[i].value == '') {
+          if (inputElements[i].value == '') {
             // add an "invalid" class to the field:
-            y[i].className += ' invalid';
+            inputElements[i].className += ' invalid';
             // and set the current valid status to false
             valid = false;
           }
@@ -592,5 +598,9 @@
         e.target.classList.toggle('active');
       }
     </script>
+    <script src="https://www.gstatic.com/firebasejs/8.2.3/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.2.3/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.2.3/firebase-firestore.js"></script>
+    <script src="public/firebase.js"></script>
   </body>
 </html>

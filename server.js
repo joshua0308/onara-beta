@@ -281,9 +281,7 @@ gameIO.on('connection', (socket) => {
       console.log(
         'debug: cancel-call...',
         'from',
-        players[socket.id].displayName,
-        'to',
-        players[receiverId].displayName
+        players[socket.id].displayName
       );
     } catch (e) {
       console.log(e);

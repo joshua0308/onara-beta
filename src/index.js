@@ -61,26 +61,26 @@ if (firebase.auth().isSignInWithEmailLink(window.location.href)) {
         .then((doc) => {
           const playerData = doc.data();
 
-          if (playerData) {
+          if (playerData.email) {
             console.log('debug: player found in DB');
             new AronaGame(config, playerData, false);
           } else {
             console.log('debug: player not found in DB');
+            window.location.replace('/');
+            // const now = firebase.firestore.Timestamp.now();
 
-            const now = firebase.firestore.Timestamp.now();
+            // const newPlayerData = {
+            //   displayName: '',
+            //   email: '',
+            //   profilePicURL: '',
+            //   uid: playerAuth.uid,
+            //   createdAt: now,
+            //   updatedAt: now
+            // };
 
-            const newPlayerData = {
-              displayName: '',
-              email: '',
-              profilePicURL: '',
-              uid: playerAuth.uid,
-              createdAt: now,
-              updatedAt: now
-            };
-
-            playerDocRef.set(newPlayerData).then(() => {
-              new AronaGame(config, newPlayerData, true);
-            });
+            // playerDocRef.set(newPlayerData).then(() => {
+            //   new AronaGame(config, newPlayerData, true);
+            // });
           }
         })
         .catch((e) => {
@@ -109,23 +109,24 @@ if (firebase.auth().isSignInWithEmailLink(window.location.href)) {
         .then((doc) => {
           const playerData = doc.data();
 
-          if (playerData) {
+          if (playerData.email) {
             new AronaGame(config, playerData, false);
           } else {
-            const now = firebase.firestore.Timestamp.now();
+            window.location.replace('/');
+            // const now = firebase.firestore.Timestamp.now();
 
-            const newPlayerData = {
-              displayName: playerAuth.displayName,
-              email: playerAuth.email,
-              profilePicURL: playerAuth.photoURL || '',
-              uid: playerAuth.uid,
-              createdAt: now,
-              updatedAt: now
-            };
+            // const newPlayerData = {
+            //   displayName: playerAuth.displayName,
+            //   email: playerAuth.email,
+            //   profilePicURL: playerAuth.photoURL || '',
+            //   uid: playerAuth.uid,
+            //   createdAt: now,
+            //   updatedAt: now
+            // };
 
-            playerDocRef.set(newPlayerData).then(() => {
-              new AronaGame(config, newPlayerData, true);
-            });
+            // playerDocRef.set(newPlayerData).then(() => {
+            //   new AronaGame(config, newPlayerData, true);
+            // });
           }
         })
         .catch(console.error);
