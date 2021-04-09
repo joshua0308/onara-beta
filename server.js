@@ -277,18 +277,11 @@ gameIO.on('connection', (socket) => {
   );
 
   socket.on('cancel-call', ({ receiverId }) => {
-    try {
-      console.log(
-        'debug: cancel-call...',
-        'from',
-        players[socket.id].displayName,
-        'to',
-        players[receiverId].displayName
-      );
-    } catch (e) {
-      console.log(e);
-    }
-
+    console.log(
+      'debug: cancel-call...',
+      'from',
+      players[socket.id].displayName
+    );
     socket.to(receiverId).emit('call-cancelled');
   });
 
