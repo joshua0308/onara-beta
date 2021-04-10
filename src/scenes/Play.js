@@ -91,7 +91,7 @@ class Play extends Phaser.Scene {
         const myPlayerData = doc.data();
         const friends = myPlayerData.friends;
 
-        if (friends.length) {
+        if (friends && friends.length) {
           fetch('/players')
             .then((res) => res.json())
             .then((data) => {

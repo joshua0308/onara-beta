@@ -1,51 +1,60 @@
 // if the user is already logged in, move to the game page
 firebase.auth().onAuthStateChanged((user) => {
   if (user) {
-    console.log('debug: logged in', user);
-
-    const uid = user.uid;
-    const firebaseDb = firebase.firestore();
-    const playerDocRef = firebaseDb.collection('players').doc(uid);
-
-    playerDocRef
-      .get()
-      .then((doc) => {
-        const playerData = doc.data();
-
-        if (playerData.email) {
-          console.log('debug: player found in DB');
-          window.location.replace('/game');
-        } else if (playerData) {
-          playerDocRef.delete().then(() => {
-            // window.location.replace('/');
-          });
-        } else {
-          console.log('debug: player not found in DB');
-          window.location.replace('/signup');
-          // const now = firebase.firestore.Timestamp.now();
-
-          // const newPlayerData = {
-          //   displayName: '',
-          //   email: '',
-          //   profilePicURL: '',
-          //   uid: uid,
-          //   createdAt: now,
-          //   updatedAt: now
-          // };
-
-          // playerDocRef.set(newPlayerData).then(() => {
-          //   window.location.replace('/signup');
-          // });
-        }
-      })
-      .catch((e) => {
-        console.log(e);
-        // window.location.replace('/');
-      });
+    console.log('debug: logged in', user.displayName, user.email);
+    window.location.replace('/game');
   } else {
     console.log('debug: not logged in');
   }
 });
+
+// firebase.auth().onAuthStateChanged((user) => {
+//   if (user) {
+//     console.log('debug: logged in', user);
+
+//     const uid = user.uid;
+//     const firebaseDb = firebase.firestore();
+//     const playerDocRef = firebaseDb.collection('players').doc(uid);
+
+//     playerDocRef
+//       .get()
+//       .then((doc) => {
+//         const playerData = doc.data();
+
+//         if (playerData) {
+//           console.log('debug: player found in DB');
+//           window.location.replace('/game');
+//           // } else if (playerData) {
+//           //   playerDocRef.delete().then(() => {
+//           //     // window.location.replace('/');
+//           //   });
+//         } else {
+//           console.log('debug: player not found in DB');
+//           window.location.replace('/signup');
+//           const now = firebase.firestore.Timestamp.now();
+
+//           const newPlayerData = {
+//             displayName: '',
+//             email: '',
+//             profilePicURL: '',
+//             uid: uid,
+//             createdAt: now,
+//             updatedAt: now
+//           };
+
+//           playerDocRef.set(newPlayerData).then(() => {
+//             window.location.replace('/signup');
+//           });
+//         }
+//       })
+//       .catch((e) => {
+//         console.log(e);
+//         // window.location.replace('/');
+//       });
+//   } else {
+//     console.log('debug: not logged in');
+//   }
+// });
 
 function initGoogleAuth() {
   console.log('initGoogleAuth');

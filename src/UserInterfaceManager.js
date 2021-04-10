@@ -294,17 +294,167 @@ class UserInterfaceManager {
 
   async createProfileFormInterface(myPlayer) {
     this.scene.scene.pause();
+    this.hideOnlineList();
 
+    const saveButtonCallback = () => {
+      this.logger.log('save profile');
+
+      const usernameInput = document.getElementById('username-input');
+      const firstnameInput = document.getElementById('firstname-input');
+      const lastnameInput = document.getElementById('lastname-input');
+      const birthdayInput = document.getElementById('birthday-input');
+      const cityInput = document.getElementById('city-input');
+      const countryInput = document.getElementById('country-input');
+      const languageInput = document.getElementById('language-input');
+      const emailInput = document.getElementById('email-input');
+      const phoneInput = document.getElementById('phone-input');
+      const positionInput = document.getElementById('position-input');
+      const currentlyInput = document.getElementById('currently-input');
+      const previouslyInput = document.getElementById('previously-input');
+      const educationInput = document.getElementById('education-input');
+
+      const formInputValues = {
+        username: usernameInput.value,
+        displayName: `${firstnameInput.value} ${lastnameInput.value}`,
+        firstname: firstnameInput.value,
+        lastname: lastnameInput.value,
+        birthday: birthdayInput.value,
+        city: cityInput.value,
+        country: countryInput.value,
+        language: languageInput.value,
+        email: emailInput.value,
+        phone: phoneInput.value,
+        position: positionInput.value,
+        currently: currentlyInput.value,
+        previously: previouslyInput.value,
+        education: educationInput.value,
+        updatedAt: this.firebase.firestore.Timestamp.now(),
+        gender: 'male'
+      };
+
+      myPlayerDocRef.set(formInputValues, { merge: true }).then(() => {
+        this.scene.updateMyPlayerInfo(formInputValues);
+        this.updateOnlineList(
+          this.scene.myPlayer.uid,
+          formInputValues.displayName
+        );
+        this.scene.myPlayerSprite.updatePlayerName(formInputValues.displayName);
+        this.scene.myPlayerSprite.updateCharacterType(formInputValues.gender);
+        this.scene.socket.emit('update-player', this.scene.myPlayer);
+      });
+
+      this.removeProfileFormInterface();
+    };
+
+    function selectAvatar(e) {
+      const element = e.target;
+
+      const avatarContainers = document
+        .querySelectorAll('.avatar-container')
+        .forEach((container) => {
+          if (container.querySelector('img') !== element) {
+            container.style.backgroundColor = null;
+          } else {
+            container.style.backgroundColor = 'rgba(69, 106, 221, 0.5)';
+          }
+        });
+    }
+
+    function showTab(n) {
+      // This function will display the specified tab of the form...
+      var x = document.getElementsByClassName('tab');
+      x[n].style.display = 'block';
+
+      // hide previous button on first tab
+      if (n == 0) {
+        document.getElementById('prevBtn').style.display = 'none';
+      } else {
+        document.getElementById('prevBtn').style.display = 'inline';
+      }
+
+      if (n == x.length - 1) {
+        document.getElementById('nextBtn').innerHTML = 'Submit';
+        document.getElementById('nextBtn').onclick = () => {
+          console.log('submit');
+          // window.location.replace('/game');
+          // removeProfileFormInterface();
+          saveButtonCallback();
+        };
+      } else {
+        document.getElementById('nextBtn').innerHTML = 'Next';
+        document.getElementById('nextBtn').onclick = () => nextPrev(1);
+      }
+      //... and run a function that will display the correct step indicator:
+      fixStepIndicator(n);
+    }
+
+    function nextPrev(n) {
+      console.log(currentTab);
+      // This function will figure out which tab to display
+      var x = document.getElementsByClassName('tab');
+      // Exit the function if any field in the current tab is invalid:
+      if (n == 1 && !validateForm()) return false;
+      // Hide the current tab:
+      x[currentTab].style.display = 'none';
+      // Increase or decrease the current tab by 1:
+      currentTab = currentTab + n;
+      // if you have reached the end of the form...
+      if (currentTab >= x.length) {
+        return false;
+      }
+      // Otherwise, display the correct tab:
+      showTab(currentTab);
+    }
+
+    function validateForm() {
+      // short circuit for now
+      return true;
+    }
+
+    function fixStepIndicator(n) {
+      // This function removes the "active" class of all steps...
+      var i,
+        x = document.getElementsByClassName('step');
+      for (i = 0; i < x.length; i++) {
+        x[i].className = x[i].className.replace(' active', '');
+      }
+      //... and adds the "active" class on the current step:
+      x[n].className += ' active';
+    }
+
+    function toggleButton(e) {
+      console.log(e);
+      e.target.classList.toggle('active');
+    }
+
+    const playersRef = this.firebaseDb.collection('players');
     const myPlayerDocRef = this.firebaseDb
       .collection('players')
       .doc(myPlayer.uid);
 
     const doc = await myPlayerDocRef.get();
     const myPlayerData = doc.data();
+    let currentTab = 0; // Current tab is set to be the first tab (0)
 
     document.body.appendChild(
-      <this.ProfileForm props={{ myPlayerData, myPlayerDocRef }} />
+      <this.ProfileForm
+        props={{
+          myPlayerData,
+          nextPrev,
+          playersRef
+          // myPlayerDocRef,
+          // currentTab,
+          // selectAvatar,
+          // toggleButton
+        }}
+      />
     );
+
+    document.querySelectorAll('.avatar-container').forEach((container) => {
+      container.onclick = selectAvatar;
+    });
+
+    showTab(currentTab); // Display the current tab
   }
 
   removeProfileFormInterface() {

@@ -1,208 +1,265 @@
 import React from 'jsx-dom';
+import { AlphaSenderContext } from 'twilio/lib/rest/messaging/v1/service/alphaSender';
 function ProfileForm({ props }) {
-  const { myPlayerData, myPlayerDocRef } = props;
-  let isMale = false;
-
-  if (myPlayerData.gender) {
-    if (myPlayerData.gender === 'male') {
-      isMale = true;
-    } else {
-      isMale = false;
-    }
-  }
-
-  const saveButtonCallback = (e) => {
-    this.logger.log('save profile');
-    e.preventDefault();
-
-    const profileEditForm = document.getElementById('profile-edit-form');
-
-    if (profileEditForm.checkValidity() === false) {
-      profileEditForm.classList.add('was-validated');
-      return;
-    }
-
-    const formInputValues = {
-      displayName: profileEditForm.elements['name'].value,
-      position: profileEditForm.elements['position'].value,
-      education: profileEditForm.elements['education'].value,
-      city: profileEditForm.elements['city'].value,
-      country: profileEditForm.elements['country'].value,
-      updatedAt: this.firebase.firestore.Timestamp.now(),
-      gender: document.getElementById('male-radio').checked ? 'male' : 'female'
-    };
-
-    myPlayerDocRef.set(formInputValues, { merge: true }).then(() => {
-      this.scene.updateMyPlayerInfo(formInputValues);
-      this.updateOnlineList(
-        this.scene.myPlayer.uid,
-        formInputValues.displayName
-      );
-      this.scene.myPlayerSprite.updatePlayerName(formInputValues.displayName);
-      this.scene.myPlayerSprite.updateCharacterType(formInputValues.gender);
-      this.scene.socket.emit('update-player', this.scene.myPlayer);
-    });
-
-    this.removeProfileFormInterface();
-  };
+  let { myPlayerData, nextPrev, playersRef } = props;
 
   return (
     <div id="profile-form-wrapper" className="background-overlay">
-      <div className="container rounded bg-white w-50">
-        <div className="row">
-          <div className="col-md-3 border-right d-flex flex-column align-items-center text-center justify-content-center">
-            <div
-              className="nav flex-column nav-pills"
-              role="tablist"
-              aria-orientation="vertical"
-            >
-              <a
-                className="nav-link active"
-                data-toggle="pill"
-                href="#"
-                role="tab"
-              >
-                Profile
-              </a>
+      <div className="page-container">
+        {/* <!-- Circles which indicates the steps of the form: --> */}
+        <div className="progress-container">
+          <span className="step"></span>
+          <span className="step"></span>
+          <span className="step"></span>
+          <span className="step"></span>
+          <span className="step"></span>
+          <span className="step"></span>
+          <span className="step"></span>
+        </div>
+
+        <div className="header-container">
+          <p>Tell us a little bit about yourself</p>
+        </div>
+        <div id="box-container">
+          <div className="tab tab-container">
+            {/* <!-- step 1 - username --> */}
+            <div className="title-container">
+              <p>Choose your username</p>
+            </div>
+            <div className="input-container">
+              <input
+                id="username-input"
+                placeholder="Username"
+                style={{ textAlign: 'center' }}
+                value={myPlayerData.username}
+                onInput={(e) => {
+                  var query = playersRef.where(
+                    'username',
+                    '==',
+                    e.target.value
+                  );
+                  query.get().then((querySnapshot) => {
+                    let valid = true;
+                    console.log('debug: querySnapshot', querySnapshot.size);
+
+                    if (querySnapshot.size > 0) {
+                      valid = false;
+                    }
+
+                    querySnapshot.forEach((doc) => {
+                      // eslint-disable-next-line no-console
+                      console.log(
+                        'debug: doc.uid, mypl',
+                        doc.data().uid,
+                        myPlayerData.uid
+                      );
+                      if (doc.data().uid === myPlayerData.uid) {
+                        valid = true;
+                      }
+                    });
+
+                    const validIcon = document.getElementById(
+                      'username-valid-icon'
+                    );
+                    const invalidIcon = document.getElementById(
+                      'username-invalid-icon'
+                    );
+
+                    if (!valid) {
+                      validIcon.style.display = 'none';
+                      invalidIcon.style.display = 'inline';
+                    } else {
+                      validIcon.style.display = 'inline';
+                      invalidIcon.style.display = 'none';
+                    }
+                  });
+                }}
+              />
+              <i
+                id="username-valid-icon"
+                className="fas fa-check-circle"
+                style={{ display: 'none', color: 'green', fontSize: '20px' }}
+              ></i>
+              <i
+                id="username-invalid-icon"
+                className="fas fa-check-circle"
+                style={{ display: 'none', color: 'red', fontSize: '20px' }}
+              ></i>
             </div>
           </div>
-          <div className="col-md-9">
-            <button
-              style={{
-                position: 'absolute',
-                left: '0px',
-                margin: '10px',
-                borderStyle: 'none',
-                width: '40px',
-                height: '40px',
-                borderRadius: '20px',
-                cursor: 'pointer'
-              }}
-              title="Logout"
-              alt="Logout"
-              onClick={() => {
-                this.firebaseAuth.signOut();
-                window.location.replace('/');
-              }}
+
+          <div className="tab tab-container">
+            {/* <!-- step 2 - basic info --> */}
+            <div className="title-container">
+              <p>Basic Information</p>
+              <p>
+                This basic information will be shown to other users. Tell us
+                what you'd like to show!
+              </p>
+            </div>
+            <div
+              className="input-container"
+              style="display: flex; align-items: center"
             >
-              <i className="fas fa-sign-out-alt"></i>
-            </button>
-            <div>
-              <div className="mt-5 d-flex flex-column align-items-center text-center justify-content-center">
+              <i className="fas fa-user"></i>
+              <input
+                id="firstname-input"
+                style="margin-right: 10px"
+                placeholder="First name"
+                value={myPlayerData.firstname}
+              />
+              <input
+                id="lastname-input"
+                placeholder="Last name"
+                value={myPlayerData.lastname}
+              />
+            </div>
+            <div className="input-container"></div>
+            <div className="input-container">
+              <i className="fas fa-birthday-cake"></i>
+              <input
+                id="birthday-input"
+                placeholder="Date of birth"
+                onFocus="(this.type='date')"
+                value={myPlayerData.birthday}
+              />
+            </div>
+          </div>
+
+          <div className="tab tab-container">
+            {/* <!-- step 3 - location, language --> */}
+            <div className="title-container">
+              <p>Location & Language</p>
+            </div>
+            <div className="input-container">
+              <i className="fas fa-globe-asia"></i>
+              <input
+                id="city-input"
+                placeholder="City"
+                value={myPlayerData.city}
+              />
+            </div>
+            <div className="input-container">
+              <i className="fas fa-flag"></i>
+              <input
+                id="country-input"
+                placeholder="Country"
+                value={myPlayerData.country}
+              />
+            </div>
+            <div className="input-container">
+              <i className="fas fa-flag"></i>
+              <input
+                id="language-input"
+                placeholder="Langauge (a comma separated list of languages you can speak)"
+                value={myPlayerData.language}
+              />
+            </div>
+          </div>
+
+          <div className="tab tab-container">
+            {/* <!-- step 4 - email, phone # --> */}
+            <div className="title-container">
+              <p>Contact Information</p>
+              <p>
+                We will notify you when your friends send you a message (opt-in)
+              </p>
+            </div>
+            <div className="input-container">
+              <i className="fas fa-envelope"></i>
+              <input
+                id="email-input"
+                placeholder="Email"
+                value={myPlayerData.email}
+              />
+            </div>
+            <div className="input-container">
+              <i className="fas fa-phone"></i>
+              <input
+                id="phone-input"
+                placeholder="Phone number (optional)"
+                value={myPlayerData.phone}
+              />
+            </div>
+          </div>
+
+          <div className="tab tab-container">
+            {/* <!-- step 5 - work experience --> */}
+            <div className="title-container">
+              <p>Work Experience</p>
+              <p>Tell us whatever you'd like to share with other users.</p>
+            </div>
+            <div className="input-container">
+              <i className="fas fa-user"></i>
+              <input
+                id="position-input"
+                placeholder="Position"
+                value={myPlayerData.position}
+              />
+            </div>
+            <div className="input-container">
+              <i className="fas fa-building"></i>
+              <input
+                id="currently-input"
+                placeholder="Currently"
+                value={myPlayerData.currently}
+              />
+            </div>
+            <div className="input-container">
+              <i className="fas fa-paperclip"></i>
+              <input
+                id="previously-input"
+                placeholder="Previously (a comma separated list of previous jobs)"
+                value={myPlayerData.previously}
+              />
+            </div>
+            <div className="input-container">
+              <i className="fas fa-graduation-cap"></i>
+              <input
+                id="education-input"
+                placeholder="Education"
+                value={myPlayerData.education}
+              />
+            </div>
+          </div>
+
+          <div className="tab tab-container">
+            {/* <!-- step 6 - choose avatar --> */}
+            <div className="title-container">
+              <p>Choose your avatar</p>
+            </div>
+            <div style="display: flex; justify-content: center">
+              <div className="avatar-container">
                 <img
-                  id="profile-image"
-                  className="rounded-circle"
-                  src={
-                    myPlayerData.profilePicURL ||
-                    'public/assets/placeholder-profile-pic.png'
-                  }
-                  width="150"
+                  className="avatar-img"
+                  src="public/assets/boy-signup.png"
                 />
               </div>
-              <form
-                id="profile-edit-form"
-                className="main-form needs-validation"
-              >
-                <div className="row mt-2">
-                  <div className="col-md-12 mt-3">
-                    <label className="labels">Name</label>
-                    <input
-                      type="text"
-                      name="name"
-                      className="form-control"
-                      placeholder="name"
-                      value={myPlayerData.displayName}
-                      required
-                    />
-                  </div>
-                </div>
-                <div className="row">
-                  <div className="col-md-12 mt-3">
-                    <label className="labels">Gender</label>
-                    <br />
-                    <input
-                      type="radio"
-                      id="male-radio"
-                      name="gender"
-                      value="male"
-                      checked={isMale}
-                    />
-                    <label htmlFor="male-radio"> Male</label>
-                    <br />
-                    <input
-                      type="radio"
-                      id="female-radio"
-                      name="gender"
-                      value="female"
-                      checked={!isMale}
-                    />
-                    <label htmlFor="female-radio">Female</label>
-                  </div>
-                  <div className="col-md-12 mt-3">
-                    <label className="labels">Current position</label>
-                    <input
-                      type="text"
-                      name="position"
-                      className="form-control"
-                      placeholder="position"
-                      value={myPlayerData.position}
-                      required
-                    />
-                  </div>
-                  <div className="col-md-12  mt-3">
-                    <label className="labels">Education</label>
-                    <input
-                      type="text"
-                      name="education"
-                      className="form-control"
-                      placeholder="education"
-                      value={myPlayerData.education}
-                      required
-                    />
-                  </div>
-                </div>
-                <div className="row mt-3">
-                  <div className="col-md-6 mt-3">
-                    <label className="labels">City</label>
-                    <input
-                      type="text"
-                      name="city"
-                      className="form-control"
-                      placeholder="city"
-                      value={myPlayerData.city}
-                      required
-                    />
-                  </div>
-                  <div className="col-md-6 mt-3">
-                    <label className="labels">Country</label>
-                    <input
-                      type="text"
-                      name="country"
-                      className="form-control"
-                      placeholder="country"
-                      value={myPlayerData.country}
-                      required
-                    />
-                  </div>
-                </div>
-                <div className="mt-5 text-center">
-                  <button
-                    className="btn btn-success"
-                    id="save-profile-button"
-                    type="submit"
-                    onClick={saveButtonCallback}
-                  >
-                    Save and Close
-                  </button>
-                </div>
-                <div
-                  className="text-center mt-2 alert-success"
-                  id="profile-update-status"
-                >
-                  Your profile has been updated
-                </div>
-              </form>
+              <div className="avatar-container">
+                <img
+                  className="avatar-img"
+                  src="public/assets/girl-signup.png"
+                />
+              </div>
             </div>
+          </div>
+
+          <div className="tab tab-container">
+            {/* <!-- step 7 - you're ready to go --> */}
+            <div className="title-container">
+              <p>You are ready to go!</p>
+            </div>
+            <p>Once you submit, you will be redirected to Onara's town 🎉</p>
+          </div>
+        </div>
+        <div className="buttons-container">
+          <div>
+            <button type="button" id="prevBtn" onClick={() => nextPrev(-1)}>
+              Previous
+            </button>
+            <button type="button" id="nextBtn" onClick={() => nextPrev(1)}>
+              Next
+            </button>
           </div>
         </div>
       </div>
