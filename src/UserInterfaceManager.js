@@ -312,6 +312,12 @@ class UserInterfaceManager {
       const currentlyInput = document.getElementById('currently-input');
       const previouslyInput = document.getElementById('previously-input');
       const educationInput = document.getElementById('education-input');
+      const gender =
+        Array(...document.getElementsByClassName('avatar-container'))
+          .map((el) => !!el.style.backgroundColor)
+          .indexOf(true) === 0
+          ? 'male'
+          : 'female';
 
       const formInputValues = {
         username: usernameInput.value,
@@ -329,7 +335,7 @@ class UserInterfaceManager {
         previously: previouslyInput.value,
         education: educationInput.value,
         updatedAt: this.firebase.firestore.Timestamp.now(),
-        gender: 'male'
+        gender
       };
 
       myPlayerDocRef.set(formInputValues, { merge: true }).then(() => {
@@ -505,10 +511,6 @@ class UserInterfaceManager {
           myPlayerData,
           nextPrev,
           playersRef
-          // myPlayerDocRef,
-          // currentTab,
-          // selectAvatar,
-          // toggleButton
         }}
       />
     );
