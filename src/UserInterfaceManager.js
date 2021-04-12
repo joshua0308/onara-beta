@@ -6,6 +6,7 @@ import MenuButtons from './components/MenuButtons';
 import Room from './components/Room';
 import OnlineList from './components/OnlineList';
 import ProfileForm from './components/ProfileForm';
+import SignupForm from './components/SignupForm';
 import RoomOptionsContainer from './components/RoomOptionsContainer';
 import InCallModalContainer from './components/InCallModalContainer';
 import PlayerProfileContainer from './components/PlayerProfileContainer';
@@ -27,6 +28,7 @@ class UserInterfaceManager {
     this.LevelTwoButton = LevelTwoButton.bind(this);
     this.MenuButtons = MenuButtons.bind(this);
     this.ProfileForm = ProfileForm.bind(this);
+    this.SignupForm = SignupForm.bind(this);
     this.InCallModalContainer = InCallModalContainer.bind(this);
     this.PlayerProfileContainer = PlayerProfileContainer.bind(this);
     this.IncomingCallContainer = IncomingCallContainer.bind(this);
@@ -292,9 +294,8 @@ class UserInterfaceManager {
     }
   }
 
-  async createProfileFormInterface(myPlayer) {
+  async createSignupFormInterface(myPlayer) {
     this.scene.scene.pause();
-    this.hideOnlineList();
 
     const saveButtonCallback = () => {
       this.logger.log('save profile');
@@ -349,21 +350,17 @@ class UserInterfaceManager {
         this.scene.socket.emit('update-player', this.scene.myPlayer);
       });
 
-      this.removeProfileFormInterface();
+      this.removeSignupFormInterface();
     };
 
-    function selectAvatar(e) {
-      const element = e.target;
-
-      const avatarContainers = document
-        .querySelectorAll('.avatar-container')
-        .forEach((container) => {
-          if (container.querySelector('img') !== element) {
-            container.style.backgroundColor = null;
-          } else {
-            container.style.backgroundColor = 'rgba(69, 106, 221, 0.5)';
-          }
-        });
+    function selectAvatar({ target }) {
+      document.querySelectorAll('.avatar-container').forEach((container) => {
+        if (container.querySelector('img') !== target) {
+          container.style.backgroundColor = null;
+        } else {
+          container.style.backgroundColor = 'rgba(69, 106, 221, 0.5)';
+        }
+      });
     }
 
     function showTab(n) {
@@ -382,8 +379,6 @@ class UserInterfaceManager {
         document.getElementById('nextBtn').innerHTML = 'Submit';
         document.getElementById('nextBtn').onclick = () => {
           console.log('submit');
-          // window.location.replace('/game');
-          // removeProfileFormInterface();
           saveButtonCallback();
         };
       } else {
@@ -491,11 +486,6 @@ class UserInterfaceManager {
       x[n].className += ' active';
     }
 
-    function toggleButton(e) {
-      console.log(e);
-      e.target.classList.toggle('active');
-    }
-
     const playersRef = this.firebaseDb.collection('players');
     const myPlayerDocRef = this.firebaseDb
       .collection('players')
@@ -506,7 +496,7 @@ class UserInterfaceManager {
     let currentTab = 0; // Current tab is set to be the first tab (0)
 
     document.body.appendChild(
-      <this.ProfileForm
+      <this.SignupForm
         props={{
           myPlayerData,
           nextPrev,
@@ -522,8 +512,194 @@ class UserInterfaceManager {
     showTab(currentTab); // Display the current tab
   }
 
+  async createProfileFormInterface(myPlayer) {
+    this.scene.scene.pause();
+    this.hideOnlineList();
+
+    const saveButtonCallback = () => {
+      this.logger.log('save profile');
+
+      const usernameInput = document.getElementById('username-input');
+      const firstnameInput = document.getElementById('firstname-input');
+      const lastnameInput = document.getElementById('lastname-input');
+      const birthdayInput = document.getElementById('birthday-input');
+      const cityInput = document.getElementById('city-input');
+      const countryInput = document.getElementById('country-input');
+      const languageInput = document.getElementById('language-input');
+      const emailInput = document.getElementById('email-input');
+      const phoneInput = document.getElementById('phone-input');
+      const positionInput = document.getElementById('position-input');
+      const currentlyInput = document.getElementById('currently-input');
+      const previouslyInput = document.getElementById('previously-input');
+      const educationInput = document.getElementById('education-input');
+      const gender =
+        Array(...document.getElementsByClassName('avatar-container'))
+          .map((el) => !!el.style.backgroundColor)
+          .indexOf(true) === 0
+          ? 'male'
+          : 'female';
+
+      const formInputValues = {
+        username: usernameInput.value,
+        displayName: `${firstnameInput.value} ${lastnameInput.value}`,
+        firstname: firstnameInput.value,
+        lastname: lastnameInput.value,
+        birthday: birthdayInput.value,
+        city: cityInput.value,
+        country: countryInput.value,
+        language: languageInput.value,
+        email: emailInput.value,
+        phone: phoneInput.value,
+        position: positionInput.value,
+        currently: currentlyInput.value,
+        previously: previouslyInput.value,
+        education: educationInput.value,
+        updatedAt: this.firebase.firestore.Timestamp.now(),
+        gender
+      };
+
+      myPlayerDocRef.set(formInputValues, { merge: true }).then(() => {
+        this.scene.updateMyPlayerInfo(formInputValues);
+        this.updateOnlineList(
+          this.scene.myPlayer.uid,
+          formInputValues.displayName
+        );
+        this.scene.myPlayerSprite.updatePlayerName(formInputValues.displayName);
+        this.scene.myPlayerSprite.updateCharacterType(formInputValues.gender);
+        this.scene.socket.emit('update-player', this.scene.myPlayer);
+      });
+
+      this.removeProfileFormInterface();
+    };
+
+    function selectAvatar({ target }) {
+      document.querySelectorAll('.avatar-container').forEach((container) => {
+        if (container.querySelector('img') !== target) {
+          container.style.backgroundColor = null;
+        } else {
+          container.style.backgroundColor = 'rgba(69, 106, 221, 0.5)';
+        }
+      });
+    }
+
+    function showTab(tabIndex) {
+      // This function will display the specified tab of the form...
+      var tabElements = document.getElementsByClassName('tab');
+
+      for (let i = 0; i < tabElements.length; i += 1) {
+        if (tabIndex === i) {
+          tabElements[i].style.display = 'block';
+        } else {
+          tabElements[i].style.display = 'none';
+        }
+      }
+    }
+
+    function validateForm() {
+      let tabElement = document.getElementsByClassName('tab-container');
+      let inputElements = tabElement[currentTab].getElementsByTagName('input');
+
+      function addInvalidClassToElement(element) {
+        element.classList.add('invalid');
+      }
+
+      function setInvalidReason(text) {
+        const invalidReasonElement = tabElement[
+          currentTab
+        ].getElementsByClassName('invalid-reason')[0];
+        invalidReasonElement.innerText = text;
+      }
+
+      if (currentTab === 0) {
+        // if username is less than 5 characters, return false
+        if (inputElements[0].value.length < 5) {
+          addInvalidClassToElement(inputElements[0]);
+          setInvalidReason('Username must be at least 5 characters');
+          return false;
+        }
+
+        const invalidIcon = document.getElementById('username-invalid-icon');
+
+        // if invalid icon, return false
+        if (invalidIcon.style.display !== 'none') {
+          addInvalidClassToElement(inputElements[0]);
+          setInvalidReason('Username already taken');
+          return false;
+        }
+      }
+
+      if ([1, 2, 3, 4].includes(currentTab)) {
+        for (const inputElement of inputElements) {
+          if (
+            inputElement.hasAttribute('required') &&
+            inputElement.value.trim().length === 0
+          ) {
+            addInvalidClassToElement(inputElement);
+            setInvalidReason(`${inputElement.placeholder} is required`);
+            return false;
+          }
+        }
+      }
+
+      if (currentTab === 5) {
+        const avatarContainers = document.getElementsByClassName(
+          'avatar-container'
+        );
+
+        let selected = false;
+        for (const avatarContainer of avatarContainers) {
+          if (avatarContainer.style.backgroundColor) {
+            selected = true;
+          }
+        }
+
+        if (!selected) {
+          setInvalidReason('Please select an avatar');
+          return false;
+        }
+      }
+
+      setInvalidReason('');
+      return true;
+    }
+
+    const playersRef = this.firebaseDb.collection('players');
+    const myPlayerDocRef = this.firebaseDb
+      .collection('players')
+      .doc(myPlayer.uid);
+
+    const doc = await myPlayerDocRef.get();
+    const myPlayerData = doc.data();
+    let currentTab = 0; // Current tab is set to be the first tab (0)
+
+    document.body.appendChild(
+      <this.ProfileForm
+        props={{
+          myPlayerData,
+          // nextPrev,
+          showTab,
+          playersRef
+        }}
+      />
+    );
+
+    document.querySelectorAll('.avatar-container').forEach((container) => {
+      container.onclick = selectAvatar;
+    });
+
+    showTab(currentTab); // Display the current tab
+  }
+
   removeProfileFormInterface() {
     const profileFormWrapper = document.getElementById('profile-form-wrapper');
+    if (profileFormWrapper) {
+      profileFormWrapper.remove();
+    }
+    this.scene.scene.resume();
+  }
+
+  removeSignupFormInterface() {
+    const profileFormWrapper = document.getElementById('signup-form-wrapper');
     if (profileFormWrapper) {
       profileFormWrapper.remove();
     }

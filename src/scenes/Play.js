@@ -77,7 +77,7 @@ class Play extends Phaser.Scene {
     };
 
     if (this.game.isNew) {
-      this.userInterfaceManager.createProfileFormInterface(this.myPlayer);
+      this.userInterfaceManager.createSignupFormInterface(this.myPlayer);
       this.game.isNew = false;
     }
 

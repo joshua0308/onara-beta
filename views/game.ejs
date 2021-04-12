@@ -329,10 +329,24 @@
       background-color: red;
     }
 
-    li {
+    li.message {
       margin-top: 8px;
       text-align: center;
       font-weight: 200;
+    }
+
+    .navigation-container li {
+      cursor: pointer;
+      padding: 10px 20px;
+      border-radius: 5px;
+    }
+
+    .navigation-container li:hover {
+      background-color: rgba(69, 106, 221, 0.2);
+    }
+
+    .navigation-container li:active {
+      background-color: rgba(69, 106, 221, 0.5);
     }
 
     #online-list-wrapper > div {
@@ -392,9 +406,14 @@
       color: white;
     }
 
-    #profile-form-wrapper {
+    #profile-form-wrapper, #signup-form-wrapper {
       display: flex;
       justify-content: center;
+      align-items: center;
+    }
+
+    #profile-form-wrapper .input-container {
+      display: flex;
       align-items: center;
     }
 
@@ -533,7 +552,7 @@
       transition: all 0.2s ease 0s;
     }
 
-    #nextBtn {
+    #nextBtn, #saveBtn {
       width: 240px;
       display: inline;
       user-select: none;
