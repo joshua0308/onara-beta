@@ -1,7 +1,29 @@
 import React from 'jsx-dom';
-import { AlphaSenderContext } from 'twilio/lib/rest/messaging/v1/service/alphaSender';
 function ProfileForm({ props }) {
   let { myPlayerData, nextPrev, playersRef } = props;
+
+  function removeInvalidClassAndReason(inputElement) {
+    inputElement.classList.remove('invalid');
+
+    const invalidReasonElement = inputElement
+      .closest('.tab-container')
+      .querySelector('.invalid-reason');
+
+    invalidReasonElement.innerText = '';
+  }
+
+  function toggleValid(isValid) {
+    const validIcon = document.getElementById('username-valid-icon');
+    const invalidIcon = document.getElementById('username-invalid-icon');
+
+    if (isValid) {
+      validIcon.style.display = 'inline';
+      invalidIcon.style.display = 'none';
+    } else {
+      validIcon.style.display = 'none';
+      invalidIcon.style.display = 'inline';
+    }
+  }
 
   return (
     <div id="profile-form-wrapper" className="background-overlay">
@@ -20,9 +42,10 @@ function ProfileForm({ props }) {
         <div className="header-container">
           <p>Tell us a little bit about yourself</p>
         </div>
+
         <div id="box-container">
+          {/* <!-- step 1 - username --> */}
           <div className="tab tab-container">
-            {/* <!-- step 1 - username --> */}
             <div className="title-container">
               <p>Choose your username</p>
             </div>
@@ -30,49 +53,33 @@ function ProfileForm({ props }) {
               <input
                 id="username-input"
                 placeholder="Username"
-                style={{ textAlign: 'center' }}
+                style={{ textAlign: 'center', marginRight: '10px' }}
                 value={myPlayerData.username}
                 onInput={(e) => {
-                  var query = playersRef.where(
-                    'username',
-                    '==',
-                    e.target.value
-                  );
-                  query.get().then((querySnapshot) => {
-                    let valid = true;
-                    console.log('debug: querySnapshot', querySnapshot.size);
+                  removeInvalidClassAndReason(e.target);
 
-                    if (querySnapshot.size > 0) {
-                      valid = false;
-                    }
+                  if (e.target.value.length < 5) {
+                    return toggleValid(false);
+                  }
 
-                    querySnapshot.forEach((doc) => {
-                      // eslint-disable-next-line no-console
-                      console.log(
-                        'debug: doc.uid, mypl',
-                        doc.data().uid,
-                        myPlayerData.uid
-                      );
-                      if (doc.data().uid === myPlayerData.uid) {
-                        valid = true;
+                  playersRef
+                    .where('username', '==', e.target.value)
+                    .get()
+                    .then((querySnapshot) => {
+                      let isValid = true;
+
+                      if (querySnapshot.size > 0) {
+                        isValid = false;
                       }
+
+                      querySnapshot.forEach((doc) => {
+                        if (doc.data().uid === myPlayerData.uid) {
+                          isValid = true;
+                        }
+                      });
+
+                      toggleValid(isValid);
                     });
-
-                    const validIcon = document.getElementById(
-                      'username-valid-icon'
-                    );
-                    const invalidIcon = document.getElementById(
-                      'username-invalid-icon'
-                    );
-
-                    if (!valid) {
-                      validIcon.style.display = 'none';
-                      invalidIcon.style.display = 'inline';
-                    } else {
-                      validIcon.style.display = 'inline';
-                      invalidIcon.style.display = 'none';
-                    }
-                  });
                 }}
               />
               <i
@@ -82,14 +89,15 @@ function ProfileForm({ props }) {
               ></i>
               <i
                 id="username-invalid-icon"
-                className="fas fa-check-circle"
+                className="fas fa-times-circle"
                 style={{ display: 'none', color: 'red', fontSize: '20px' }}
               ></i>
             </div>
+            <div className="invalid-reason"></div>
           </div>
 
+          {/* <!-- step 2 - basic info --> */}
           <div className="tab tab-container">
-            {/* <!-- step 2 - basic info --> */}
             <div className="title-container">
               <p>Basic Information</p>
               <p>
@@ -107,11 +115,15 @@ function ProfileForm({ props }) {
                 style="margin-right: 10px"
                 placeholder="First name"
                 value={myPlayerData.firstname}
+                onInput={(e) => removeInvalidClassAndReason(e.target)}
+                required
               />
               <input
                 id="lastname-input"
                 placeholder="Last name"
                 value={myPlayerData.lastname}
+                onInput={(e) => removeInvalidClassAndReason(e.target)}
+                required
               />
             </div>
             <div className="input-container"></div>
@@ -122,12 +134,15 @@ function ProfileForm({ props }) {
                 placeholder="Date of birth"
                 onFocus="(this.type='date')"
                 value={myPlayerData.birthday}
+                onInput={(e) => removeInvalidClassAndReason(e.target)}
+                required
               />
             </div>
+            <div className="invalid-reason"></div>
           </div>
 
+          {/* <!-- step 3 - location, language --> */}
           <div className="tab tab-container">
-            {/* <!-- step 3 - location, language --> */}
             <div className="title-container">
               <p>Location & Language</p>
             </div>
@@ -137,6 +152,8 @@ function ProfileForm({ props }) {
                 id="city-input"
                 placeholder="City"
                 value={myPlayerData.city}
+                onInput={(e) => removeInvalidClassAndReason(e.target)}
+                required
               />
             </div>
             <div className="input-container">
@@ -145,6 +162,8 @@ function ProfileForm({ props }) {
                 id="country-input"
                 placeholder="Country"
                 value={myPlayerData.country}
+                onInput={(e) => removeInvalidClassAndReason(e.target)}
+                required
               />
             </div>
             <div className="input-container">
@@ -153,12 +172,15 @@ function ProfileForm({ props }) {
                 id="language-input"
                 placeholder="Langauge (a comma separated list of languages you can speak)"
                 value={myPlayerData.language}
+                onInput={(e) => removeInvalidClassAndReason(e.target)}
+                required
               />
             </div>
+            <div className="invalid-reason"></div>
           </div>
 
+          {/* <!-- step 4 - email, phone # --> */}
           <div className="tab tab-container">
-            {/* <!-- step 4 - email, phone # --> */}
             <div className="title-container">
               <p>Contact Information</p>
               <p>
@@ -171,6 +193,8 @@ function ProfileForm({ props }) {
                 id="email-input"
                 placeholder="Email"
                 value={myPlayerData.email}
+                onInput={(e) => removeInvalidClassAndReason(e.target)}
+                required
               />
             </div>
             <div className="input-container">
@@ -181,10 +205,11 @@ function ProfileForm({ props }) {
                 value={myPlayerData.phone}
               />
             </div>
+            <div className="invalid-reason"></div>
           </div>
 
+          {/* <!-- step 5 - work experience --> */}
           <div className="tab tab-container">
-            {/* <!-- step 5 - work experience --> */}
             <div className="title-container">
               <p>Work Experience</p>
               <p>Tell us whatever you'd like to share with other users.</p>
@@ -195,6 +220,8 @@ function ProfileForm({ props }) {
                 id="position-input"
                 placeholder="Position"
                 value={myPlayerData.position}
+                onInput={(e) => removeInvalidClassAndReason(e.target)}
+                required
               />
             </div>
             <div className="input-container">
@@ -203,6 +230,8 @@ function ProfileForm({ props }) {
                 id="currently-input"
                 placeholder="Currently"
                 value={myPlayerData.currently}
+                onInput={(e) => removeInvalidClassAndReason(e.target)}
+                required
               />
             </div>
             <div className="input-container">
@@ -211,6 +240,8 @@ function ProfileForm({ props }) {
                 id="previously-input"
                 placeholder="Previously (a comma separated list of previous jobs)"
                 value={myPlayerData.previously}
+                onInput={(e) => removeInvalidClassAndReason(e.target)}
+                required
               />
             </div>
             <div className="input-container">
@@ -219,12 +250,15 @@ function ProfileForm({ props }) {
                 id="education-input"
                 placeholder="Education"
                 value={myPlayerData.education}
+                onInput={(e) => removeInvalidClassAndReason(e.target)}
+                required
               />
             </div>
+            <div className="invalid-reason"></div>
           </div>
 
+          {/* <!-- step 6 - choose avatar --> */}
           <div className="tab tab-container">
-            {/* <!-- step 6 - choose avatar --> */}
             <div className="title-container">
               <p>Choose your avatar</p>
             </div>
@@ -242,6 +276,7 @@ function ProfileForm({ props }) {
                 />
               </div>
             </div>
+            <div className="invalid-reason"></div>
           </div>
 
           <div className="tab tab-container">

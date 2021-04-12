@@ -407,7 +407,70 @@ class UserInterfaceManager {
     }
 
     function validateForm() {
-      // short circuit for now
+      let tabElement = document.getElementsByClassName('tab-container');
+      let inputElements = tabElement[currentTab].getElementsByTagName('input');
+
+      function addInvalidClassToElement(element) {
+        element.classList.add('invalid');
+      }
+
+      function setInvalidReason(text) {
+        const invalidReasonElement = tabElement[
+          currentTab
+        ].getElementsByClassName('invalid-reason')[0];
+        invalidReasonElement.innerText = text;
+      }
+
+      if (currentTab === 0) {
+        // if username is less than 5 characters, return false
+        if (inputElements[0].value.length < 5) {
+          addInvalidClassToElement(inputElements[0]);
+          setInvalidReason('Username must be at least 5 characters');
+          return false;
+        }
+
+        const invalidIcon = document.getElementById('username-invalid-icon');
+
+        // if invalid icon, return false
+        if (invalidIcon.style.display !== 'none') {
+          addInvalidClassToElement(inputElements[0]);
+          setInvalidReason('Username already taken');
+          return false;
+        }
+      }
+
+      if ([1, 2, 3, 4].includes(currentTab)) {
+        for (const inputElement of inputElements) {
+          if (
+            inputElement.hasAttribute('required') &&
+            inputElement.value.trim().length === 0
+          ) {
+            addInvalidClassToElement(inputElement);
+            setInvalidReason(`${inputElement.placeholder} is required`);
+            return false;
+          }
+        }
+      }
+
+      if (currentTab === 5) {
+        const avatarContainers = document.getElementsByClassName(
+          'avatar-container'
+        );
+
+        let selected = false;
+        for (const avatarContainer of avatarContainers) {
+          if (avatarContainer.style.backgroundColor) {
+            selected = true;
+          }
+        }
+
+        if (!selected) {
+          setInvalidReason('Please select an avatar');
+          return false;
+        }
+      }
+
+      setInvalidReason('');
       return true;
     }
 
