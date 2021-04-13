@@ -181,6 +181,19 @@ class Play extends Phaser.Scene {
       this.barQuestionnaireDisplayed = true;
       const isBar = this.getCurrentMap() === 'bar';
       this.userInterfaceManager.createBarQuestionnaireInterface(isBar);
+
+      // eslint-disable-next-line no-console
+      console.log('debug: this.myPlayer', this.myPlayer);
+      if (!this.myPlayer.interestedIn || !this.myPlayer.goodAt) {
+        let tabNum = 6;
+        if (this.myPlayer.interestedIn) {
+          tabNum = 7;
+        }
+        this.userInterfaceManager.createProfileFormInterface(
+          this.myPlayer,
+          tabNum
+        );
+      }
     });
   }
 
@@ -190,6 +203,7 @@ class Play extends Phaser.Scene {
     if (this.myPlayerSprite.body.touching.none) {
       this.barQuestionnaireDisplayed = false;
       this.userInterfaceManager.removeBarQuestionnaireInterface();
+      // this.userInterfaceManager.removeProfileFormInterface();
     }
   }
 

@@ -504,8 +504,9 @@ class UserInterfaceManager {
     showTab(currentTab); // Display the current tab
   }
 
-  async createProfileFormInterface(myPlayer) {
-    this.scene.scene.pause();
+  async createProfileFormInterface(myPlayer, currentTab = 0) {
+    if (document.getElementById('profile-form-wrapper')) return;
+    // this.scene.scene.pause();
     this.hideOnlineList();
 
     const rooms = [
@@ -649,10 +650,6 @@ class UserInterfaceManager {
           )}</span>`;
           skillButton.onclick = toggleButton;
 
-          // eslint-disable-next-line no-console
-          console.log('debug: goodAt', goodAt);
-          // eslint-disable-next-line no-console
-          console.log("debug: description.join(' ')", description.join(' '));
           if (goodAt && goodAt.indexOf(description.join(' ')) > -1) {
             skillButton.classList.add('active');
           }
@@ -831,7 +828,6 @@ class UserInterfaceManager {
 
     const doc = await myPlayerDocRef.get();
     const myPlayerData = doc.data();
-    let currentTab = 0; // Current tab is set to be the first tab (0)
 
     document.body.appendChild(
       <this.ProfileForm
@@ -859,6 +855,10 @@ class UserInterfaceManager {
     ].style.backgroundColor = 'rgba(69, 106, 221, 0.5)';
 
     showTab(currentTab); // Display the current tab
+
+    if (currentTab > 0) {
+      alert('Please fill out your interests and skills before joining the bar');
+    }
   }
 
   removeProfileFormInterface() {
