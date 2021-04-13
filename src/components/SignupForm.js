@@ -61,7 +61,7 @@ function ProfileForm({ props }) {
           {/* <!-- step 1 - username --> */}
           <div className="tab tab-container">
             <div className="title-container">
-              <p>Choose your unique username for login</p>
+              <p>Choose your username</p>
             </div>
             <div className="input-container">
               <input
@@ -141,7 +141,7 @@ function ProfileForm({ props }) {
               <i className="fas fa-globe-asia"></i>
               <input
                 id="city-input"
-                placeholder="City"
+                placeholder="City, State"
                 onInput={(e) => removeInvalidClassAndReason(e.target)}
                 required
               />
@@ -156,7 +156,7 @@ function ProfileForm({ props }) {
               />
             </div>
             <div className="input-container">
-              <i className="fas fa-flag"></i>
+              <i className="fas fa-language"></i>
               <input
                 id="language-input"
                 placeholder="Langauge (a comma separated list of languages you can speak)"
@@ -195,10 +195,7 @@ function ProfileForm({ props }) {
           <div className="tab tab-container">
             <div className="title-container">
               <p>Contact Information</p>
-              <p>
-                Tell us how you want to be notified when your friends send you a
-                message
-              </p>
+              <p>We can notify you when your friends send you a message</p>
             </div>
             <div className="input-container">
               <i className="fas fa-envelope"></i>

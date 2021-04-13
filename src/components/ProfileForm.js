@@ -100,7 +100,7 @@ function ProfileForm({ props }) {
             {/* <!-- step 0 - username --> */}
             <div className="tab tab-container">
               <div className="title-container">
-                <p>Choose your unique username for login</p>
+                <p>Choose your username</p>
               </div>
               <div className="input-container">
                 <input
@@ -193,7 +193,7 @@ function ProfileForm({ props }) {
                 <i className="fas fa-globe-asia"></i>
                 <input
                   id="city-input"
-                  placeholder="City"
+                  placeholder="City, State"
                   value={myPlayerData.city}
                   onInput={(e) => removeInvalidClassAndReason(e.target)}
                   required
@@ -210,7 +210,7 @@ function ProfileForm({ props }) {
                 />
               </div>
               <div className="input-container">
-                <i className="fas fa-flag"></i>
+                <i className="fas fa-language"></i>
                 <input
                   id="language-input"
                   placeholder="Langauge (a comma separated list of languages you can speak)"
@@ -251,10 +251,7 @@ function ProfileForm({ props }) {
             <div className="tab tab-container">
               <div className="title-container">
                 <p>Contact Information</p>
-                <p>
-                  Tell us how you want to be notified when your friends send you
-                  a message
-                </p>
+                <p>We can notify you when your friends send you a message</p>
               </div>
               <div className="input-container">
                 <i className="fas fa-envelope"></i>
@@ -358,7 +355,7 @@ function ProfileForm({ props }) {
             <div className="tab tab-container">
               <div className="title-container">
                 <p>What are you interested in?</p>
-                <p>Select from the list and add your own interests.</p>
+                <p>This is for others to learn more about you</p>
               </div>
               <div className="interest-container">
                 <p className="interest-header">Learn</p>
@@ -393,7 +390,7 @@ function ProfileForm({ props }) {
             <div className="tab tab-container">
               <div className="title-container">
                 <p>What are you good at?</p>
-                <p>Select from the list and add your skills.</p>
+                <p>People may come to you to ask about these topics</p>
               </div>
               <div className="skill-container">
                 <p className="skill-header">Learn</p>
@@ -426,7 +423,8 @@ function ProfileForm({ props }) {
 
             <div className="tab tab-container">
               <div className="title-container">
-                <p>Photos</p>
+                <p>Profile photos</p>
+                <p>Show others who you are in real life</p>
               </div>
               <img src={myPlayerData.profilePicURL} />
               <div style="margin: 24px 0;">
@@ -454,8 +452,6 @@ function ProfileForm({ props }) {
                     }
                   }
 
-                  // eslint-disable-next-line no-console
-                  console.log('debug: currentTab1', currentTab);
                   saveButtonCallback(currentTab);
                 }}
               >
