@@ -33,6 +33,9 @@ class UserInterfaceManager {
     this.PlayerProfileContainer = PlayerProfileContainer.bind(this);
     this.IncomingCallContainer = IncomingCallContainer.bind(this);
 
+    this.removeProfileFormInterface = this.removeProfileFormInterface.bind(
+      this
+    );
     this.toggleOnlineList = this.toggleOnlineList.bind(this);
   }
 
@@ -424,9 +427,9 @@ class UserInterfaceManager {
 
       if (currentTab === 0) {
         // if username is less than 5 characters, return false
-        if (inputElements[0].value.length < 5) {
+        if (inputElements[0].value.length < 3) {
           addInvalidClassToElement(inputElements[0]);
-          setInvalidReason('Username must be at least 5 characters');
+          setInvalidReason('Username must be at least 3 characters');
           return false;
         }
 
@@ -475,17 +478,6 @@ class UserInterfaceManager {
       return true;
     }
 
-    function fixStepIndicator(n) {
-      // This function removes the "active" class of all steps...
-      var i,
-        x = document.getElementsByClassName('step');
-      for (i = 0; i < x.length; i++) {
-        x[i].className = x[i].className.replace(' active', '');
-      }
-      //... and adds the "active" class on the current step:
-      x[n].className += ' active';
-    }
-
     const playersRef = this.firebaseDb.collection('players');
     const myPlayerDocRef = this.firebaseDb
       .collection('players')
@@ -516,8 +508,164 @@ class UserInterfaceManager {
     this.scene.scene.pause();
     this.hideOnlineList();
 
-    const saveButtonCallback = () => {
+    const rooms = [
+      { name: '🇨🇳 Chinese', levelOne: 'Learn', levelTwo: 'Language' },
+      { name: '🇺🇸 English', levelOne: 'Learn', levelTwo: 'Language' },
+      { name: '🇪🇸 Spanish', levelOne: 'Learn', levelTwo: 'Language' },
+      { name: '💼 Career path', levelOne: 'Learn', levelTwo: 'Professional' },
+      {
+        name: '📄 Resume building',
+        levelOne: 'Learn',
+        levelTwo: 'Professional'
+      },
+      { name: '🗣 Interview prep', levelOne: 'Learn', levelTwo: 'Professional' },
+      {
+        name: '💸 Salary negotiation',
+        levelOne: 'Learn',
+        levelTwo: 'Professional'
+      },
+      { name: '📈 Investing', levelOne: 'Learn', levelTwo: 'Life' },
+      { name: '🏠 House chores', levelOne: 'Learn', levelTwo: 'Life' },
+      { name: '🏦 Tax / Bill / Bank', levelOne: 'Learn', levelTwo: 'Life' },
+      {
+        name: '🕵️‍♀️ Investors / Founders',
+        levelOne: 'Business',
+        levelTwo: 'Investors / Founders meetup'
+      },
+      {
+        name: '👩‍💻 Practice pitching',
+        levelOne: 'Business',
+        levelTwo: 'Prep for presentation / Practice pitching'
+      },
+      {
+        name: '🎨 Designers',
+        levelOne: 'Business',
+        levelTwo: 'Hire a candidate / Job searching'
+      },
+      {
+        name: '🖥 Engineers',
+        levelOne: 'Business',
+        levelTwo: 'Hire a candidate / Job searching'
+      },
+      {
+        name: '🤑 Finance',
+        levelOne: 'Business',
+        levelTwo: 'Hire a candidate / Job searching'
+      },
+      {
+        name: '📑 Business Roles',
+        levelOne: 'Business',
+        levelTwo: 'Hire a candidate / Job searching'
+      },
+      {
+        name: '🧘‍♀️ Yoga / Meditation',
+        levelOne: 'Health',
+        levelTwo: 'Mental wellness'
+      },
+      {
+        name: '💬 Talk to a therapist',
+        levelOne: 'Health',
+        levelTwo: 'Mental wellness'
+      },
+      {
+        name: '🩺 Doctors / Patients meetup',
+        levelOne: 'Health',
+        levelTwo: 'Urgent care'
+      },
+      {
+        name: '🏋️‍♀️ Physical fitness',
+        levelOne: 'Health',
+        levelTwo: 'Physical fitness'
+      },
+      { name: '👩‍❤️‍👨 Serious relationship', levelOne: 'Fun', levelTwo: 'Dating' },
+      { name: '💕 Casual dating', levelOne: 'Fun', levelTwo: 'Dating' },
+      {
+        name: '📺 Watch something',
+        levelOne: 'Fun',
+        levelTwo: 'Do an activity'
+      },
+      { name: '🎸 Listen / Sing', levelOne: 'Fun', levelTwo: 'Do an activity' },
+      { name: '🍕 Eat / Drink', levelOne: 'Fun', levelTwo: 'Do an activity' },
+      { name: '👨‍🍳 Cook together', levelOne: 'Fun', levelTwo: 'Do an activity' },
+      { name: '🎨 Draw / Paint', levelOne: 'Fun', levelTwo: 'Do an activity' },
+      {
+        name: '👨‍👨‍👧‍👦 Volunteer group',
+        levelOne: 'Fun',
+        levelTwo: 'Do an activity'
+      },
+      { name: '🌏 Global issues', levelOne: 'Fun', levelTwo: 'Chat/Debate' },
+      { name: '⚽️ Sports', levelOne: 'Fun', levelTwo: 'Chat/Debate' },
+      { name: '📚 Books', levelOne: 'Fun', levelTwo: 'Chat/Debate' },
+      { name: '🎬 TV / Film', levelOne: 'Fun', levelTwo: 'Chat/Debate' },
+      { name: '🚌 Travel', levelOne: 'Fun', levelTwo: 'Chat/Debate' }
+    ];
+
+    function toggleButton(e) {
+      const button = e.target.closest('button');
+      button.classList.toggle('active');
+    }
+
+    function populateInterestButtons(interestedIn) {
+      for (const room of rooms) {
+        const levelOne = room.levelOne.toLowerCase();
+        const buttonsContainerList = document.querySelectorAll(
+          `.interest-buttons-container.${levelOne}`
+        );
+
+        for (const container of buttonsContainerList) {
+          const [emoji, ...description] = room.name.split(' ');
+          const interestButton = document.createElement('button');
+          interestButton.classList.add('interest-button');
+          interestButton.innerHTML = `<span class='emoji-span'>${emoji}</span><span class='button-description'>${description.join(
+            ' '
+          )}</span>`;
+          interestButton.onclick = toggleButton;
+
+          if (
+            interestedIn &&
+            interestedIn.indexOf(description.join(' ')) > -1
+          ) {
+            interestButton.classList.add('active');
+          }
+
+          container.appendChild(interestButton);
+        }
+      }
+    }
+
+    function populateSkillButtons(goodAt) {
+      for (const room of rooms) {
+        const levelOne = room.levelOne.toLowerCase();
+        const buttonsContainerList = document.querySelectorAll(
+          `.skill-buttons-container.${levelOne}`
+        );
+
+        for (const container of buttonsContainerList) {
+          const [emoji, ...description] = room.name.split(' ');
+          const skillButton = document.createElement('button');
+          skillButton.classList.add('skill-button');
+          skillButton.innerHTML = `<span class='emoji-span'>${emoji}</span><span class='button-description'>${description.join(
+            ' '
+          )}</span>`;
+          skillButton.onclick = toggleButton;
+
+          // eslint-disable-next-line no-console
+          console.log('debug: goodAt', goodAt);
+          // eslint-disable-next-line no-console
+          console.log("debug: description.join(' ')", description.join(' '));
+          if (goodAt && goodAt.indexOf(description.join(' ')) > -1) {
+            skillButton.classList.add('active');
+          }
+
+          container.appendChild(skillButton);
+        }
+      }
+    }
+
+    const saveButtonCallback = (currentTab) => {
       this.logger.log('save profile');
+
+      if (!validateForm(currentTab)) return;
 
       const usernameInput = document.getElementById('username-input');
       const firstnameInput = document.getElementById('firstname-input');
@@ -538,6 +686,12 @@ class UserInterfaceManager {
           .indexOf(true) === 0
           ? 'male'
           : 'female';
+      const interests = Array(...document.querySelectorAll('.interest-button'))
+        .filter((button) => button.classList.contains('active'))
+        .map((button) => button.querySelector('.button-description').innerText);
+      const skills = Array(...document.querySelectorAll('.skill-button'))
+        .filter((button) => button.classList.contains('active'))
+        .map((button) => button.querySelector('.button-description').innerText);
 
       const formInputValues = {
         username: usernameInput.value,
@@ -555,6 +709,8 @@ class UserInterfaceManager {
         previously: previouslyInput.value,
         education: educationInput.value,
         updatedAt: this.firebase.firestore.Timestamp.now(),
+        goodAt: skills.join(','),
+        interestedIn: interests.join(','),
         gender
       };
 
@@ -568,8 +724,6 @@ class UserInterfaceManager {
         this.scene.myPlayerSprite.updateCharacterType(formInputValues.gender);
         this.scene.socket.emit('update-player', this.scene.myPlayer);
       });
-
-      this.removeProfileFormInterface();
     };
 
     function selectAvatar({ target }) {
@@ -584,27 +738,34 @@ class UserInterfaceManager {
 
     function showTab(tabIndex) {
       // This function will display the specified tab of the form...
-      var tabElements = document.getElementsByClassName('tab');
+      const tabElements = document.getElementsByClassName('tab');
+      const liElements = document
+        .querySelector('.navigation-container')
+        .getElementsByTagName('li');
 
       for (let i = 0; i < tabElements.length; i += 1) {
         if (tabIndex === i) {
           tabElements[i].style.display = 'block';
+          liElements[i].style.backgroundColor = 'rgb(69, 106, 221)';
+          liElements[i].style.color = 'white';
         } else {
           tabElements[i].style.display = 'none';
+          liElements[i].style.backgroundColor = null;
+          liElements[i].style.color = 'rgb(69, 106, 221)';
         }
       }
     }
 
-    function validateForm() {
-      let tabElement = document.getElementsByClassName('tab-container');
-      let inputElements = tabElement[currentTab].getElementsByTagName('input');
+    function validateForm(currentTab) {
+      let tabElements = document.getElementsByClassName('tab-container');
+      let inputElements = tabElements[currentTab].getElementsByTagName('input');
 
       function addInvalidClassToElement(element) {
         element.classList.add('invalid');
       }
 
       function setInvalidReason(text) {
-        const invalidReasonElement = tabElement[
+        const invalidReasonElement = tabElements[
           currentTab
         ].getElementsByClassName('invalid-reason')[0];
         invalidReasonElement.innerText = text;
@@ -612,9 +773,9 @@ class UserInterfaceManager {
 
       if (currentTab === 0) {
         // if username is less than 5 characters, return false
-        if (inputElements[0].value.length < 5) {
+        if (inputElements[0].value.length < 3) {
           addInvalidClassToElement(inputElements[0]);
-          setInvalidReason('Username must be at least 5 characters');
+          setInvalidReason('Username must be at least 3 characters');
           return false;
         }
 
@@ -676,9 +837,11 @@ class UserInterfaceManager {
       <this.ProfileForm
         props={{
           myPlayerData,
-          // nextPrev,
+          saveButtonCallback,
           showTab,
-          playersRef
+          currentTab,
+          playersRef,
+          removeProfileFormInterface: this.removeProfileFormInterface
         }}
       />
     );
@@ -686,6 +849,14 @@ class UserInterfaceManager {
     document.querySelectorAll('.avatar-container').forEach((container) => {
       container.onclick = selectAvatar;
     });
+
+    populateInterestButtons(myPlayerData.interestedIn);
+    populateSkillButtons(myPlayerData.goodAt);
+
+    // select avatar
+    document.querySelectorAll('.avatar-container')[
+      myPlayerData.gender === 'male' ? 0 : 1
+    ].style.backgroundColor = 'rgba(69, 106, 221, 0.5)';
 
     showTab(currentTab); // Display the current tab
   }

@@ -413,8 +413,8 @@
     }
 
     #profile-form-wrapper .input-container {
-      display: flex;
-      align-items: center;
+      /* display: flex;
+      align-items: center; */
     }
 
     #profile-update-status {
@@ -495,7 +495,7 @@
 
     .input-container input {
       width: 100%;
-      max-width: 350px;
+      max-width: 250px;
       margin: 2px auto;
       padding: 8px 16px;
       background-color: rgb(246, 246, 247);
@@ -507,6 +507,10 @@
         sans-serif;
       font-size: 14px;
       cursor: text;
+    }
+
+    #profile-form-wrapper .input-container input {
+      width: 80%;
     }
 
     /* Mark input boxes that gets an error on validation: */
@@ -749,7 +753,7 @@
       color: rgb(91, 91, 91);
     }
 
-    .interest-buttons-container {
+    .interest-buttons-container, .skill-buttons-container {
       display: flex;
       flex-flow: row wrap;
       -webkit-box-align: center;
@@ -758,7 +762,7 @@
       padding: 0px;
     }
 
-    .interest-buttons-container button {
+    .interest-buttons-container button, .skill-buttons-container button {
       color: rgb(71, 168, 165);
       background-color: rgb(255, 255, 255);
       border: 1px solid rgb(71, 168, 165);
@@ -776,18 +780,18 @@
       transition: all 0.2s ease 0s;
     }
 
-    .interest-buttons-container button.active {
+    .interest-buttons-container button.active, .skill-buttons-container button.active {
       background-color: rgb(71, 168, 165);
       color: white;
     }
 
-    .interest-header {
+    .interest-header, .skill-header {
       margin-top: 24px;
       margin-bottom: 16px;
       color: rgb(172, 172, 172);
     }
 
-    .interest-container {
+    .interest-container, .skill-container {
       text-align: left;
     }
 

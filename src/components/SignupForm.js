@@ -14,13 +14,26 @@ function ProfileForm({ props }) {
   }
 
   function toggleValid(isValid) {
+    let tabElements = document.getElementsByClassName('tab-container');
+    const invalidReasonElement = tabElements[0].getElementsByClassName(
+      'invalid-reason'
+    )[0];
+    let inputElements = tabElements[0].getElementsByTagName('input');
+
     const validIcon = document.getElementById('username-valid-icon');
     const invalidIcon = document.getElementById('username-invalid-icon');
 
     if (isValid) {
+      invalidReasonElement.innerText = 'Username available';
       validIcon.style.display = 'inline';
       invalidIcon.style.display = 'none';
     } else {
+      if (inputElements[0].value.length < 3) {
+        invalidReasonElement.innerText =
+          'Username must be at least 3 characters';
+      } else {
+        invalidReasonElement.innerText = 'Username already taken';
+      }
       validIcon.style.display = 'none';
       invalidIcon.style.display = 'inline';
     }
@@ -41,14 +54,14 @@ function ProfileForm({ props }) {
         </div>
 
         <div className="header-container">
-          <p>Tell us a little bit about yourself</p>
+          <p>Welcome to Onara! Let’s get you started</p>
         </div>
 
         <div id="box-container">
           {/* <!-- step 1 - username --> */}
           <div className="tab tab-container">
             <div className="title-container">
-              <p>Choose your username</p>
+              <p>Choose your unique username for login</p>
             </div>
             <div className="input-container">
               <input
@@ -101,8 +114,8 @@ function ProfileForm({ props }) {
             <div className="title-container">
               <p>Basic Information</p>
               <p>
-                This basic information will be shown to other users. Tell us
-                what you'd like to show!
+                Basic information will be shown to other users (Name, Location,
+                Language)
               </p>
             </div>
             <div
@@ -123,25 +136,6 @@ function ProfileForm({ props }) {
                 onInput={(e) => removeInvalidClassAndReason(e.target)}
                 required
               />
-            </div>
-            <div className="input-container"></div>
-            <div className="input-container">
-              <i className="fas fa-birthday-cake"></i>
-              <input
-                id="birthday-input"
-                placeholder="Date of birth"
-                onFocus="(this.type='date')"
-                onInput={(e) => removeInvalidClassAndReason(e.target)}
-                required
-              />
-            </div>
-            <div className="invalid-reason"></div>
-          </div>
-
-          {/* <!-- step 3 - location, language --> */}
-          <div className="tab tab-container">
-            <div className="title-container">
-              <p>Location & Language</p>
             </div>
             <div className="input-container">
               <i className="fas fa-globe-asia"></i>
@@ -173,12 +167,37 @@ function ProfileForm({ props }) {
             <div className="invalid-reason"></div>
           </div>
 
+          {/* <!-- step 3 - location, language --> */}
+          <div className="tab tab-container">
+            <div className="title-container">
+              <p>How old are you?</p>
+              <p>
+                This certifies that you are over 18 years old. This information
+                is for legal purposes and will not be visible to other users.
+                (Date of Birth)
+              </p>
+            </div>
+
+            <div className="input-container">
+              <i className="fas fa-birthday-cake"></i>
+              <input
+                id="birthday-input"
+                placeholder="Date of birth"
+                onFocus="(this.type='date')"
+                onInput={(e) => removeInvalidClassAndReason(e.target)}
+                required
+              />
+            </div>
+            <div className="invalid-reason"></div>
+          </div>
+
           {/* <!-- step 4 - email, phone # --> */}
           <div className="tab tab-container">
             <div className="title-container">
               <p>Contact Information</p>
               <p>
-                We will notify you when your friends send you a message (opt-in)
+                Tell us how you want to be notified when your friends send you a
+                message
               </p>
             </div>
             <div className="input-container">
@@ -201,8 +220,10 @@ function ProfileForm({ props }) {
           {/* <!-- step 5 - work experience --> */}
           <div className="tab tab-container">
             <div className="title-container">
-              <p>Work Experience</p>
-              <p>Tell us whatever you'd like to share with other users.</p>
+              <p>My experience</p>
+              <p>
+                Keep your friends up to date with where you studied and worked
+              </p>
             </div>
             <div className="input-container">
               <i className="fas fa-user"></i>
@@ -217,7 +238,7 @@ function ProfileForm({ props }) {
               <i className="fas fa-building"></i>
               <input
                 id="currently-input"
-                placeholder="Currently"
+                placeholder="Current work"
                 onInput={(e) => removeInvalidClassAndReason(e.target)}
                 required
               />
@@ -226,7 +247,7 @@ function ProfileForm({ props }) {
               <i className="fas fa-paperclip"></i>
               <input
                 id="previously-input"
-                placeholder="Previously (a comma separated list of previous jobs)"
+                placeholder="Previous work"
                 onInput={(e) => removeInvalidClassAndReason(e.target)}
                 required
               />
@@ -247,6 +268,10 @@ function ProfileForm({ props }) {
           <div className="tab tab-container">
             <div className="title-container">
               <p>Choose your avatar</p>
+              <p>
+                Limited selection for now - you’ll soon be able to create your
+                own custom avatar… coming soon!
+              </p>
             </div>
             <div style="display: flex; justify-content: center">
               <div className="avatar-container">
