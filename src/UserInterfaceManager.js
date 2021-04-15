@@ -13,11 +13,12 @@ import PlayerProfileContainer from './components/PlayerProfileContainer';
 import IncomingCallContainer from './components/IncomingCallContainer';
 
 class UserInterfaceManager {
-  constructor(scene, firebase, firebaseAuth, firebaseDb) {
+  constructor(scene, firebase, firebaseAuth, firebaseDb, firebaseStorage) {
     this.scene = scene;
     this.firebase = firebase;
     this.firebaseAuth = firebaseAuth;
     this.firebaseDb = firebaseDb;
+    this.firebaseStorage = firebaseStorage;
     this.logger = new Logger('UserInterfaceManager');
     this.socket = null;
 
@@ -392,6 +393,17 @@ class UserInterfaceManager {
       fixStepIndicator(n);
     }
 
+    function fixStepIndicator(n) {
+      // This function removes the "active" class of all steps...
+      var i,
+        x = document.getElementsByClassName('step');
+      for (i = 0; i < x.length; i++) {
+        x[i].className = x[i].className.replace(' active', '');
+      }
+      //... and adds the "active" class on the current step:
+      x[n].className += ' active';
+    }
+
     function nextPrev(n) {
       console.log(currentTab);
       // This function will figure out which tab to display
@@ -606,6 +618,15 @@ class UserInterfaceManager {
       button.classList.toggle('active');
     }
 
+    function setBackground(url) {
+      const containers = document.querySelectorAll('.profile-img-container');
+      for (const container of containers) {
+        container.style.backgroundColor = null;
+      }
+
+      document.getElementById(url).style.backgroundColor = 'rgb(236 232 232)';
+    }
+
     function populateInterestButtons(interestedIn) {
       for (const room of rooms) {
         const levelOne = room.levelOne.toLowerCase();
@@ -721,6 +742,16 @@ class UserInterfaceManager {
         this.scene.myPlayerSprite.updateCharacterType(formInputValues.gender);
         this.scene.socket.emit('update-player', this.scene.myPlayer);
       });
+
+      if (currentTab < 8) {
+        showTab(currentTab + 1);
+      }
+
+      if (currentTab === 7) {
+        document.getElementById('saveBtn').innerText = 'Save';
+      } else {
+        document.getElementById('saveBtn').innerText = 'Save and Next';
+      }
     };
 
     function selectAvatar({ target }) {
@@ -833,14 +864,19 @@ class UserInterfaceManager {
       <this.ProfileForm
         props={{
           myPlayerData,
+          myPlayerDocRef,
           saveButtonCallback,
           showTab,
           currentTab,
           playersRef,
+          setBackground,
+          firebaseStorage: this.firebaseStorage,
           removeProfileFormInterface: this.removeProfileFormInterface
         }}
       />
     );
+
+    setBackground(myPlayerData.profilePicURL[0]);
 
     document.querySelectorAll('.avatar-container').forEach((container) => {
       container.onclick = selectAvatar;
@@ -1035,7 +1071,7 @@ class UserInterfaceManager {
           }}
           className="video-element"
           src={
-            this.scene.players[socketId].profilePicURL ||
+            this.scene.players[socketId].profilePicURL[0] ||
             '/public/assets/placeholder-profile-pic.png'
           }
         ></img>
@@ -1194,7 +1230,7 @@ class UserInterfaceManager {
           }}
           className="video-element"
           src={
-            this.scene.players[socketId].profilePicURL ||
+            this.scene.players[socketId].profilePicURL[0] ||
             '/public/assets/placeholder-profile-pic.png'
           }
         ></img>
@@ -1288,7 +1324,7 @@ class UserInterfaceManager {
             marginRight: '10px'
           }}
           src={
-            playerInfo.profilePicURL ||
+            playerInfo.profilePicURL[0] ||
             '/public/assets/placeholder-profile-pic.png'
           }
         />
@@ -1343,7 +1379,7 @@ class UserInterfaceManager {
             marginRight: '10px'
           }}
           src={
-            playerInfo.profilePicURL ||
+            playerInfo.profilePicURL[0] ||
             '/public/assets/placeholder-profile-pic.png'
           }
         />

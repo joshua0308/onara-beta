@@ -47,7 +47,7 @@ function IncomingCallContainer({ props }) {
         <img
           id="player-image"
           src={
-            playerData.profilePicURL ||
+            playerData.profilePicURL[0] ||
             'public/assets/placeholder-profile-pic.png'
           }
         />

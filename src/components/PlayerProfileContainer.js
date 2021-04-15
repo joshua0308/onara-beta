@@ -94,17 +94,56 @@ function PlayerProfileContainer({ props }) {
     fontSize: '1rem'
   };
 
+  function createImages(urls) {
+    return urls.map((url, idx) => {
+      return (
+        <img
+          key={`player-image-${url}`}
+          id="player-image"
+          src={url || 'public/assets/placeholder-profile-pic.png'}
+          style={{ display: idx === 0 ? 'inline-block' : 'none' }}
+          className="player-image-class"
+        />
+      );
+    });
+  }
+
   return (
     <div id="player-profile-container">
-      <img
-        id="player-image"
-        src={
-          playerData.profilePicURL ||
-          'public/assets/placeholder-profile-pic.png'
-        }
-      />
+      {createImages(playerData.profilePicURL)}
+      {playerData.profilePicURL.length > 1 && (
+        <i
+          style={{
+            fontSize: '20px',
+            position: 'fixed',
+            marginTop: '1.5rem'
+          }}
+          className="fas fa-chevron-circle-right"
+          onClick={() => {
+            const imageElements = document.querySelectorAll(
+              '.player-image-class'
+            );
+
+            let index;
+
+            for (let i = 0; i < imageElements.length; i += 1) {
+              if (imageElements[i].style.display === 'inline-block') {
+                imageElements[i].style.display = 'none';
+                index = i + 1;
+                break;
+              }
+            }
+
+            if (imageElements[index]) {
+              imageElements[index].style.display = 'inline-block';
+            } else {
+              imageElements[0].style.display = 'inline-block';
+            }
+          }}
+        ></i>
+      )}
       <div id="player-name" className="font-bold">
-        @{playerData.displayName}
+        @{playerData.username || playerData.displayName}
       </div>
       <div id="player-name">{playerData.displayName}</div>
       <div style={{ margin: '20px 0' }}>

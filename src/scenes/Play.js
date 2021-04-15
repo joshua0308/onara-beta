@@ -64,11 +64,13 @@ class Play extends Phaser.Scene {
     this.firebase = this.game.firebase;
     this.firebaseAuth = this.game.firebaseAuth;
     this.firebaseDb = this.game.firebaseDb;
+    this.firebaseStorage = this.game.firebaseStorage;
     this.userInterfaceManager = new UserInterfaceManager(
       this,
       this.firebase,
       this.firebaseAuth,
-      this.firebaseDb
+      this.firebaseDb,
+      this.firebaseStorage
     );
 
     this.myPlayer = {
