@@ -49,7 +49,16 @@ firebaseAuth.onAuthStateChanged((playerAuth) => {
               ? [playerData.profilePicURL]
               : playerData.profilePicURL;
 
-          new AronaGame(config, playerData, false);
+          playerDocRef
+            .set(
+              {
+                profilePicURL: playerData.profilePicURL
+              },
+              { merge: true }
+            )
+            .then(() => {
+              new AronaGame(config, playerData, false);
+            });
         } else {
           const now = firebase.firestore.Timestamp.now();
 
