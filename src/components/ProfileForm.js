@@ -13,7 +13,7 @@ function ProfileForm({ props }) {
     updateOnlineListImage,
     updateMyPlayerInfo,
     socket,
-    createCustomInterestElement
+    createCustomInterestOrSkillElement
   } = props;
 
   const profilePicArray = myPlayerData.profilePicURL;
@@ -576,19 +576,13 @@ function ProfileForm({ props }) {
                   ></input>
                   <button
                     onClick={(e) => {
-                      // eslint-disable-next-line no-console
-                      console.log('debug: e', e);
-                      console.log(
-                        document.getElementById('custom-interest-input').value
-                      );
-
                       const inputValue = document.getElementById(
                         'custom-interest-input'
                       ).value;
                       document.getElementById('custom-interest-input').value =
                         '';
 
-                      const customInterestElement = createCustomInterestElement(
+                      const customInterestElement = createCustomInterestOrSkillElement(
                         inputValue
                       );
 
@@ -649,16 +643,42 @@ function ProfileForm({ props }) {
                   <p className="skill-header">Fun</p>
                   <div className="fun skill-buttons-container"></div>
                 </div>
-                <form className="add-your-own-form">
+                <div className="add-your-own-container">
                   <input
+                    id="custom-skill-input"
                     placeholder="Add your own"
-                    onInput="this.className = ''"
-                    name="phone"
                   ></input>
-                  <button>
+                  <button
+                    onClick={(e) => {
+                      const inputValue = document.getElementById(
+                        'custom-skill-input'
+                      ).value;
+                      document.getElementById('custom-skill-input').value = '';
+
+                      const customSkillElement = createCustomInterestOrSkillElement(
+                        inputValue,
+                        'skill'
+                      );
+
+                      const customSkillContainer = document.getElementById(
+                        'custom-skill-container'
+                      );
+                      customSkillContainer.append(customSkillElement);
+                    }}
+                  >
                     <img src="https://lunchclub.com/static/media/tag-add-filled.412b15af.svg" />
                   </button>
-                </form>
+                </div>
+                <div
+                  id="custom-skill-container"
+                  style={{
+                    display: 'flex',
+                    flexFlow: 'row wrap',
+                    alignItems: 'center',
+                    justifyContent: 'left',
+                    padding: '0px'
+                  }}
+                ></div>
                 <div className="invalid-reason"></div>
               </div>
               <div className="buttons-container">

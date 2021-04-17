@@ -660,7 +660,7 @@ class UserInterfaceManager {
       );
 
       for (const customInterest of customInterests) {
-        const customInterestElement = createCustomInterestElement(
+        const customInterestElement = createCustomInterestOrSkillElement(
           customInterest
         );
 
@@ -672,6 +672,9 @@ class UserInterfaceManager {
     }
 
     function populateSkillButtons(goodAt) {
+      const skills = goodAt.split(',');
+      const added = [];
+
       for (const room of rooms) {
         const levelOne = room.levelOne.toLowerCase();
         const buttonsContainerList = document.querySelectorAll(
@@ -689,10 +692,25 @@ class UserInterfaceManager {
 
           if (goodAt && goodAt.indexOf(description.join(' ')) > -1) {
             skillButton.classList.add('active');
+            added.push(description.join(' '));
           }
 
           container.appendChild(skillButton);
         }
+      }
+
+      const customSkills = skills.filter((skill) => added.indexOf(skill) < 0);
+
+      for (const customSkill of customSkills) {
+        const customInterestElement = createCustomInterestOrSkillElement(
+          customSkill,
+          'skill'
+        );
+
+        const customSkillContainer = document.getElementById(
+          'custom-skill-container'
+        );
+        customSkillContainer.append(customInterestElement);
       }
     }
 
@@ -737,6 +755,10 @@ class UserInterfaceManager {
       const skills = Array(...document.querySelectorAll('.skill-button'))
         .filter((button) => button.classList.contains('active'))
         .map((button) => button.querySelector('.button-description').innerText);
+      const customSkills = Array(
+        ...document.querySelectorAll('.custom-skill')
+      ).map((p) => p.innerText);
+      const skillsCombined = skills.concat(customSkills);
 
       const interests = Array(...document.querySelectorAll('.interest-button'))
         .filter((button) => button.classList.contains('active'))
@@ -762,7 +784,7 @@ class UserInterfaceManager {
         previously: previouslyInput.value,
         education: educationInput.value,
         updatedAt: this.firebase.firestore.Timestamp.now(),
-        goodAt: skills.join(','),
+        goodAt: skillsCombined.join(','),
         interestedIn: interestsCombined.join(','),
         gender
       };
@@ -883,9 +905,12 @@ class UserInterfaceManager {
       return true;
     }
 
-    function createCustomInterestElement(inputValue) {
+    function createCustomInterestOrSkillElement(
+      inputValue,
+      category = 'interest'
+    ) {
       return (
-        <p className="custom-interest">
+        <p className={`custom-${category}`}>
           {inputValue}
           <button
             style={{
@@ -939,7 +964,7 @@ class UserInterfaceManager {
           updateOnlineListImage: this.updateOnlineListImage,
           updateMyPlayerInfo: this.scene.updateMyPlayerInfo,
           socket: this.scene.socket,
-          createCustomInterestElement
+          createCustomInterestOrSkillElement
         }}
       />
     );
