@@ -12,6 +12,97 @@ import InCallModalContainer from './components/InCallModalContainer';
 import PlayerProfileContainer from './components/PlayerProfileContainer';
 import IncomingCallContainer from './components/IncomingCallContainer';
 
+const rooms = [
+  { name: '🇨🇳 Chinese', levelOne: 'Learn', levelTwo: 'Language' },
+  { name: '🇺🇸 English', levelOne: 'Learn', levelTwo: 'Language' },
+  { name: '🇪🇸 Spanish', levelOne: 'Learn', levelTwo: 'Language' },
+  { name: '💼 Career path', levelOne: 'Learn', levelTwo: 'Professional' },
+  {
+    name: '📄 Resume building',
+    levelOne: 'Learn',
+    levelTwo: 'Professional'
+  },
+  { name: '🗣 Interview prep', levelOne: 'Learn', levelTwo: 'Professional' },
+  {
+    name: '💸 Salary negotiation',
+    levelOne: 'Learn',
+    levelTwo: 'Professional'
+  },
+  { name: '📈 Investing', levelOne: 'Learn', levelTwo: 'Life' },
+  { name: '🏠 House chores', levelOne: 'Learn', levelTwo: 'Life' },
+  { name: '🏦 Tax / Bill / Bank', levelOne: 'Learn', levelTwo: 'Life' },
+  {
+    name: '🕵️‍♀️ Investors / Founders',
+    levelOne: 'Business',
+    levelTwo: 'Investors / Founders meetup'
+  },
+  {
+    name: '👩‍💻 Practice pitching',
+    levelOne: 'Business',
+    levelTwo: 'Prep for presentation / Practice pitching'
+  },
+  {
+    name: '🎨 Designers',
+    levelOne: 'Business',
+    levelTwo: 'Hire a candidate / Job searching'
+  },
+  {
+    name: '🖥 Engineers',
+    levelOne: 'Business',
+    levelTwo: 'Hire a candidate / Job searching'
+  },
+  {
+    name: '🤑 Finance',
+    levelOne: 'Business',
+    levelTwo: 'Hire a candidate / Job searching'
+  },
+  {
+    name: '📑 Business Roles',
+    levelOne: 'Business',
+    levelTwo: 'Hire a candidate / Job searching'
+  },
+  {
+    name: '🧘‍♀️ Yoga / Meditation',
+    levelOne: 'Health',
+    levelTwo: 'Mental wellness'
+  },
+  {
+    name: '💬 Talk to a therapist',
+    levelOne: 'Health',
+    levelTwo: 'Mental wellness'
+  },
+  {
+    name: '🩺 Doctors / Patients meetup',
+    levelOne: 'Health',
+    levelTwo: 'Urgent care'
+  },
+  {
+    name: '🏋️‍♀️ Physical fitness',
+    levelOne: 'Health',
+    levelTwo: 'Physical fitness'
+  },
+  { name: '👩‍❤️‍👨 Serious relationship', levelOne: 'Fun', levelTwo: 'Dating' },
+  { name: '💕 Casual dating', levelOne: 'Fun', levelTwo: 'Dating' },
+  {
+    name: '📺 Watch something',
+    levelOne: 'Fun',
+    levelTwo: 'Do an activity'
+  },
+  { name: '🎸 Listen / Sing', levelOne: 'Fun', levelTwo: 'Do an activity' },
+  { name: '🍕 Eat / Drink', levelOne: 'Fun', levelTwo: 'Do an activity' },
+  { name: '👨‍🍳 Cook together', levelOne: 'Fun', levelTwo: 'Do an activity' },
+  { name: '🎨 Draw / Paint', levelOne: 'Fun', levelTwo: 'Do an activity' },
+  {
+    name: '👨‍👨‍👧‍👦 Volunteer group',
+    levelOne: 'Fun',
+    levelTwo: 'Do an activity'
+  },
+  { name: '🌏 Global issues', levelOne: 'Fun', levelTwo: 'Chat/Debate' },
+  { name: '⚽️ Sports', levelOne: 'Fun', levelTwo: 'Chat/Debate' },
+  { name: '📚 Books', levelOne: 'Fun', levelTwo: 'Chat/Debate' },
+  { name: '🎬 TV / Film', levelOne: 'Fun', levelTwo: 'Chat/Debate' },
+  { name: '🚌 Travel', levelOne: 'Fun', levelTwo: 'Chat/Debate' }
+];
 class UserInterfaceManager {
   constructor(scene, firebase, firebaseAuth, firebaseDb, firebaseStorage) {
     this.scene = scene;
@@ -345,7 +436,7 @@ class UserInterfaceManager {
 
       myPlayerDocRef.set(formInputValues, { merge: true }).then(() => {
         this.scene.updateMyPlayerInfo(formInputValues);
-        this.updateOnlineList(
+        this.updateOnlineListName(
           this.scene.myPlayer.uid,
           formInputValues.displayName
         );
@@ -518,100 +609,7 @@ class UserInterfaceManager {
 
   async createProfileFormInterface(myPlayer, currentTab = 0) {
     if (document.getElementById('profile-form-wrapper')) return;
-    // this.scene.scene.pause();
     this.hideOnlineList();
-
-    const rooms = [
-      { name: '🇨🇳 Chinese', levelOne: 'Learn', levelTwo: 'Language' },
-      { name: '🇺🇸 English', levelOne: 'Learn', levelTwo: 'Language' },
-      { name: '🇪🇸 Spanish', levelOne: 'Learn', levelTwo: 'Language' },
-      { name: '💼 Career path', levelOne: 'Learn', levelTwo: 'Professional' },
-      {
-        name: '📄 Resume building',
-        levelOne: 'Learn',
-        levelTwo: 'Professional'
-      },
-      { name: '🗣 Interview prep', levelOne: 'Learn', levelTwo: 'Professional' },
-      {
-        name: '💸 Salary negotiation',
-        levelOne: 'Learn',
-        levelTwo: 'Professional'
-      },
-      { name: '📈 Investing', levelOne: 'Learn', levelTwo: 'Life' },
-      { name: '🏠 House chores', levelOne: 'Learn', levelTwo: 'Life' },
-      { name: '🏦 Tax / Bill / Bank', levelOne: 'Learn', levelTwo: 'Life' },
-      {
-        name: '🕵️‍♀️ Investors / Founders',
-        levelOne: 'Business',
-        levelTwo: 'Investors / Founders meetup'
-      },
-      {
-        name: '👩‍💻 Practice pitching',
-        levelOne: 'Business',
-        levelTwo: 'Prep for presentation / Practice pitching'
-      },
-      {
-        name: '🎨 Designers',
-        levelOne: 'Business',
-        levelTwo: 'Hire a candidate / Job searching'
-      },
-      {
-        name: '🖥 Engineers',
-        levelOne: 'Business',
-        levelTwo: 'Hire a candidate / Job searching'
-      },
-      {
-        name: '🤑 Finance',
-        levelOne: 'Business',
-        levelTwo: 'Hire a candidate / Job searching'
-      },
-      {
-        name: '📑 Business Roles',
-        levelOne: 'Business',
-        levelTwo: 'Hire a candidate / Job searching'
-      },
-      {
-        name: '🧘‍♀️ Yoga / Meditation',
-        levelOne: 'Health',
-        levelTwo: 'Mental wellness'
-      },
-      {
-        name: '💬 Talk to a therapist',
-        levelOne: 'Health',
-        levelTwo: 'Mental wellness'
-      },
-      {
-        name: '🩺 Doctors / Patients meetup',
-        levelOne: 'Health',
-        levelTwo: 'Urgent care'
-      },
-      {
-        name: '🏋️‍♀️ Physical fitness',
-        levelOne: 'Health',
-        levelTwo: 'Physical fitness'
-      },
-      { name: '👩‍❤️‍👨 Serious relationship', levelOne: 'Fun', levelTwo: 'Dating' },
-      { name: '💕 Casual dating', levelOne: 'Fun', levelTwo: 'Dating' },
-      {
-        name: '📺 Watch something',
-        levelOne: 'Fun',
-        levelTwo: 'Do an activity'
-      },
-      { name: '🎸 Listen / Sing', levelOne: 'Fun', levelTwo: 'Do an activity' },
-      { name: '🍕 Eat / Drink', levelOne: 'Fun', levelTwo: 'Do an activity' },
-      { name: '👨‍🍳 Cook together', levelOne: 'Fun', levelTwo: 'Do an activity' },
-      { name: '🎨 Draw / Paint', levelOne: 'Fun', levelTwo: 'Do an activity' },
-      {
-        name: '👨‍👨‍👧‍👦 Volunteer group',
-        levelOne: 'Fun',
-        levelTwo: 'Do an activity'
-      },
-      { name: '🌏 Global issues', levelOne: 'Fun', levelTwo: 'Chat/Debate' },
-      { name: '⚽️ Sports', levelOne: 'Fun', levelTwo: 'Chat/Debate' },
-      { name: '📚 Books', levelOne: 'Fun', levelTwo: 'Chat/Debate' },
-      { name: '🎬 TV / Film', levelOne: 'Fun', levelTwo: 'Chat/Debate' },
-      { name: '🚌 Travel', levelOne: 'Fun', levelTwo: 'Chat/Debate' }
-    ];
 
     function toggleButton(e) {
       const button = e.target.closest('button');
@@ -680,8 +678,21 @@ class UserInterfaceManager {
       }
     }
 
-    const saveButtonCallback = (currentTab) => {
+    const saveButtonCallback = () => {
       this.logger.log('save profile');
+
+      const liElements = document
+        .querySelector('.navigation-container')
+        .getElementsByTagName('li');
+
+      let currentTab;
+
+      for (let i = 0; i < liElements.length; i += 1) {
+        if (liElements[i].style.backgroundColor) {
+          currentTab = i;
+          break;
+        }
+      }
 
       if (!validateForm(currentTab)) return;
 
@@ -734,23 +745,19 @@ class UserInterfaceManager {
 
       myPlayerDocRef.set(formInputValues, { merge: true }).then(() => {
         this.scene.updateMyPlayerInfo(formInputValues);
-        this.updateOnlineList(
+        this.updateOnlineListName(
           this.scene.myPlayer.uid,
           formInputValues.displayName
         );
         this.scene.myPlayerSprite.updatePlayerName(formInputValues.displayName);
         this.scene.myPlayerSprite.updateCharacterType(formInputValues.gender);
+        // eslint-disable-next-line no-console
+        console.log('debug: this.scene.myPlayer', this.scene.myPlayer);
         this.scene.socket.emit('update-player', this.scene.myPlayer);
       });
 
       if (currentTab < 8) {
         showTab(currentTab + 1);
-      }
-
-      if (currentTab === 7) {
-        document.getElementById('saveBtn').innerText = 'Save';
-      } else {
-        document.getElementById('saveBtn').innerText = 'Save and Next';
       }
     };
 
@@ -871,7 +878,10 @@ class UserInterfaceManager {
           playersRef,
           setBackground,
           firebaseStorage: this.firebaseStorage,
-          removeProfileFormInterface: this.removeProfileFormInterface
+          removeProfileFormInterface: this.removeProfileFormInterface,
+          updateOnlineListImage: this.updateOnlineListImage,
+          updateMyPlayerInfo: this.scene.updateMyPlayerInfo,
+          socket: this.scene.socket
         }}
       />
     );
@@ -937,8 +947,14 @@ class UserInterfaceManager {
     }
   }
 
-  updateOnlineList(uid, updatedName) {
+  updateOnlineListName(uid, updatedName) {
     document.getElementById(`player-name-${uid}`).innerText = updatedName;
+  }
+
+  updateOnlineListImage(uid, image_url) {
+    document
+      .getElementById(`player-${uid}`)
+      .querySelector('img').src = image_url;
   }
 
   async createPlayerProfileInterface(player, isCurrentPlayer = false) {
@@ -1319,7 +1335,6 @@ class UserInterfaceManager {
         <img
           style={{
             width: '30px',
-            height: '30px',
             borderRadius: '15px',
             marginRight: '10px'
           }}
@@ -1374,7 +1389,6 @@ class UserInterfaceManager {
         <img
           style={{
             width: '30px',
-            height: '30px',
             borderRadius: '15px',
             marginRight: '10px'
           }}

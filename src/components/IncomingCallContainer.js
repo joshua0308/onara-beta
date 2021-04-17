@@ -98,7 +98,7 @@ function IncomingCallContainer({ props }) {
                 color: '#565656'
               }}
             >
-              💯 I&apos;m good at
+              💯 You can come to me about...
             </span>
             <br />
             <div style={{ marginLeft: '15px' }}>
@@ -115,7 +115,7 @@ function IncomingCallContainer({ props }) {
               className=" profile-subheader"
               style={{ fontWeight: '600', color: '#565656' }}
             >
-              ❤️ I want to meet people who like
+              ❤️ I want to meet people who like...
             </span>
             <br />
             <div style={{ marginLeft: '15px' }}>

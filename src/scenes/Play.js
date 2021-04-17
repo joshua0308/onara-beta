@@ -37,6 +37,9 @@ class Play extends Phaser.Scene {
       ...this.myPlayer,
       ...updatedPlayerInfo
     };
+
+    // eslint-disable-next-line no-console
+    console.log('debug: this.myPlayer', this.myPlayer);
   }
 
   testDevEnv() {
@@ -262,9 +265,14 @@ class Play extends Phaser.Scene {
 
     this.socket.on('player-updated', (player) => {
       this.logger.log('socket on player-updated', player.displayName);
-      this.userInterfaceManager.updateOnlineList(
+      this.userInterfaceManager.updateOnlineListName(
         player.uid,
         player.displayName
+      );
+
+      this.userInterfaceManager.updateOnlineListImage(
+        player.uid,
+        player.profilePicURL[0]
       );
       const otherPlayer = this.otherPlayersGroup.getMatching(
         'socketId',

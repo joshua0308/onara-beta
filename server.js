@@ -65,10 +65,17 @@ class Player {
   }
 
   update(playerInfo) {
-    if (this.displayName !== playerInfo.displayName) {
+    if (playerInfo.displayName && this.displayName !== playerInfo.displayName) {
       this.displayName = playerInfo.displayName;
     }
-    this.gender = playerInfo.gender;
+
+    if (playerInfo.gender) {
+      this.gender = playerInfo.gender;
+    }
+
+    if (playerInfo.profilePicURL) {
+      this.profilePicURL = playerInfo.profilePicURL;
+    }
   }
 }
 
