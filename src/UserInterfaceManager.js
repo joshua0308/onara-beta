@@ -626,6 +626,8 @@ class UserInterfaceManager {
     }
 
     function populateInterestButtons(interestedIn) {
+      const interests = interestedIn.split(',');
+      const added = [];
       for (const room of rooms) {
         const levelOne = room.levelOne.toLowerCase();
         const buttonsContainerList = document.querySelectorAll(
@@ -646,10 +648,26 @@ class UserInterfaceManager {
             interestedIn.indexOf(description.join(' ')) > -1
           ) {
             interestButton.classList.add('active');
+            added.push(description.join(' '));
           }
 
           container.appendChild(interestButton);
         }
+      }
+
+      const customInterests = interests.filter(
+        (interest) => added.indexOf(interest) < 0
+      );
+
+      for (const customInterest of customInterests) {
+        const customInterestElement = createCustomInterestElement(
+          customInterest
+        );
+
+        const customInterestContainer = document.getElementById(
+          'custom-interest-container'
+        );
+        customInterestContainer.append(customInterestElement);
       }
     }
 
@@ -715,12 +733,18 @@ class UserInterfaceManager {
           .indexOf(true) === 0
           ? 'male'
           : 'female';
-      const interests = Array(...document.querySelectorAll('.interest-button'))
-        .filter((button) => button.classList.contains('active'))
-        .map((button) => button.querySelector('.button-description').innerText);
+
       const skills = Array(...document.querySelectorAll('.skill-button'))
         .filter((button) => button.classList.contains('active'))
         .map((button) => button.querySelector('.button-description').innerText);
+
+      const interests = Array(...document.querySelectorAll('.interest-button'))
+        .filter((button) => button.classList.contains('active'))
+        .map((button) => button.querySelector('.button-description').innerText);
+      const customInterests = Array(
+        ...document.querySelectorAll('.custom-interest')
+      ).map((p) => p.innerText);
+      const interestsCombined = interests.concat(customInterests);
 
       const formInputValues = {
         username: usernameInput.value,
@@ -739,7 +763,7 @@ class UserInterfaceManager {
         education: educationInput.value,
         updatedAt: this.firebase.firestore.Timestamp.now(),
         goodAt: skills.join(','),
-        interestedIn: interests.join(','),
+        interestedIn: interestsCombined.join(','),
         gender
       };
 
@@ -859,6 +883,39 @@ class UserInterfaceManager {
       return true;
     }
 
+    function createCustomInterestElement(inputValue) {
+      return (
+        <p className="custom-interest">
+          {inputValue}
+          <button
+            style={{
+              backgroundColor: 'transparent',
+              borderStyle: 'none',
+              width: '30px',
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center'
+            }}
+            onClick={(e) => {
+              const pElement = e.target.closest('p');
+              pElement.remove();
+            }}
+          >
+            <i
+              className="fas fa-times do-not-apply"
+              style={{
+                width: null,
+                height: null,
+                marginTop: null,
+                marginRight: null,
+                color: 'rgb(71, 168, 165)'
+              }}
+            ></i>
+          </button>
+        </p>
+      );
+    }
+
     const playersRef = this.firebaseDb.collection('players');
     const myPlayerDocRef = this.firebaseDb
       .collection('players')
@@ -881,7 +938,8 @@ class UserInterfaceManager {
           removeProfileFormInterface: this.removeProfileFormInterface,
           updateOnlineListImage: this.updateOnlineListImage,
           updateMyPlayerInfo: this.scene.updateMyPlayerInfo,
-          socket: this.scene.socket
+          socket: this.scene.socket,
+          createCustomInterestElement
         }}
       />
     );

@@ -12,7 +12,8 @@ function ProfileForm({ props }) {
     setBackground,
     updateOnlineListImage,
     updateMyPlayerInfo,
-    socket
+    socket,
+    createCustomInterestElement
   } = props;
 
   const profilePicArray = myPlayerData.profilePicURL;
@@ -567,16 +568,49 @@ function ProfileForm({ props }) {
                   <p className="interest-header">Fun</p>
                   <div className="fun interest-buttons-container"></div>
                 </div>
-                <form className="add-your-own-form">
+                <div className="add-your-own-container">
                   <input
+                    id="custom-interest-input"
                     placeholder="Add your own"
-                    onInput="this.className = ''"
                     name="phone"
                   ></input>
-                  <button>
+                  <button
+                    onClick={(e) => {
+                      // eslint-disable-next-line no-console
+                      console.log('debug: e', e);
+                      console.log(
+                        document.getElementById('custom-interest-input').value
+                      );
+
+                      const inputValue = document.getElementById(
+                        'custom-interest-input'
+                      ).value;
+                      document.getElementById('custom-interest-input').value =
+                        '';
+
+                      const customInterestElement = createCustomInterestElement(
+                        inputValue
+                      );
+
+                      const customInterestContainer = document.getElementById(
+                        'custom-interest-container'
+                      );
+                      customInterestContainer.append(customInterestElement);
+                    }}
+                  >
                     <img src="https://lunchclub.com/static/media/tag-add-filled.412b15af.svg" />
                   </button>
-                </form>
+                </div>
+                <div
+                  id="custom-interest-container"
+                  style={{
+                    display: 'flex',
+                    flexFlow: 'row wrap',
+                    alignItems: 'center',
+                    justifyContent: 'left',
+                    padding: '0px'
+                  }}
+                ></div>
                 <div className="invalid-reason"></div>
               </div>
               <div className="buttons-container">
