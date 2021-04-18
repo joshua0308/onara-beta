@@ -249,6 +249,8 @@ gameIO.on('connection', (socket) => {
     player.update(playerInfo);
 
     if (players[socket.id].barId) {
+      // eslint-disable-next-line no-console
+      console.log('debug: players[socket.id].barId', players[socket.id].barId);
       socket.to(players[socket.id].barId).emit('player-updated', player);
     }
   });

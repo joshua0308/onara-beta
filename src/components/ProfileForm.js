@@ -17,20 +17,20 @@ function ProfileForm({ props }) {
   } = props;
 
   const profilePicArray = myPlayerData.profilePicURL;
-  const removeProfilePicButtonOnclick = (e) => {
-    const elementToDelete = e.target.parentElement;
-    const imageUrl = elementToDelete.id;
 
-    const profilePicArray =
-      typeof myPlayerData.profilePicURL === 'string'
-        ? [myPlayerData.profilePicURL]
-        : myPlayerData.profilePicURL;
+  const removeImageHandler = (e) => {
+    console.log('remove image');
+    const imageContainerToDelete = e.target.closest('.profile-img-container');
+    const imageUrl = imageContainerToDelete.id;
 
+    const profilePicArray = myPlayerData.profilePicURL;
     if (profilePicArray.length <= 1) {
       return alert('You need to have at least one profile picture');
     }
 
+    // set the pic url without the image we want to remove
     const newArray = profilePicArray.filter((url) => url !== imageUrl);
+    myPlayerData.profilePicURL = newArray;
 
     myPlayerDocRef.set(
       {
@@ -39,45 +39,132 @@ function ProfileForm({ props }) {
       { merge: true }
     );
 
-    elementToDelete.remove();
+    // remove image container
+    imageContainerToDelete.remove();
+
+    // add new image container
+    const newImageElement = createImageElement('');
+    document
+      .getElementById('profile-img-array-container')
+      .appendChild(newImageElement);
+
+    // update background color to the next picture
+    updateOnlineListImage(myPlayerData.uid, newArray[0]);
     setBackground(newArray[0]);
     updateMyPlayerInfo({
       profilePicURL: newArray
     });
+
+    // emit the change
     socket.emit('update-player', {
       profilePicURL: newArray
     });
   };
 
-  const setProfilePicButtonOnClick = (e) => {
-    const imageUrl = e.target.parentElement.id;
+  // const setProfilePicButtonOnClick = (e) => {
+  //   const imageUrl = e.target.parentElement.id;
 
-    const profilePicArray =
-      typeof myPlayerData.profilePicURL === 'string'
-        ? [myPlayerData.profilePicURL]
-        : myPlayerData.profilePicURL;
+  //   const profilePicArray =
+  //     typeof myPlayerData.profilePicURL === 'string'
+  //       ? [myPlayerData.profilePicURL]
+  //       : myPlayerData.profilePicURL;
 
-    const newArray = profilePicArray.filter((url) => url !== imageUrl);
-    newArray.unshift(imageUrl);
+  //   const newArray = profilePicArray.filter((url) => url !== imageUrl);
+  //   newArray.unshift(imageUrl);
 
-    myPlayerDocRef.set(
-      {
-        profilePicURL: newArray
-      },
-      { merge: true }
+  //   myPlayerDocRef.set(
+  //     {
+  //       profilePicURL: newArray
+  //     },
+  //     { merge: true }
+  //   );
+
+  //   updateOnlineListImage(myPlayerData.uid, imageUrl);
+  //   setBackground(imageUrl);
+  //   updateMyPlayerInfo({
+  //     profilePicURL: newArray
+  //   });
+  //   socket.emit('update-player', {
+  //     profilePicURL: newArray
+  //   });
+  // };
+
+  const ImageElement = ({ props }) => {
+    const { url, key } = props;
+    return (
+      <img
+        key={key}
+        src={url}
+        className="profile-img"
+        style={{
+          borderRadius: '10px'
+        }}
+      />
     );
-
-    updateOnlineListImage(myPlayerData.uid, imageUrl);
-    setBackground(imageUrl);
-    updateMyPlayerInfo({
-      profilePicURL: newArray
-    });
-    socket.emit('update-player', {
-      profilePicURL: newArray
-    });
   };
+
+  const EmptyElement = () => (
+    <div
+      className="empty-div"
+      style={{
+        width: '150px',
+        height: '150px',
+        backgroundColor: 'rgb(236, 232, 232)',
+        borderRadius: '10px'
+      }}
+    ></div>
+  );
+
+  const addImageHandler = (e) => {
+    const imageContainer = e.target.closest('.profile-img-container');
+    const inputElement = imageContainer.querySelector('.upload-input');
+    console.log('imageContainer', imageContainer);
+    console.log('inputElement', inputElement);
+    inputElement.click();
+  };
+
+  function showNthTab(num, currentTab) {
+    return () => showTab(num, currentTab);
+  }
+
+  async function inputOnChange(e) {
+    try {
+      const file = e.target.files[0];
+      const storageRef = firebaseStorage.ref();
+      const fileRef = storageRef.child(
+        myPlayerData.uid + Math.random().toString().substring(2, 10)
+      );
+      await fileRef.put(file);
+      const fileUrl = await fileRef.getDownloadURL();
+
+      const imageArrayContainer = e.target.closest(
+        '#profile-img-array-container'
+      );
+      const oldImageContainer = e.target.closest('.profile-img-container');
+
+      const newImageContainer = createImageElement(fileUrl, fileUrl);
+      imageArrayContainer.replaceChild(newImageContainer, oldImageContainer);
+
+      const profilePicArray =
+        typeof myPlayerData.profilePicURL === 'string'
+          ? [myPlayerData.profilePicURL]
+          : myPlayerData.profilePicURL;
+
+      profilePicArray.push(fileUrl);
+
+      myPlayerDocRef.set(
+        {
+          profilePicURL: profilePicArray
+        },
+        { merge: true }
+      );
+    } catch (e) {
+      console.log(e);
+    }
+  }
 
   function createImageElement(url, key) {
+    const isDraggable = url ? true : false;
     return (
       <div
         style={{
@@ -86,40 +173,62 @@ function ProfileForm({ props }) {
           alignItems: 'center',
           justifyContent: 'center',
           padding: '10px',
-          borderRadius: '10px'
+          borderRadius: '10px',
+          position: 'relative'
         }}
         id={url}
-        className="profile-img-container"
+        className={`profile-img-container ${isDraggable ? 'draggable' : ''}`}
       >
-        <img
-          key={key}
-          src={url}
-          className="profile-img"
-          style={{
-            borderRadius: '10px'
-          }}
-        />
+        {url ? <ImageElement props={{ url, key: url }} /> : <EmptyElement />}
         <div
           style={{
+            position: 'absolute',
+            bottom: '5px',
+            right: '5px',
+            width: '24px',
+            height: '24px',
+            borderRadius: '12px',
+            backgroundColor: '#456add',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
             cursor: 'pointer'
           }}
-          onClick={setProfilePicButtonOnClick}
+          onClick={url ? removeImageHandler : addImageHandler}
         >
-          Set as Profile Picture
-        </div>
-        <div
-          style={{
-            cursor: 'pointer'
-          }}
-          onClick={removeProfilePicButtonOnclick}
-        >
-          Remove
+          {url ? (
+            <i className="fas fa-times" style={{ color: 'white' }} />
+          ) : (
+            <i className="fas fa-plus" style={{ color: 'white' }} />
+          )}
+          <input
+            className="upload-input"
+            type="file"
+            hidden
+            onChange={inputOnChange}
+          ></input>
+
+          {/* <div style="margin: 24px 0;">
+            <button
+              id="upload-button"
+              onClick={() => {
+                document.getElementById('upload-input').click();
+              }}
+            >
+              Upload image
+            </button>
+          </div> */}
         </div>
       </div>
     );
   }
   function createImgElements(urls) {
-    return urls.map((url, idx) => {
+    const newUrls = ['', '', '', '', '', ''];
+    urls.forEach((url, idx) => {
+      newUrls[idx] = url;
+    });
+
+    return newUrls.map((url, idx) => {
       return createImageElement(url, url);
     });
   }
@@ -158,10 +267,6 @@ function ProfileForm({ props }) {
       validIcon.style.display = 'none';
       invalidIcon.style.display = 'inline';
     }
-  }
-
-  function showNthTab(num, currentTab) {
-    return () => showTab(num, currentTab);
   }
 
   return (
@@ -702,11 +807,15 @@ function ProfileForm({ props }) {
                 </div>
                 <div
                   id="profile-img-array-container"
-                  style={{ display: 'flex', justifyContent: 'center' }}
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'center',
+                    flexWrap: 'wrap'
+                  }}
                 >
                   {createImgElements(profilePicArray)}
                 </div>
-                <div style="margin: 24px 0;">
+                {/* <div style="margin: 24px 0;">
                   <button
                     id="upload-button"
                     onClick={() => {
@@ -717,44 +826,11 @@ function ProfileForm({ props }) {
                       id="upload-input"
                       type="file"
                       hidden
-                      onChange={async (e) => {
-                        try {
-                          const file = e.target.files[0];
-                          const storageRef = firebaseStorage.ref();
-                          const fileRef = storageRef.child(
-                            myPlayerData.uid +
-                              Math.random().toString().substring(2, 10)
-                          );
-                          await fileRef.put(file);
-                          const fileUrl = await fileRef.getDownloadURL();
-
-                          document
-                            .getElementById('profile-img-array-container')
-                            .appendChild(createImageElement(fileUrl, fileUrl));
-
-                          console.log(myPlayerData.profilePicURL);
-
-                          const profilePicArray =
-                            typeof myPlayerData.profilePicURL === 'string'
-                              ? [myPlayerData.profilePicURL]
-                              : myPlayerData.profilePicURL;
-
-                          profilePicArray.push(fileUrl);
-
-                          myPlayerDocRef.set(
-                            {
-                              profilePicURL: profilePicArray
-                            },
-                            { merge: true }
-                          );
-                        } catch (e) {
-                          console.log(e);
-                        }
-                      }}
+                      onChange={inputOnChange}
                     ></input>
                     Upload image
                   </button>
-                </div>
+                </div> */}
                 <div className="invalid-reason"></div>
               </div>
               <div className="buttons-container">

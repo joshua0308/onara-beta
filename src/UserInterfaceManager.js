@@ -985,6 +985,44 @@ class UserInterfaceManager {
 
     showTab(currentTab); // Display the current tab
 
+    Sortable.create(document.getElementById('profile-img-array-container'), {
+      animation: 200,
+      sort: true,
+      draggable: '.draggable',
+      onUpdate: (e) => {
+        const profileImageUrl = e.to.firstChild.id;
+        setBackground(profileImageUrl);
+        // updateOnlineListImage(myPlayerData.uid, profileImageUrl);
+        document
+          .getElementById(`player-${myPlayerData.uid}`)
+          .querySelector('img').src = profileImageUrl;
+
+        console.log('onUpdate', profileImageUrl);
+        const imageContainers = e.to.children;
+        const newImageArray = [];
+
+        for (let i = 0; i < imageContainers.length; i += 1) {
+          if (imageContainers[i].id) {
+            newImageArray.push(imageContainers[i].id);
+          }
+        }
+
+        // eslint-disable-next-line no-console
+        console.log('debug: newImageArray', newImageArray);
+        myPlayerDocRef.set(
+          {
+            profilePicURL: newImageArray
+          },
+          { merge: true }
+        );
+
+        // emit the change
+        this.socket.emit('update-player', {
+          profilePicURL: newImageArray
+        });
+      }
+    });
+
     if (currentTab > 0) {
       alert('Please fill out your interests and skills before joining the bar');
     }
@@ -1418,6 +1456,8 @@ class UserInterfaceManager {
         <img
           style={{
             width: '30px',
+            height: '30px',
+            objectFit: 'cover',
             borderRadius: '15px',
             marginRight: '10px'
           }}
@@ -1472,6 +1512,8 @@ class UserInterfaceManager {
         <img
           style={{
             width: '30px',
+            height: '30px',
+            objectFit: 'cover',
             borderRadius: '15px',
             marginRight: '10px'
           }}
