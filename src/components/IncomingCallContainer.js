@@ -66,7 +66,10 @@ function IncomingCallContainer({ props }) {
         <div id="player-bio" style={{ fontSize: '15px', color: '#717171' }}>
           <div style={listStyle}>
             <span style={{ marginRight: '5px' }}>💼</span>
-            <span>Currently {playerData.currently}</span>
+            <span>
+              Currently {playerData.position || 'Works'} @{' '}
+              {playerData.currently}
+            </span>
           </div>
           <div style={listStyle}>
             <span style={{ marginRight: '5px' }}>📄</span>

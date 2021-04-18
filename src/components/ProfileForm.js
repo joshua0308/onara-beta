@@ -61,34 +61,6 @@ function ProfileForm({ props }) {
     });
   };
 
-  // const setProfilePicButtonOnClick = (e) => {
-  //   const imageUrl = e.target.parentElement.id;
-
-  //   const profilePicArray =
-  //     typeof myPlayerData.profilePicURL === 'string'
-  //       ? [myPlayerData.profilePicURL]
-  //       : myPlayerData.profilePicURL;
-
-  //   const newArray = profilePicArray.filter((url) => url !== imageUrl);
-  //   newArray.unshift(imageUrl);
-
-  //   myPlayerDocRef.set(
-  //     {
-  //       profilePicURL: newArray
-  //     },
-  //     { merge: true }
-  //   );
-
-  //   updateOnlineListImage(myPlayerData.uid, imageUrl);
-  //   setBackground(imageUrl);
-  //   updateMyPlayerInfo({
-  //     profilePicURL: newArray
-  //   });
-  //   socket.emit('update-player', {
-  //     profilePicURL: newArray
-  //   });
-  // };
-
   const ImageElement = ({ props }) => {
     const { url, key } = props;
     return (
@@ -118,8 +90,6 @@ function ProfileForm({ props }) {
   const addImageHandler = (e) => {
     const imageContainer = e.target.closest('.profile-img-container');
     const inputElement = imageContainer.querySelector('.upload-input');
-    console.log('imageContainer', imageContainer);
-    console.log('inputElement', inputElement);
     inputElement.click();
   };
 
@@ -188,7 +158,7 @@ function ProfileForm({ props }) {
             width: '24px',
             height: '24px',
             borderRadius: '12px',
-            backgroundColor: '#456add',
+            backgroundColor: url ? '#e0737d' : '#456add',
             display: 'flex',
             justifyContent: 'center',
             alignItems: 'center',
@@ -207,17 +177,6 @@ function ProfileForm({ props }) {
             hidden
             onChange={inputOnChange}
           ></input>
-
-          {/* <div style="margin: 24px 0;">
-            <button
-              id="upload-button"
-              onClick={() => {
-                document.getElementById('upload-input').click();
-              }}
-            >
-              Upload image
-            </button>
-          </div> */}
         </div>
       </div>
     );
@@ -371,7 +330,7 @@ function ProfileForm({ props }) {
                     className="fas fa-times-circle"
                     style={{
                       display: 'none',
-                      color: 'red',
+                      color: '#e0737d',
                       fontSize: '20px',
                       marginLeft: '10px'
                     }}
@@ -406,7 +365,7 @@ function ProfileForm({ props }) {
                   className="input-container"
                   style="display: flex; align-items: center"
                 >
-                  <i className="fas fa-user"></i>
+                  <i className="fas mr-10 fa-user"></i>
                   <input
                     id="firstname-input"
                     style="margin-right: 10px"
@@ -424,7 +383,7 @@ function ProfileForm({ props }) {
                   />
                 </div>
                 <div className="input-container">
-                  <i className="fas fa-globe-asia"></i>
+                  <i className="fas mr-10 fa-globe-asia"></i>
                   <input
                     id="city-input"
                     placeholder="City, State"
@@ -434,7 +393,7 @@ function ProfileForm({ props }) {
                   />
                 </div>
                 <div className="input-container">
-                  <i className="fas fa-flag"></i>
+                  <i className="fas mr-10 fa-flag"></i>
                   <input
                     id="country-input"
                     placeholder="Country"
@@ -444,7 +403,7 @@ function ProfileForm({ props }) {
                   />
                 </div>
                 <div className="input-container">
-                  <i className="fas fa-language"></i>
+                  <i className="fas mr-10 fa-language"></i>
                   <input
                     id="language-input"
                     placeholder="Langauge (a comma separated list of languages you can speak)"
@@ -481,7 +440,7 @@ function ProfileForm({ props }) {
                   </p>
                 </div>
                 <div className="input-container">
-                  <i className="fas fa-birthday-cake"></i>
+                  <i className="fas mr-10 fa-birthday-cake"></i>
                   <input
                     id="birthday-input"
                     placeholder="Date of birth"
@@ -514,7 +473,7 @@ function ProfileForm({ props }) {
                   <p>We can notify you when your friends send you a message</p>
                 </div>
                 <div className="input-container">
-                  <i className="fas fa-envelope"></i>
+                  <i className="fas mr-10 fa-envelope"></i>
                   <input
                     id="email-input"
                     placeholder="Email"
@@ -524,7 +483,7 @@ function ProfileForm({ props }) {
                   />
                 </div>
                 <div className="input-container">
-                  <i className="fas fa-phone"></i>
+                  <i className="fas mr-10 fa-phone"></i>
                   <input
                     id="phone-input"
                     placeholder="Phone number (optional)"
@@ -557,17 +516,7 @@ function ProfileForm({ props }) {
                   </p>
                 </div>
                 <div className="input-container">
-                  <i className="fas fa-user"></i>
-                  <input
-                    id="position-input"
-                    placeholder="Position"
-                    value={myPlayerData.position}
-                    onInput={(e) => removeInvalidClassAndReason(e.target)}
-                    required
-                  />
-                </div>
-                <div className="input-container">
-                  <i className="fas fa-building"></i>
+                  <i className="fas mr-10 fa-building"></i>
                   <input
                     id="currently-input"
                     placeholder="Current work"
@@ -577,7 +526,17 @@ function ProfileForm({ props }) {
                   />
                 </div>
                 <div className="input-container">
-                  <i className="fas fa-paperclip"></i>
+                  <i className="fas mr-10 fa-user"></i>
+                  <input
+                    id="position-input"
+                    placeholder="Position"
+                    value={myPlayerData.position}
+                    onInput={(e) => removeInvalidClassAndReason(e.target)}
+                    required
+                  />
+                </div>
+                <div className="input-container">
+                  <i className="fas mr-10 fa-paperclip"></i>
                   <input
                     id="previously-input"
                     placeholder="Previous work"
@@ -587,7 +546,7 @@ function ProfileForm({ props }) {
                   />
                 </div>
                 <div className="input-container">
-                  <i className="fas fa-graduation-cap"></i>
+                  <i className="fas mr-10 fa-graduation-cap"></i>
                   <input
                     id="education-input"
                     placeholder="Education"
@@ -676,7 +635,7 @@ function ProfileForm({ props }) {
                 <div className="add-your-own-container">
                   <input
                     id="custom-interest-input"
-                    placeholder="Add your own"
+                    placeholder="Add your own interest"
                     name="phone"
                   ></input>
                   <button
@@ -751,7 +710,7 @@ function ProfileForm({ props }) {
                 <div className="add-your-own-container">
                   <input
                     id="custom-skill-input"
-                    placeholder="Add your own"
+                    placeholder="Add your own skill"
                   ></input>
                   <button
                     onClick={(e) => {
