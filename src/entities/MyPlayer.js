@@ -22,10 +22,16 @@ class MyPlayer extends Phaser.GameObjects.Container {
 
     this.setInteractive().on(
       Phaser.Input.Events.GAMEOBJECT_POINTER_DOWN,
-      () => {
-        this.scene.userInterfaceManager.createPlayerProfileInterface(
-          playerInfo,
-          true
+      (_, __, ___, e) => {
+        e.stopPropagation();
+
+        setTimeout(
+          () =>
+            this.scene.userInterfaceManager.createPlayerProfileInterface(
+              playerInfo,
+              true
+            ),
+          50
         );
       }
     );

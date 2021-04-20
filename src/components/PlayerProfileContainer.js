@@ -4,6 +4,7 @@ function PlayerProfileContainer({ props }) {
   const { playerData, isCurrentPlayer, player } = props;
 
   const handleAudioCallButton = (e) => {
+    e.stopPropagation();
     console.log('request-call', e);
     const buyADrinkButton = document.getElementById('audio-call-button');
     const closeButton = document.getElementById('close-profile-button');
@@ -13,6 +14,7 @@ function PlayerProfileContainer({ props }) {
     buyADrinkButton.innerText = 'Calling...';
     buyADrinkButton.style.backgroundColor = '#c9a747';
 
+    closeButton.style.display = 'inline-block';
     closeText.innerText = 'Cancel';
     closeButton.style.backgroundColor = '#cb3838';
     closeIcon.classList.remove('fa-times');
@@ -31,6 +33,7 @@ function PlayerProfileContainer({ props }) {
   };
 
   const handleVideoCallButton = (e) => {
+    e.stopPropagation();
     const buyADrinkButton = document.getElementById('video-call-button');
     const closeButton = document.getElementById('close-profile-button');
     const closeIcon = document.getElementById('close-button-icon');
@@ -56,7 +59,8 @@ function PlayerProfileContainer({ props }) {
     buyADrinkButton.removeEventListener('click', handleVideoCallButton);
   };
 
-  const handleCloseButton = () => {
+  const handleCloseButton = (e) => {
+    e.stopPropagation();
     const closeButton = document.getElementById('close-profile-button');
     if (closeButton.innerText === 'Cancel') {
       this.socket.emit('cancel-call', { receiverId: player.socketId });
@@ -110,6 +114,20 @@ function PlayerProfileContainer({ props }) {
 
   return (
     <div id="player-profile-container">
+      <i
+        className="fas fa-times-circle"
+        style={{
+          fontSize: '20px',
+          color: 'rgb(69, 106, 221)',
+          margin: '10px',
+          cursor: 'pointer',
+          position: 'absolute',
+          top: '0px',
+          right: '0px'
+        }}
+        onClick={this.removePlayerProfileInterface}
+      ></i>
+
       {createImages(playerData.profilePicURL)}
       {playerData.profilePicURL.length > 1 && (
         <i
@@ -259,24 +277,25 @@ function PlayerProfileContainer({ props }) {
               <i className="fas fa-phone"></i>
               <div>Audio</div>
             </button>
+            <button
+              id="close-profile-button"
+              onClick={handleCloseButton}
+              style={{
+                backgroundColor: 'rgb(181 181 181)',
+                color: 'white',
+                borderStyle: 'none',
+                borderRadius: '15px',
+                padding: '3px 12px',
+                cursor: 'pointer',
+                boxShadow: '#bcbdbd 3px 3px 3px',
+                display: 'none'
+              }}
+            >
+              <i id="close-button-icon" className="fas fa-times"></i>
+              <div id="close-button-text">Close</div>
+            </button>
           </>
         )}
-        <button
-          id="close-profile-button"
-          onClick={handleCloseButton}
-          style={{
-            backgroundColor: 'rgb(181 181 181)',
-            color: 'white',
-            borderStyle: 'none',
-            borderRadius: '15px',
-            padding: '3px 12px',
-            cursor: 'pointer',
-            boxShadow: '#bcbdbd 3px 3px 3px'
-          }}
-        >
-          <i id="close-button-icon" className="fas fa-times"></i>
-          <div id="close-button-text">Close</div>
-        </button>
       </div>
     </div>
   );

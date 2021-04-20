@@ -28,10 +28,16 @@ class OtherPlayer extends Phaser.GameObjects.Container {
 
     this.setInteractive().on(
       Phaser.Input.Events.GAMEOBJECT_POINTER_DOWN,
-      () => {
-        this.userInterfaceManager.createPlayerProfileInterface(
-          playerInfo,
-          false
+      (_, __, ___, e) => {
+        e.stopPropagation();
+
+        setTimeout(
+          () =>
+            this.userInterfaceManager.createPlayerProfileInterface(
+              playerInfo,
+              false
+            ),
+          50
         );
       }
     );

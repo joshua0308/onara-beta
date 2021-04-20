@@ -774,22 +774,6 @@ function ProfileForm({ props }) {
                 >
                   {createImgElements(profilePicArray)}
                 </div>
-                {/* <div style="margin: 24px 0;">
-                  <button
-                    id="upload-button"
-                    onClick={() => {
-                      document.getElementById('upload-input').click();
-                    }}
-                  >
-                    <input
-                      id="upload-input"
-                      type="file"
-                      hidden
-                      onChange={inputOnChange}
-                    ></input>
-                    Upload image
-                  </button>
-                </div> */}
                 <div className="invalid-reason"></div>
               </div>
               <div className="buttons-container">

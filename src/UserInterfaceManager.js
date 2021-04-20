@@ -797,8 +797,6 @@ class UserInterfaceManager {
         );
         this.scene.myPlayerSprite.updatePlayerName(formInputValues.displayName);
         this.scene.myPlayerSprite.updateCharacterType(formInputValues.gender);
-        // eslint-disable-next-line no-console
-        console.log('debug: this.scene.myPlayer', this.scene.myPlayer);
         this.scene.socket.emit('update-player', this.scene.myPlayer);
       });
 
@@ -929,10 +927,6 @@ class UserInterfaceManager {
             <i
               className="fas fa-times do-not-apply"
               style={{
-                width: null,
-                height: null,
-                marginTop: null,
-                marginRight: null,
                 color: 'rgb(71, 168, 165)'
               }}
             ></i>
