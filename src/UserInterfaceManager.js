@@ -1040,6 +1040,97 @@ class UserInterfaceManager {
 
   createInCallInterface() {
     document.body.appendChild(<this.InCallModalContainer />);
+
+    const wrapper = document.getElementById('videos-wrapper');
+    const rect = wrapper.getBoundingClientRect();
+
+    const centerX = window.innerWidth / 2 - (rect.right - rect.x) / 2;
+    const centerY = window.innerHeight / 2 - 200;
+    wrapper.style.transform = `translate(${centerX}px, ${centerY}px)`;
+
+    const position = { x: centerX, y: centerY };
+
+    interact('#videos-wrapper').draggable({
+      listeners: {
+        start: function (event) {
+          console.log(event.target);
+        },
+        move(event) {
+          position.x += event.dx;
+          position.y += event.dy;
+
+          if (position.x < 0) position.x = 0;
+          if (position.y < 0) position.y = 0;
+
+          event.target.style.transform = `translate(${position.x}px, ${position.y}px)`;
+        }
+      }
+    });
+
+    interact('#videos-wrapper').resizable({
+      edges: { top: false, left: false, bottom: true, right: true },
+      listeners: {
+        move: function (event) {
+          let width = event.rect.width;
+          let height = event.rect.height;
+          const containers = document.querySelectorAll('.video-element');
+          const count = containers.length;
+
+          // if one row, if height <= video length * 2
+
+          // can't get samller than the length of containers
+
+          Object.assign(event.target.style, {
+            width: `${width}px`,
+            height: `${height}px`
+          });
+
+          let minLength;
+
+          if (width > height) {
+            minLength = Math.min((width - count * 20) / count, height - 20);
+            // if height is greater than minLength * 2,
+            // we can make multiple rows
+            if (height > minLength * 2 + 20) {
+              const newCount = Math.ceil(count / 2);
+
+              const newLength = Math.min(
+                (width - newCount * 20) / newCount,
+                height - 20
+              );
+              if (newLength * 2 < height) {
+                minLength = newLength - 20;
+              }
+            }
+          } else if (height > width) {
+            minLength = Math.min((height - count * 20) / count, width - 20);
+
+            if (width > minLength * 2 + 20) {
+              const newCount = Math.ceil(count / 2);
+              const newLength = Math.min(
+                (height - newCount * 20) / newCount,
+                width - 20
+              );
+              if (newLength * 2 < width) {
+                minLength = newLength - 20;
+              }
+            }
+          }
+
+          const maxLength = 3000000;
+
+          const videoLength = Math.min(minLength, maxLength);
+
+          for (const container of containers) {
+            Object.assign(container.style, {
+              width: `${videoLength - 40}px`,
+              height: `${videoLength - 40}px`
+            });
+          }
+        }
+      }
+    });
+
     this.hideOnlineList();
   }
 
