@@ -129,6 +129,7 @@ class UserInterfaceManager {
       this
     );
     this.toggleOnlineList = this.toggleOnlineList.bind(this);
+    this.handleResize = this.handleResize.bind(this);
   }
 
   addSocket(socket) {
@@ -1038,17 +1039,29 @@ class UserInterfaceManager {
     this.scene.scene.resume();
   }
 
+  maximizeVideosWrapper() {
+    const { x, y } = this.getVideosWrapperCenter();
+    const wrapper = document.getElementById('videos-wrapper');
+
+    wrapper.style.transform = `translate(${x}px, ${y}px)`;
+  }
+
+  getVideosWrapperCenter() {
+    const wrapper = document.getElementById('videos-wrapper');
+    const rect = wrapper.getBoundingClientRect();
+    const videoDefaultLength = 200;
+
+    const x = window.innerWidth / 2 - (rect.right - rect.x) / 2;
+    const y = window.innerHeight / 2 - videoDefaultLength;
+
+    return { x, y };
+  }
+
   createInCallInterface() {
     document.body.appendChild(<this.InCallModalContainer />);
 
-    const wrapper = document.getElementById('videos-wrapper');
-    const rect = wrapper.getBoundingClientRect();
-
-    const centerX = window.innerWidth / 2 - (rect.right - rect.x) / 2;
-    const centerY = window.innerHeight / 2 - 200;
-    wrapper.style.transform = `translate(${centerX}px, ${centerY}px)`;
-
-    const position = { x: centerX, y: centerY };
+    this.maximizeVideosWrapper();
+    const position = this.getVideosWrapperCenter();
 
     interact('#videos-wrapper').draggable({
       listeners: {
@@ -1068,70 +1081,55 @@ class UserInterfaceManager {
     });
 
     interact('#videos-wrapper').resizable({
-      edges: { top: false, left: false, bottom: true, right: true },
+      edges: { top: false, left: true, bottom: true, right: true },
       listeners: {
-        move: function (event) {
-          let width = event.rect.width;
-          let height = event.rect.height;
-          const containers = document.querySelectorAll('.video-element');
-          const count = containers.length;
-
-          // if one row, if height <= video length * 2
-
-          // can't get samller than the length of containers
-
-          Object.assign(event.target.style, {
-            width: `${width}px`,
-            height: `${height}px`
-          });
-
-          let minLength;
-
-          if (width > height) {
-            minLength = Math.min((width - count * 20) / count, height - 20);
-            // if height is greater than minLength * 2,
-            // we can make multiple rows
-            if (height > minLength * 2 + 20) {
-              const newCount = Math.ceil(count / 2);
-
-              const newLength = Math.min(
-                (width - newCount * 20) / newCount,
-                height - 20
-              );
-              if (newLength * 2 < height) {
-                minLength = newLength - 20;
-              }
-            }
-          } else if (height > width) {
-            minLength = Math.min((height - count * 20) / count, width - 20);
-
-            if (width > minLength * 2 + 20) {
-              const newCount = Math.ceil(count / 2);
-              const newLength = Math.min(
-                (height - newCount * 20) / newCount,
-                width - 20
-              );
-              if (newLength * 2 < width) {
-                minLength = newLength - 20;
-              }
-            }
-          }
-
-          const maxLength = 3000000;
-
-          const videoLength = Math.min(minLength, maxLength);
-
-          for (const container of containers) {
-            Object.assign(container.style, {
-              width: `${videoLength - 40}px`,
-              height: `${videoLength - 40}px`
-            });
-          }
-        }
+        move: this.handleResize
       }
     });
 
     this.hideOnlineList();
+  }
+
+  handleResize(event) {
+    let width = event.rect.width;
+    let height = event.rect.height;
+
+    // if one row, if height <= video length * 2
+
+    // can't get samller than the length of containers
+
+    Object.assign(event.target.style, {
+      width: `${width}px`,
+      height: `${height}px`
+    });
+
+    this.resizeVideos(width, height);
+  }
+
+  resizeVideos(wrapperWidth, wrapperHeight) {
+    const count = document.querySelectorAll('video').length;
+    const marginY = 100;
+    const marginX = 20;
+    const width = wrapperWidth;
+    const height = wrapperHeight;
+    const containers = document.querySelectorAll('.video-element');
+
+    let videoLength;
+    const widthDividedByCount = (width - marginX * count) / count;
+    const heightDividedByCount = (height - marginY * count) / count;
+
+    if (widthDividedByCount >= heightDividedByCount) {
+      videoLength = Math.min(widthDividedByCount, height - marginY);
+    } else if (widthDividedByCount < heightDividedByCount) {
+      videoLength = Math.min(heightDividedByCount, width);
+    }
+
+    for (const container of containers) {
+      Object.assign(container.style, {
+        width: `${videoLength}px`,
+        height: `${videoLength}px`
+      });
+    }
   }
 
   removeInCallInterface() {
@@ -1658,13 +1656,13 @@ class UserInterfaceManager {
       videosWrapper.style.marginLeft = '30px';
 
       videoElements.forEach((element) => {
-        element.style.height = '250px';
-        element.style.width = '250px';
+        // element.style.height = '250px';
+        // element.style.width = '250px';
       });
 
       imageElements.forEach((element) => {
-        element.style.height = '250px';
-        element.style.width = '250px';
+        // element.style.height = '250px';
+        // element.style.width = '250px';
       });
 
       let screenshareElement;
@@ -1735,13 +1733,13 @@ class UserInterfaceManager {
       videosWrapper.style.marginLeft = '0';
 
       videoElements.forEach((element) => {
-        element.style.height = '500px';
-        element.style.width = '500px';
+        // element.style.height = '500px';
+        // element.style.width = '500px';
       });
 
       imageElements.forEach((element) => {
-        element.style.height = '500px';
-        element.style.width = '500px';
+        // element.style.height = '500px';
+        // element.style.width = '500px';
       });
 
       const screenshareContainer = document.getElementById(
