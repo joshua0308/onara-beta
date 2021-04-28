@@ -1,6 +1,11 @@
 import React from 'jsx-dom';
 
-function InCallButtons() {
+function InCallButtons({ props }) {
+  const {
+    maximizeVideosWrapperWithPosition,
+    minimizeVideosWrapperWithPosition
+  } = props;
+
   const toggleVideo = () => {
     const stream = this.scene.nativePeerManager.localStream;
     const videoIcon = document.getElementById('video-icon');
@@ -116,12 +121,15 @@ function InCallButtons() {
       screenshareIcon.classList.remove('fa-desktop');
       screenshareIcon.classList.add('fa-camera');
 
-      this.scene.nativePeerManager.requestScreenshare();
+      this.scene.nativePeerManager.requestScreenshare(
+        minimizeVideosWrapperWithPosition
+      );
     } else {
       screenshareIcon.classList.remove('fa-camera');
       screenshareIcon.classList.add('fa-desktop');
 
       this.scene.nativePeerManager.switchToCameraTrack();
+      maximizeVideosWrapperWithPosition();
     }
   };
 
@@ -148,9 +156,6 @@ function InCallButtons() {
       <button id="toggle-audio-button" onClick={() => toggleAudio()}>
         <i id="audio-icon" className="fas fa-microphone fa-xs"></i>
       </button>
-      {/* <button id="toggle-message-button" onClick={() => toggleMessage()}>
-        <i className="fas fa-comments"></i>
-      </button> */}
       <button id="toggle-background-button" onClick={() => toggleBackground()}>
         <i id="background-icon" className="fas fa-eye fa-xs"></i>
       </button>
@@ -159,6 +164,22 @@ function InCallButtons() {
         onClick={() => toggleScreenshare()}
       >
         <i id="screenshare-icon" className="fas fa-desktop fa-xs"></i>
+      </button>
+      <button
+        onClick={() => {
+          console.log('expand');
+          maximizeVideosWrapperWithPosition();
+        }}
+      >
+        <i className="fas fa-expand-alt"></i>
+      </button>
+      <button
+        onClick={() => {
+          console.log('expand');
+          minimizeVideosWrapperWithPosition();
+        }}
+      >
+        <i className="fas fa-compress-alt"></i>
       </button>
       <button id="end-call-button-button" onClick={() => endCall()}>
         <i id="end-call-icon" className="fas fa-phone-slash fa-xs"></i>

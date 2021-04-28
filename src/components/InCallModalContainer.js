@@ -1,7 +1,11 @@
 import React from 'jsx-dom';
 import IncallButtons from './InCallButtons';
 
-function InCallContainer() {
+function InCallModalContainer({ props }) {
+  const {
+    maximizeVideosWrapperWithPosition,
+    minimizeVideosWrapperWithPosition
+  } = props;
   const IncallButtonsBinded = IncallButtons.bind(this);
 
   const keyDownHandler = (e) => {
@@ -17,7 +21,12 @@ function InCallContainer() {
   return (
     <div id="in-call-modal-container" className="background-overlay visible">
       <div id="videos-wrapper" style={{ zIndex: 40 }}></div>
-      <IncallButtonsBinded />
+      <IncallButtonsBinded
+        props={{
+          maximizeVideosWrapperWithPosition,
+          minimizeVideosWrapperWithPosition
+        }}
+      />
       <div
         id="chat-container"
         style={{
@@ -98,4 +107,4 @@ function InCallContainer() {
   );
 }
 
-export default InCallContainer;
+export default InCallModalContainer;

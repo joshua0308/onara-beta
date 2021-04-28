@@ -112,6 +112,7 @@ class UserInterfaceManager {
     this.firebaseStorage = firebaseStorage;
     this.logger = new Logger('UserInterfaceManager');
     this.socket = null;
+    this.videosWrapperPosition = { x: 0, y: 0 };
 
     this.RoomOptionsContainer = RoomOptionsContainer.bind(this);
     this.Room = Room.bind(this);
@@ -130,6 +131,8 @@ class UserInterfaceManager {
     );
     this.toggleOnlineList = this.toggleOnlineList.bind(this);
     this.handleResize = this.handleResize.bind(this);
+    this.handleDrag = this.handleDrag.bind(this);
+    this.maximizeVideosWrapper = this.maximizeVideosWrapper.bind(this);
   }
 
   addSocket(socket) {
@@ -405,7 +408,7 @@ class UserInterfaceManager {
       const languageInput = document.getElementById('language-input');
       const emailInput = document.getElementById('email-input');
       const phoneInput = document.getElementById('phone-input');
-      const positionInput = document.getElementById('position-input');
+      const videosWrapperPnput = document.getElementById('videosWrapperPinput');
       const currentlyInput = document.getElementById('currently-input');
       const previouslyInput = document.getElementById('previously-input');
       const educationInput = document.getElementById('education-input');
@@ -1040,48 +1043,82 @@ class UserInterfaceManager {
   }
 
   maximizeVideosWrapper() {
-    const { x, y } = this.getVideosWrapperCenter();
     const wrapper = document.getElementById('videos-wrapper');
+    wrapper.style.width = '80vw';
+    wrapper.style.height = '60vh';
+    const { x, y } = this.getVideosWrapperCenter();
+    Object.assign(this.videosWrapperPosition, { x, y });
 
     wrapper.style.transform = `translate(${x}px, ${y}px)`;
+
+    const { width, height } = this.getElementDimension(wrapper);
+    this.resizeVideos(width, height);
+  }
+
+  minimizeVideosWrapper() {
+    const wrapper = document.getElementById('videos-wrapper');
+    wrapper.style.width = '15vw';
+    wrapper.style.height = '60vh';
+
+    const { y } = this.getVideosWrapperCenter();
+    Object.assign(this.videosWrapperPosition, { y });
+
+    wrapper.style.transform = `translate(30px, ${y}px)`;
+
+    const { width, height } = this.getElementDimension(wrapper);
+    this.resizeVideos(width, height);
+  }
+
+  getElementDimension(element) {
+    const rect = element.getBoundingClientRect();
+    return {
+      width: rect.right - rect.x,
+      height: rect.bottom - rect.y
+    };
   }
 
   getVideosWrapperCenter() {
     const wrapper = document.getElementById('videos-wrapper');
-    const rect = wrapper.getBoundingClientRect();
-    const videoDefaultLength = 200;
 
-    const x = window.innerWidth / 2 - (rect.right - rect.x) / 2;
-    const y = window.innerHeight / 2 - videoDefaultLength;
+    const { width, height } = this.getElementDimension(wrapper);
+
+    const x = window.innerWidth / 2 - width / 2;
+    const y = window.innerHeight / 2 - height / 2;
 
     return { x, y };
   }
 
   createInCallInterface() {
-    document.body.appendChild(<this.InCallModalContainer />);
+    this.videosWrapperPosition = { x: 0, y: 0 };
+    const maximizeVideosWrapperWithPosition = this.maximizeVideosWrapper.bind(
+      this
+    );
+    const minimizeVideosWrapperWithPosition = this.minimizeVideosWrapper.bind(
+      this
+    );
 
-    this.maximizeVideosWrapper();
-    const position = this.getVideosWrapperCenter();
+    document.body.appendChild(
+      <this.InCallModalContainer
+        props={{
+          maximizeVideosWrapperWithPosition,
+          minimizeVideosWrapperWithPosition
+        }}
+      />
+    );
+
+    maximizeVideosWrapperWithPosition();
 
     interact('#videos-wrapper').draggable({
       listeners: {
         start: function (event) {
           console.log(event.target);
         },
-        move(event) {
-          position.x += event.dx;
-          position.y += event.dy;
-
-          if (position.x < 0) position.x = 0;
-          if (position.y < 0) position.y = 0;
-
-          event.target.style.transform = `translate(${position.x}px, ${position.y}px)`;
-        }
+        move: this.handleDrag
       }
     });
 
     interact('#videos-wrapper').resizable({
-      edges: { top: false, left: true, bottom: true, right: true },
+      edges: { top: false, left: false, bottom: true, right: true },
       listeners: {
         move: this.handleResize
       }
@@ -1090,13 +1127,19 @@ class UserInterfaceManager {
     this.hideOnlineList();
   }
 
+  handleDrag(event) {
+    this.videosWrapperPosition.x += event.dx;
+    this.videosWrapperPosition.y += event.dy;
+
+    if (this.videosWrapperPosition.x < 0) this.videosWrapperPosition.x = 0;
+    if (this.videosWrapperPosition.y < 0) this.videosWrapperPosition.y = 0;
+
+    event.target.style.transform = `translate(${this.videosWrapperPosition.x}px, ${this.videosWrapperPosition.y}px)`;
+  }
+
   handleResize(event) {
     let width = event.rect.width;
     let height = event.rect.height;
-
-    // if one row, if height <= video length * 2
-
-    // can't get samller than the length of containers
 
     Object.assign(event.target.style, {
       width: `${width}px`,
@@ -1642,28 +1685,10 @@ class UserInterfaceManager {
   }
 
   setDisplayMode(mode, stream, isMyScreenshare = false) {
-    const videosWrapper = document.getElementById('videos-wrapper');
-    const videoElements = document.querySelectorAll('video');
     const modalContainer = document.getElementById('in-call-modal-container');
-    const imageElements = document
-      .getElementById('in-call-modal-container')
-      .querySelectorAll('img');
 
     if (mode === 'screenshare') {
-      videosWrapper.style.width = '300px';
-      videosWrapper.style.flexDirection = 'column';
-      videosWrapper.style.justifyContent = 'space-evenly';
-      videosWrapper.style.marginLeft = '30px';
-
-      videoElements.forEach((element) => {
-        // element.style.height = '250px';
-        // element.style.width = '250px';
-      });
-
-      imageElements.forEach((element) => {
-        // element.style.height = '250px';
-        // element.style.width = '250px';
-      });
+      this.minimizeVideosWrapper();
 
       let screenshareElement;
 
@@ -1726,22 +1751,41 @@ class UserInterfaceManager {
       );
 
       modalContainer.appendChild(<ScreenshareContainer />);
+
+      // const position = { x: 0, y: 0 };
+      // interact('#screenshare-container').draggable({
+      //   listeners: {
+      //     start: function (event) {
+      //       console.log(event.target);
+      //     },
+      //     move(event) {
+      //       position.x += event.dx;
+      //       position.y += event.dy;
+
+      //       if (position.x < 0) position.x = 0;
+      //       if (position.y < 0) position.y = 0;
+
+      //       event.target.style.transform = `translate(${position.x}px, ${position.y}px)`;
+      //     }
+      //   }
+      // });
+
+      // interact('#screenshare-container').resizable({
+      //   edges: { top: false, left: false, bottom: true, right: true },
+      //   listeners: {
+      //     move: function handleResize(event) {
+      //       let width = event.rect.width;
+      //       let height = event.rect.height;
+
+      //       Object.assign(event.target.style, {
+      //         width: `${width}px`,
+      //         height: `${height}px`
+      //       });
+      //     }
+      //   }
+      // });
     } else if (mode === 'video') {
-      videosWrapper.style.width = '100%';
-      videosWrapper.style.flexDirection = 'row';
-      videosWrapper.style.justifyContent = 'none';
-      videosWrapper.style.marginLeft = '0';
-
-      videoElements.forEach((element) => {
-        // element.style.height = '500px';
-        // element.style.width = '500px';
-      });
-
-      imageElements.forEach((element) => {
-        // element.style.height = '500px';
-        // element.style.width = '500px';
-      });
-
+      this.maximizeVideosWrapper();
       const screenshareContainer = document.getElementById(
         'screenshare-container'
       );

@@ -368,7 +368,7 @@ class NativePeerManager {
     }
   }
 
-  async requestScreenshare() {
+  async requestScreenshare(callback) {
     try {
       const stream = await navigator.mediaDevices.getDisplayMedia({
         video: true,
@@ -387,6 +387,8 @@ class NativePeerManager {
         roomHash: this.roomHash,
         mode: this.mode
       });
+
+      callback();
     } catch (e) {
       console.log(e);
       console.log('Error sharing screen');
