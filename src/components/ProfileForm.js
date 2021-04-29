@@ -317,7 +317,7 @@ function ProfileForm({ props }) {
                   />
                   <i
                     id="username-valid-icon"
-                    className="fas fa-check-circle"
+                    className="fas mr-10 fa-check-circle"
                     style={{
                       display: 'none',
                       color: 'green',
@@ -327,7 +327,7 @@ function ProfileForm({ props }) {
                   ></i>
                   <i
                     id="username-invalid-icon"
-                    className="fas fa-times-circle"
+                    className="fas mr-10 fa-times-circle"
                     style={{
                       display: 'none',
                       color: '#e0737d',
@@ -406,7 +406,7 @@ function ProfileForm({ props }) {
                   <i className="fas mr-10 fa-language"></i>
                   <input
                     id="language-input"
-                    placeholder="Langauge (a comma separated list of languages you can speak)"
+                    placeholder="Langauge (use comma to separate each language)"
                     value={myPlayerData.language}
                     onInput={(e) => removeInvalidClassAndReason(e.target)}
                     required
@@ -792,7 +792,7 @@ function ProfileForm({ props }) {
         </div>
         <div onClick={removeProfileFormInterface}>
           <i
-            className="fas fa-times-circle"
+            className="fas mr-10 fa-times-circle"
             style={{
               fontSize: '20px',
               color: 'rgb(69, 106, 221)',

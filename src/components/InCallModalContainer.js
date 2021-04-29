@@ -2,16 +2,11 @@ import React from 'jsx-dom';
 import IncallButtons from './InCallButtons';
 
 function InCallModalContainer({ props }) {
-  const {
-    maximizeVideosWrapperWithPosition,
-    minimizeVideosWrapperWithPosition
-  } = props;
+  const { maximizeVideosWrapper, minimizeVideosWrapper } = props;
   const IncallButtonsBinded = IncallButtons.bind(this);
 
   const keyDownHandler = (e) => {
     if (e.key === 'Enter' && e.target.value) {
-      console.log('key pressed', e.key, e.target.value, e);
-
       const message = e.target.value;
       this.scene.nativePeerManager.sendMessage(message);
       e.target.value = '';
@@ -20,12 +15,41 @@ function InCallModalContainer({ props }) {
 
   return (
     <div id="in-call-modal-container" className="background-overlay visible">
-      <div id="videos-wrapper" style={{ zIndex: 40 }}></div>
+      <div id="videos-wrapper" style={{ zIndex: 40 }}>
+        <div id="video-resize-btn-container" className="hide">
+          <button className="video-resize-btn" onClick={minimizeVideosWrapper}>
+            <i
+              className="fas fa-minus"
+              style={{
+                background: '#FFBD44',
+                borderRadius: '50%',
+                padding: '8px',
+                fontSize: '12px',
+                borderColor: '#989898',
+                borderStyle: 'solid',
+                borderWidth: '1px'
+              }}
+            ></i>
+          </button>
+          <button className="video-resize-btn" onClick={maximizeVideosWrapper}>
+            <i
+              className="fas fa-expand-alt"
+              style={{
+                background: '#00CA4E',
+                borderRadius: '50%',
+                padding: '6px',
+                fontSize: '15px',
+                borderColor: '#989898',
+                borderStyle: 'solid',
+                borderWidth: '1px'
+              }}
+            ></i>
+          </button>
+        </div>
+      </div>
+
       <IncallButtonsBinded
-        props={{
-          maximizeVideosWrapperWithPosition,
-          minimizeVideosWrapperWithPosition
-        }}
+        props={{ maximizeVideosWrapper, minimizeVideosWrapper }}
       />
       <div
         id="chat-container"

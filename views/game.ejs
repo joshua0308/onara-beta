@@ -12,10 +12,13 @@
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
     integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
   <link href="public/images/favicon.ico" rel="shortcut icon" type="image/x-icon">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons"
+  rel="stylesheet">
 
   <script src="https://kit.fontawesome.com/f2f061e556.js" crossorigin="anonymous"></script>
   <script src="https://raw.githack.com/SortableJS/Sortable/master/Sortable.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/interactjs/dist/interact.min.js"></script>
+  
 
   <style>
     html {
@@ -55,17 +58,26 @@
 
     #in-call-buttons-wrapper {
       position: fixed;
-      top: 50px;
-      left: 50%;
+      top: 50%;
+      transform: translate(0, -50%);
+      left: 25px;
+      width: 60px;
       padding: 0 10px;
-      margin-left: -150px;
-      width: 300px;
-      height: 60px;
-      border-radius: 30px;
       display: flex;
-      justify-content: space-evenly;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .in-call-buttons-section {
+      padding: 10px 5px;
+      border-radius: 30px;
       background: rgb(0,0,0,0.9);
       box-shadow: 3px 3px 16px #23262b, -3px -3px 16px #1c1d23;
+    }
+
+    .in-call-buttons-section:first-child {
+      margin-bottom: 50px;
     }
 
     .icon-button, #in-call-buttons-wrapper button {
@@ -76,6 +88,22 @@
       font-size: 30px;
       transition: all 0.3s ease-in-out;
       color: grey;
+    }
+    
+    .video-resize-btn {
+      background: transparent;
+      border: none;
+      border-radius: 5px;
+      font-size: 30px;
+      color: rgb(88 88 88);
+    }
+
+    .video-resize-btn:hover, .video-resize-btn:active {
+      color: rgb(100 100 100);
+    }
+
+    .video-resize-btn:focus {
+      outline: none;
     }
 
     #in-call-buttons-wrapper button:hover {
@@ -110,12 +138,8 @@
     }
 
     #in-call-modal-container {
-      /* display: flex;
-      justify-content: center;
-      align-items: center; */
-      /* display: inline; */
       transition: all 0.3s ease-in-out;
-      background-color: rgba(74, 67, 67, 0.4);
+      background-color: rgba(74, 67, 67, 0.2);
     }
 
     #bar-questionnaire-modal-wrapper {
@@ -223,6 +247,18 @@
 
     #videos-wrapper:hover, #videos-wrapper:active {
       background-color: rgba(230, 230, 230, 0.20);
+    }
+
+    #videos-wrapper:hover #video-resize-btn-container {
+      display: inline-block;
+    }
+
+    #video-resize-btn-container {
+      display: none;
+      position: absolute;
+      top: 0;
+      right: 0;
+      transition: display 0.3s ease-in-out;
     }
 
     .video-element {
@@ -425,11 +461,6 @@
       display: flex;
       justify-content: center;
       align-items: center;
-    }
-
-    #profile-form-wrapper .input-container {
-      /* display: flex;
-      align-items: center; */
     }
 
     #profile-update-status {

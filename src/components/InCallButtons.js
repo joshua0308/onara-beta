@@ -1,11 +1,7 @@
 import React from 'jsx-dom';
 
 function InCallButtons({ props }) {
-  const {
-    maximizeVideosWrapperWithPosition,
-    minimizeVideosWrapperWithPosition
-  } = props;
-
+  const { minimizeVideosWrapper, maximizeVideosWrapper } = props;
   const toggleVideo = () => {
     const stream = this.scene.nativePeerManager.localStream;
     const videoIcon = document.getElementById('video-icon');
@@ -70,6 +66,7 @@ function InCallButtons({ props }) {
   };
 
   const toggleBackground = () => {
+    const pElement = document.getElementById('toggle-background-text');
     const backgroundIcon = document.getElementById('background-icon');
     const toggleBackgroundButton = document.getElementById(
       'toggle-background-button'
@@ -87,18 +84,21 @@ function InCallButtons({ props }) {
       backgroundIcon.classList.remove('fa-eye');
       backgroundIcon.classList.add('fa-eye-slash');
       toggleBackgroundButton.style.color = 'red';
+      pElement.innerText = 'Play mode';
       this.scene.scene.pause();
     } else {
       inCallModalWrapper.style.backgroundColor = 'rgba(74, 67, 67, 0.4)';
       backgroundIcon.classList.remove('fa-eye-slash');
       backgroundIcon.classList.add('fa-eye');
       toggleBackgroundButton.style.color = 'grey';
+      pElement.innerText = 'Focus mode';
       this.scene.scene.resume();
     }
   };
 
   const toggleScreenshare = () => {
     this.logger.log('toggleScreenshare');
+    const pElement = document.getElementById('toggle-screenshare-text');
 
     if (
       !this.scene.nativePeerManager.hasVideoTrack(
@@ -121,24 +121,15 @@ function InCallButtons({ props }) {
       screenshareIcon.classList.remove('fa-desktop');
       screenshareIcon.classList.add('fa-camera');
 
-      this.scene.nativePeerManager.requestScreenshare(
-        minimizeVideosWrapperWithPosition
-      );
+      this.scene.nativePeerManager.requestScreenshare(minimizeVideosWrapper);
+      pElement.innerText = 'Stop sharing';
     } else {
       screenshareIcon.classList.remove('fa-camera');
       screenshareIcon.classList.add('fa-desktop');
 
       this.scene.nativePeerManager.switchToCameraTrack();
-      maximizeVideosWrapperWithPosition();
-    }
-  };
-
-  const toggleMessage = () => {
-    const chatContainer = document.getElementById('chat-container');
-    if (chatContainer.style.display === 'none') {
-      chatContainer.style.display = 'inline';
-    } else {
-      chatContainer.style.display = 'none';
+      // maximizeVideosWrapper();
+      pElement.innerText = 'Present now';
     }
   };
 
@@ -150,40 +141,31 @@ function InCallButtons({ props }) {
 
   return (
     <div id="in-call-buttons-wrapper" style={{ zIndex: 100 }}>
-      <button id="toggle-video-button" onClick={() => toggleVideo()}>
-        <i id="video-icon" className="fas fa-video fa-xs"></i>
-      </button>
-      <button id="toggle-audio-button" onClick={() => toggleAudio()}>
-        <i id="audio-icon" className="fas fa-microphone fa-xs"></i>
-      </button>
-      <button id="toggle-background-button" onClick={() => toggleBackground()}>
-        <i id="background-icon" className="fas fa-eye fa-xs"></i>
-      </button>
-      <button
-        id="toggle-screenshare-button"
-        onClick={() => toggleScreenshare()}
-      >
-        <i id="screenshare-icon" className="fas fa-desktop fa-xs"></i>
-      </button>
-      <button
-        onClick={() => {
-          console.log('expand');
-          maximizeVideosWrapperWithPosition();
-        }}
-      >
-        <i className="fas fa-expand-alt"></i>
-      </button>
-      <button
-        onClick={() => {
-          console.log('expand');
-          minimizeVideosWrapperWithPosition();
-        }}
-      >
-        <i className="fas fa-compress-alt"></i>
-      </button>
-      <button id="end-call-button-button" onClick={() => endCall()}>
-        <i id="end-call-icon" className="fas fa-phone-slash fa-xs"></i>
-      </button>
+      <div className="in-call-buttons-section">
+        <button id="toggle-video-button" onClick={() => toggleVideo()}>
+          <i id="video-icon" className="fas fa-video fa-xs"></i>
+        </button>
+        <button id="toggle-audio-button" onClick={() => toggleAudio()}>
+          <i id="audio-icon" className="fas fa-microphone fa-xs"></i>
+        </button>
+        <button id="end-call-button-button" onClick={() => endCall()}>
+          <i id="end-call-icon" className="fas fa-phone-slash fa-xs"></i>
+        </button>
+      </div>
+      <div className="in-call-buttons-section">
+        <button id="toggle-screenshare-button" onClick={toggleScreenshare}>
+          <i id="screenshare-icon" className="fas fa-desktop fa-xs"></i>
+          <p id="toggle-screenshare-text" style={{ fontSize: '10px' }}>
+            Present now
+          </p>
+        </button>
+        <button id="toggle-background-button" onClick={toggleBackground}>
+          <i id="background-icon" className="fas fa-eye fa-xs"></i>
+          <p id="toggle-background-text" style={{ fontSize: '10px' }}>
+            Focus mode
+          </p>
+        </button>
+      </div>
     </div>
   );
 }

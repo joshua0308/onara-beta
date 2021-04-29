@@ -344,6 +344,12 @@ class NativePeerManager {
     // If stop screenshare button is clicked, it fires the end event
     videoTrack.onended = () => {
       console.log('videoTrack onended');
+      const pElement = document.getElementById('toggle-screenshare-text');
+      const screenshareIcon = document.getElementById('screenshare-icon');
+      screenshareIcon.classList.remove('fa-camera');
+      screenshareIcon.classList.add('fa-desktop');
+      pElement.innerText = 'Present now';
+
       this.switchToCameraTrack();
     };
 

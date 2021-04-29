@@ -65,7 +65,7 @@ firebaseAuth.onAuthStateChanged((playerAuth) => {
           const newPlayerData = {
             displayName: playerAuth.displayName,
             email: playerAuth.email,
-            profilePicURL: playerAuth.photoURL || '',
+            profilePicURL: [playerAuth.photoURL],
             uid: playerAuth.uid,
             createdAt: now,
             updatedAt: now

@@ -133,6 +133,7 @@ class UserInterfaceManager {
     this.handleResize = this.handleResize.bind(this);
     this.handleDrag = this.handleDrag.bind(this);
     this.maximizeVideosWrapper = this.maximizeVideosWrapper.bind(this);
+    this.minimizeVideosWrapper = this.minimizeVideosWrapper.bind(this);
   }
 
   addSocket(socket) {
@@ -630,7 +631,7 @@ class UserInterfaceManager {
     }
 
     function populateInterestButtons(interestedIn) {
-      const interests = interestedIn.split(',');
+      const interests = interestedIn ? interestedIn.split(',') : [];
       const added = [];
       for (const room of rooms) {
         const levelOne = room.levelOne.toLowerCase();
@@ -676,7 +677,7 @@ class UserInterfaceManager {
     }
 
     function populateSkillButtons(goodAt) {
-      const skills = goodAt.split(',');
+      const skills = goodAt ? goodAt.split(',') : [];
       const added = [];
 
       for (const room of rooms) {
@@ -1057,13 +1058,13 @@ class UserInterfaceManager {
 
   minimizeVideosWrapper() {
     const wrapper = document.getElementById('videos-wrapper');
-    wrapper.style.width = '15vw';
-    wrapper.style.height = '60vh';
+    wrapper.style.width = '60vw';
+    wrapper.style.height = '150px';
 
-    const { y } = this.getVideosWrapperCenter();
-    Object.assign(this.videosWrapperPosition, { y });
+    const { x } = this.getVideosWrapperCenter();
+    Object.assign(this.videosWrapperPosition, { x });
 
-    wrapper.style.transform = `translate(30px, ${y}px)`;
+    wrapper.style.transform = `translate(${x}px, 10px)`;
 
     const { width, height } = this.getElementDimension(wrapper);
     this.resizeVideos(width, height);
@@ -1090,23 +1091,17 @@ class UserInterfaceManager {
 
   createInCallInterface() {
     this.videosWrapperPosition = { x: 0, y: 0 };
-    const maximizeVideosWrapperWithPosition = this.maximizeVideosWrapper.bind(
-      this
-    );
-    const minimizeVideosWrapperWithPosition = this.minimizeVideosWrapper.bind(
-      this
-    );
 
     document.body.appendChild(
       <this.InCallModalContainer
         props={{
-          maximizeVideosWrapperWithPosition,
-          minimizeVideosWrapperWithPosition
+          maximizeVideosWrapper: this.maximizeVideosWrapper,
+          minimizeVideosWrapper: this.minimizeVideosWrapper
         }}
       />
     );
 
-    maximizeVideosWrapperWithPosition();
+    this.maximizeVideosWrapper();
 
     interact('#videos-wrapper').draggable({
       listeners: {
@@ -1708,6 +1703,7 @@ class UserInterfaceManager {
           <div
             style={{
               width: '42vw',
+              textAlign: 'center',
               backgroundColor: '#8585858f',
               height: '40vh',
               display: 'flex',
@@ -1737,6 +1733,7 @@ class UserInterfaceManager {
           id="screenshare-container"
           style={{
             position: 'absolute',
+            textAlign: 'center',
             zIndex: 1,
             top: '50%',
             left: '50%',
@@ -1785,7 +1782,6 @@ class UserInterfaceManager {
       //   }
       // });
     } else if (mode === 'video') {
-      this.maximizeVideosWrapper();
       const screenshareContainer = document.getElementById(
         'screenshare-container'
       );
@@ -1793,6 +1789,7 @@ class UserInterfaceManager {
       if (screenshareContainer) {
         screenshareContainer.remove();
       }
+      this.maximizeVideosWrapper();
     }
   }
 }

@@ -97,12 +97,12 @@ function ProfileForm({ props }) {
               />
               <i
                 id="username-valid-icon"
-                className="fas fa-check-circle"
+                className="fas mr-10 fa-check-circle"
                 style={{ display: 'none', color: 'green', fontSize: '20px' }}
               ></i>
               <i
                 id="username-invalid-icon"
-                className="fas fa-times-circle"
+                className="fas mr-10 fa-times-circle"
                 style={{ display: 'none', color: 'red', fontSize: '20px' }}
               ></i>
             </div>
@@ -122,7 +122,7 @@ function ProfileForm({ props }) {
               className="input-container"
               style="display: flex; align-items: center"
             >
-              <i className="fas fa-user"></i>
+              <i className="fas mr-10 fa-user"></i>
               <input
                 id="firstname-input"
                 style="margin-right: 10px"
@@ -138,7 +138,7 @@ function ProfileForm({ props }) {
               />
             </div>
             <div className="input-container">
-              <i className="fas fa-globe-asia"></i>
+              <i className="fas mr-10 fa-globe-asia"></i>
               <input
                 id="city-input"
                 placeholder="City, State"
@@ -147,7 +147,7 @@ function ProfileForm({ props }) {
               />
             </div>
             <div className="input-container">
-              <i className="fas fa-flag"></i>
+              <i className="fas mr-10 fa-flag"></i>
               <input
                 id="country-input"
                 placeholder="Country"
@@ -156,10 +156,10 @@ function ProfileForm({ props }) {
               />
             </div>
             <div className="input-container">
-              <i className="fas fa-language"></i>
+              <i className="fas mr-10 fa-language"></i>
               <input
                 id="language-input"
-                placeholder="Langauge (a comma separated list of languages you can speak)"
+                placeholder="Langauge (use comma to separate each language)"
                 onInput={(e) => removeInvalidClassAndReason(e.target)}
                 required
               />
@@ -179,7 +179,7 @@ function ProfileForm({ props }) {
             </div>
 
             <div className="input-container">
-              <i className="fas fa-birthday-cake"></i>
+              <i className="fas mr-10 fa-birthday-cake"></i>
               <input
                 id="birthday-input"
                 placeholder="Date of birth"
@@ -198,7 +198,7 @@ function ProfileForm({ props }) {
               <p>We can notify you when your friends send you a message</p>
             </div>
             <div className="input-container">
-              <i className="fas fa-envelope"></i>
+              <i className="fas mr-10 fa-envelope"></i>
               <input
                 id="email-input"
                 placeholder="Email"
@@ -208,7 +208,7 @@ function ProfileForm({ props }) {
               />
             </div>
             <div className="input-container">
-              <i className="fas fa-phone"></i>
+              <i className="fas mr-10 fa-phone"></i>
               <input id="phone-input" placeholder="Phone number (optional)" />
             </div>
             <div className="invalid-reason"></div>
@@ -223,7 +223,7 @@ function ProfileForm({ props }) {
               </p>
             </div>
             <div className="input-container">
-              <i className="fas fa-user"></i>
+              <i className="fas mr-10 fa-user"></i>
               <input
                 id="position-input"
                 placeholder="Position"
@@ -232,7 +232,7 @@ function ProfileForm({ props }) {
               />
             </div>
             <div className="input-container">
-              <i className="fas fa-building"></i>
+              <i className="fas mr-10 fa-building"></i>
               <input
                 id="currently-input"
                 placeholder="Current work"
@@ -241,7 +241,7 @@ function ProfileForm({ props }) {
               />
             </div>
             <div className="input-container">
-              <i className="fas fa-paperclip"></i>
+              <i className="fas mr-10 fa-paperclip"></i>
               <input
                 id="previously-input"
                 placeholder="Previous work"
@@ -250,7 +250,7 @@ function ProfileForm({ props }) {
               />
             </div>
             <div className="input-container">
-              <i className="fas fa-graduation-cap"></i>
+              <i className="fas mr-10 fa-graduation-cap"></i>
               <input
                 id="education-input"
                 placeholder="Education"
