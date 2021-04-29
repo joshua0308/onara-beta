@@ -1,7 +1,4 @@
 export const rooms = [
-  { name: '🇨🇳 Chinese', levelOne: 'Learn', levelTwo: 'Language' },
-  { name: '🇺🇸 English', levelOne: 'Learn', levelTwo: 'Language' },
-  { name: '🇪🇸 Spanish', levelOne: 'Learn', levelTwo: 'Language' },
   { name: '💼 Career path', levelOne: 'Learn', levelTwo: 'Professional' },
   { name: '📄 Resume building', levelOne: 'Learn', levelTwo: 'Professional' },
   { name: '🗣 Interview prep', levelOne: 'Learn', levelTwo: 'Professional' },
@@ -13,6 +10,9 @@ export const rooms = [
   { name: '📈 Investing', levelOne: 'Learn', levelTwo: 'Life' },
   { name: '🏠 House chores', levelOne: 'Learn', levelTwo: 'Life' },
   { name: '🏦 Tax / Bill / Bank', levelOne: 'Learn', levelTwo: 'Life' },
+  { name: '🇺🇸 English', levelOne: 'Learn', levelTwo: 'Language' },
+  { name: '🇪🇸 Spanish', levelOne: 'Learn', levelTwo: 'Language' },
+  { name: '🇨🇳 Chinese', levelOne: 'Learn', levelTwo: 'Language' },
   {
     name: '🕵️‍♀️ Investors / Founders meetup',
     levelOne: 'Business',
