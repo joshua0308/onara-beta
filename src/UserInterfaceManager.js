@@ -408,7 +408,7 @@ class UserInterfaceManager {
       const languageInput = document.getElementById('language-input');
       const emailInput = document.getElementById('email-input');
       const phoneInput = document.getElementById('phone-input');
-      const videosWrapperPnput = document.getElementById('videosWrapperPinput');
+      const positionInput = document.getElementById('position-input');
       const currentlyInput = document.getElementById('currently-input');
       const previouslyInput = document.getElementById('previously-input');
       const educationInput = document.getElementById('education-input');
