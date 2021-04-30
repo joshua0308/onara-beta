@@ -71,7 +71,7 @@ function ProfileForm({ props }) {
                 onInput={(e) => {
                   removeInvalidClassAndReason(e.target);
 
-                  if (e.target.value.length < 5) {
+                  if (e.target.value.length < 3) {
                     return toggleValid(false);
                   }
 
