@@ -79,6 +79,32 @@ class Preload extends Phaser.Scene {
       spacing: 111
     });
 
+    this.load.spritesheet('cat-idle', 'assets/new-player/cat-idle.png', {
+      frameWidth: 783,
+      frameHeight: 1080,
+      spacing: -100
+    });
+
+    // 63.3%
+
+    this.load.spritesheet('cat-drink', 'assets/new-player/cat-drink.png', {
+      frameWidth: 783,
+      frameHeight: 1080,
+      spacing: -100
+    });
+
+    this.load.spritesheet('cat-walk', 'assets/new-player/cat-walk.png', {
+      frameWidth: 783,
+      frameHeight: 1080,
+      spacing: -100
+    });
+
+    this.load.spritesheet('cat-jump', 'assets/new-player/cat-jump.png', {
+      frameWidth: 783,
+      frameHeight: 1080,
+      spacing: -100
+    });
+
     this.load.once('complete', () => {
       this.startGame();
     });

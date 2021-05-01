@@ -11,11 +11,12 @@ class OtherPlayer extends Phaser.GameObjects.Container {
     userInterfaceManager
   ) {
     super(scene, x, y);
-    if (playerInfo.gender) {
-      this.characterType = playerInfo.gender === 'male' ? 'boy' : 'girl';
-    } else {
-      this.characterType = 'girl';
-    }
+    // if (playerInfo.gender) {
+    //   this.characterType = playerInfo.gender === 'male' ? 'boy' : 'girl';
+    // } else {
+    //   this.characterType = 'girl';
+    // }
+    this.characterType = 'cat';
 
     this.uid = playerInfo.uid;
     this.socket = socket;
@@ -56,9 +57,19 @@ class OtherPlayer extends Phaser.GameObjects.Container {
   createSprite() {
     const player = this.scene.add.sprite(0, 0, `${this.characterType}-idle`, 0);
     player.name = 'sprite';
-    player.setScale(0.4);
+    player.setScale(this.getScale());
     player.play(`${this.characterType}-idle`, true);
     this.add(player);
+  }
+
+  getScale() {
+    let scale = 0.4;
+
+    if (['dog', 'cat'].includes(this.characterType)) {
+      scale = 0.3;
+    }
+
+    return scale;
   }
 
   createPlayerName(name) {

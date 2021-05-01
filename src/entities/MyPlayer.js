@@ -5,11 +5,9 @@ import React from 'jsx-dom';
 class MyPlayer extends Phaser.GameObjects.Container {
   constructor(scene, x, y, socket, playerInfo) {
     super(scene, x, y);
-    if (playerInfo.gender) {
-      this.characterType = playerInfo.gender === 'male' ? 'boy' : 'girl';
-    } else {
-      this.characterType = 'girl';
-    }
+    // eslint-disable-next-line no-console
+    console.log('debug: playerInfo.gender', playerInfo.gender);
+    this.setCharacterType(playerInfo.gender);
 
     this.playerInfo = playerInfo;
     this.socket = socket;
@@ -68,11 +66,43 @@ class MyPlayer extends Phaser.GameObjects.Container {
     this.scene.physics.add.existing(this);
   }
 
+  setCharacterType(gender) {
+    switch (gender) {
+      case 'male':
+        this.characterType = 'boy';
+        break;
+      case 'female':
+        this.characterType = 'girl';
+        break;
+      case 'cat':
+        this.characterType = 'cat';
+        break;
+      case 'dog':
+        this.characterType = 'dog';
+        break;
+      default:
+        this.characterType = 'boy';
+        break;
+    }
+  }
+
   createSprite() {
     const player = this.scene.add.sprite(0, 0, `${this.characterType}-idle`, 0);
-    player.setScale(0.4);
+    this.player = player;
+
+    this.updateScale();
     player.name = 'sprite';
     this.add(player);
+  }
+
+  getScale() {
+    let scale = 0.4;
+
+    if (['dog', 'cat'].includes(this.characterType)) {
+      scale = 0.3;
+    }
+
+    return scale;
   }
 
   createPlayerName(name) {
@@ -165,8 +195,14 @@ class MyPlayer extends Phaser.GameObjects.Container {
     this.createPlayerName(updatedName);
   }
 
+  updateScale() {
+    const scale = this.getScale();
+    this.player.setScale(scale);
+  }
+
   updateCharacterType(type) {
-    this.characterType = type === 'male' ? 'boy' : 'girl';
+    this.setCharacterType(type);
+    this.updateScale();
   }
 
   update() {

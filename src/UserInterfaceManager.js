@@ -309,12 +309,27 @@ class UserInterfaceManager {
       const currentlyInput = document.getElementById('currently-input');
       const previouslyInput = document.getElementById('previously-input');
       const educationInput = document.getElementById('education-input');
-      const gender =
-        Array(...document.getElementsByClassName('avatar-container'))
-          .map((el) => !!el.style.backgroundColor)
-          .indexOf(true) === 0
-          ? 'male'
-          : 'female';
+      const genderIndex = Array(
+        ...document.getElementsByClassName('avatar-container')
+      )
+        .map((el) => !!el.style.backgroundColor)
+        .indexOf(true);
+
+      let gender;
+
+      switch (genderIndex) {
+        case 0:
+          gender = 'male';
+          break;
+        case 1:
+          gender = 'female';
+          break;
+        case 2:
+          gender = 'cat';
+          break;
+        default:
+          gender = 'male';
+      }
 
       const formInputValues = {
         username: usernameInput.value,
@@ -646,12 +661,30 @@ class UserInterfaceManager {
       const currentlyInput = document.getElementById('currently-input');
       const previouslyInput = document.getElementById('previously-input');
       const educationInput = document.getElementById('education-input');
-      const gender =
-        Array(...document.getElementsByClassName('avatar-container'))
-          .map((el) => !!el.style.backgroundColor)
-          .indexOf(true) === 0
-          ? 'male'
-          : 'female';
+
+      const genderIndex = Array(
+        ...document.getElementsByClassName('avatar-container')
+      )
+        .map((el) => !!el.style.backgroundColor)
+        .indexOf(true);
+
+      let gender;
+
+      // eslint-disable-next-line no-console
+      console.log('debug: genderIndex', genderIndex);
+      switch (genderIndex) {
+        case 0:
+          gender = 'male';
+          break;
+        case 1:
+          gender = 'female';
+          break;
+        case 2:
+          gender = 'cat';
+          break;
+        default:
+          gender = 'male';
+      }
 
       const skills = Array(...document.querySelectorAll('.skill-button'))
         .filter((button) => button.classList.contains('active'))
@@ -874,8 +907,30 @@ class UserInterfaceManager {
     populateSkillButtons(myPlayerData.goodAt);
 
     // select avatar
+    let genderIndex;
+
+    // eslint-disable-next-line no-console
+    console.log('debug: myPlayerData.gender', myPlayerData.gender);
+    switch (myPlayerData.gender) {
+      case 'male':
+        genderIndex = 0;
+        break;
+      case 'female':
+        genderIndex = 1;
+        break;
+      case 'cat':
+        genderIndex = 2;
+        break;
+      case 'dog':
+        genderIndex = 3;
+        break;
+      default:
+        genderIndex = 0;
+        break;
+    }
+
     document.querySelectorAll('.avatar-container')[
-      myPlayerData.gender === 'male' ? 0 : 1
+      genderIndex
     ].style.backgroundColor = 'rgba(69, 106, 221, 0.5)';
 
     showTab(currentTab); // Display the current tab

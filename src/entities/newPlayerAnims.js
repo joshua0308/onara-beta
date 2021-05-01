@@ -98,4 +98,104 @@ export default (anims) => {
     frameRate: 4,
     repeat: -1
   });
+
+  anims.create({
+    key: 'cat-idle',
+    frames: anims.generateFrameNumbers('cat-idle', {
+      start: 0,
+      end: 4
+    }),
+    frameRate: 4,
+    repeat: -1
+  });
+
+  anims.create({
+    key: 'cat-drink',
+    frames: anims.generateFrameNumbers('cat-drink', {
+      start: 0,
+      end: 6
+    }),
+    frameRate: 3,
+    repeat: -1
+  });
+
+  anims.create({
+    key: 'cat-walk',
+    frames: anims.generateFrameNumbers('cat-walk', {
+      start: 0,
+      end: 10
+    }),
+    frameRate: 8,
+    repeat: -1
+  });
+
+  anims.create({
+    key: 'cat-jump',
+    frames: anims.generateFrameNumbers('cat-jump', {
+      start: 1,
+      end: 6
+    }),
+    frameRate: 4,
+    repeat: -1
+  });
+
+  anims.create({
+    key: 'cat-duck',
+    frames: anims.generateFrameNumbers('cat-jump', {
+      start: 5,
+      end: 5
+    }),
+    frameRate: 4,
+    repeat: -1
+  });
+
+  anims.create({
+    key: 'dog-idle',
+    frames: anims.generateFrameNumbers('dog-idle', {
+      start: 0,
+      end: 4
+    }),
+    frameRate: 4,
+    repeat: -1
+  });
+
+  anims.create({
+    key: 'dog-drink',
+    frames: anims.generateFrameNumbers('dog-drink', {
+      start: 0,
+      end: 6
+    }),
+    frameRate: 3,
+    repeat: -1
+  });
+
+  anims.create({
+    key: 'dog-walk',
+    frames: anims.generateFrameNumbers('dog-walk', {
+      start: 0,
+      end: 10
+    }),
+    frameRate: 8,
+    repeat: -1
+  });
+
+  anims.create({
+    key: 'dog-jump',
+    frames: anims.generateFrameNumbers('dog-jump', {
+      start: 1,
+      end: 6
+    }),
+    frameRate: 4,
+    repeat: -1
+  });
+
+  anims.create({
+    key: 'dog-duck',
+    frames: anims.generateFrameNumbers('dog-jump', {
+      start: 5,
+      end: 5
+    }),
+    frameRate: 4,
+    repeat: -1
+  });
 };
