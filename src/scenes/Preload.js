@@ -85,8 +85,6 @@ class Preload extends Phaser.Scene {
       spacing: -100
     });
 
-    // 63.3%
-
     this.load.spritesheet('cat-drink', 'assets/new-player/cat-drink.png', {
       frameWidth: 783,
       frameHeight: 1080,
@@ -100,6 +98,30 @@ class Preload extends Phaser.Scene {
     });
 
     this.load.spritesheet('cat-jump', 'assets/new-player/cat-jump.png', {
+      frameWidth: 783,
+      frameHeight: 1080,
+      spacing: -100
+    });
+
+    this.load.spritesheet('dog-idle', 'assets/new-player/dog-idle.png', {
+      frameWidth: 783,
+      frameHeight: 1080,
+      spacing: -100
+    });
+
+    this.load.spritesheet('dog-drink', 'assets/new-player/dog-drink.png', {
+      frameWidth: 783,
+      frameHeight: 1080,
+      spacing: -100
+    });
+
+    this.load.spritesheet('dog-walk', 'assets/new-player/dog-walk.png', {
+      frameWidth: 783,
+      frameHeight: 1080,
+      spacing: -100
+    });
+
+    this.load.spritesheet('dog-jump', 'assets/new-player/dog-jump.png', {
       frameWidth: 783,
       frameHeight: 1080,
       spacing: -100

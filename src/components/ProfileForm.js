@@ -599,6 +599,12 @@ function ProfileForm({ props }) {
                       src="public/assets/cat-signup.png"
                     />
                   </div>
+                  <div className="avatar-container">
+                    <img
+                      className="avatar-img"
+                      src="public/assets/dog-signup.png"
+                    />
+                  </div>
                 </div>
                 <div className="invalid-reason"></div>
               </div>

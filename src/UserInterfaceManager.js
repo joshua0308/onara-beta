@@ -327,6 +327,9 @@ class UserInterfaceManager {
         case 2:
           gender = 'cat';
           break;
+        case 3:
+          gender = 'dog';
+          break;
         default:
           gender = 'male';
       }
@@ -670,8 +673,6 @@ class UserInterfaceManager {
 
       let gender;
 
-      // eslint-disable-next-line no-console
-      console.log('debug: genderIndex', genderIndex);
       switch (genderIndex) {
         case 0:
           gender = 'male';
@@ -681,6 +682,9 @@ class UserInterfaceManager {
           break;
         case 2:
           gender = 'cat';
+          break;
+        case 3:
+          gender = 'dog';
           break;
         default:
           gender = 'male';
@@ -905,33 +909,33 @@ class UserInterfaceManager {
 
     populateInterestButtons(myPlayerData.interestedIn);
     populateSkillButtons(myPlayerData.goodAt);
+    populateAvatar(myPlayerData.gender);
 
-    // select avatar
-    let genderIndex;
+    function populateAvatar(type) {
+      let genderIndex;
 
-    // eslint-disable-next-line no-console
-    console.log('debug: myPlayerData.gender', myPlayerData.gender);
-    switch (myPlayerData.gender) {
-      case 'male':
-        genderIndex = 0;
-        break;
-      case 'female':
-        genderIndex = 1;
-        break;
-      case 'cat':
-        genderIndex = 2;
-        break;
-      case 'dog':
-        genderIndex = 3;
-        break;
-      default:
-        genderIndex = 0;
-        break;
+      switch (type) {
+        case 'male':
+          genderIndex = 0;
+          break;
+        case 'female':
+          genderIndex = 1;
+          break;
+        case 'cat':
+          genderIndex = 2;
+          break;
+        case 'dog':
+          genderIndex = 3;
+          break;
+        default:
+          genderIndex = 0;
+          break;
+      }
+
+      document.querySelectorAll('.avatar-container')[
+        genderIndex
+      ].style.backgroundColor = 'rgba(69, 106, 221, 0.5)';
     }
-
-    document.querySelectorAll('.avatar-container')[
-      genderIndex
-    ].style.backgroundColor = 'rgba(69, 106, 221, 0.5)';
 
     showTab(currentTab); // Display the current tab
 

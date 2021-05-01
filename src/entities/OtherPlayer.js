@@ -11,12 +11,7 @@ class OtherPlayer extends Phaser.GameObjects.Container {
     userInterfaceManager
   ) {
     super(scene, x, y);
-    // if (playerInfo.gender) {
-    //   this.characterType = playerInfo.gender === 'male' ? 'boy' : 'girl';
-    // } else {
-    //   this.characterType = 'girl';
-    // }
-    this.characterType = 'cat';
+    this.setCharacterType(playerInfo.gender);
 
     this.uid = playerInfo.uid;
     this.socket = socket;
@@ -54,10 +49,32 @@ class OtherPlayer extends Phaser.GameObjects.Container {
     this.scene.physics.add.existing(this);
   }
 
+  setCharacterType(gender) {
+    switch (gender) {
+      case 'male':
+        this.characterType = 'boy';
+        break;
+      case 'female':
+        this.characterType = 'girl';
+        break;
+      case 'cat':
+        this.characterType = 'cat';
+        break;
+      case 'dog':
+        this.characterType = 'dog';
+        break;
+      default:
+        this.characterType = 'boy';
+        break;
+    }
+  }
+
   createSprite() {
     const player = this.scene.add.sprite(0, 0, `${this.characterType}-idle`, 0);
+    this.player = player;
+
+    this.updateScale();
     player.name = 'sprite';
-    player.setScale(this.getScale());
     player.play(`${this.characterType}-idle`, true);
     this.add(player);
   }
@@ -158,8 +175,14 @@ class OtherPlayer extends Phaser.GameObjects.Container {
     this.createPlayerName(updatedName);
   }
 
+  updateScale() {
+    const scale = this.getScale();
+    this.player.setScale(scale);
+  }
+
   updateCharacterType(type) {
-    this.characterType = type === 'male' ? 'boy' : 'girl';
+    this.setCharacterType(type);
+    this.updateScale();
 
     const sprite = this.getByName('sprite');
     sprite.play(`${this.characterType}-idle`, true); // need to play anim to change the character type

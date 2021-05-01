@@ -173,7 +173,7 @@ export default (anims) => {
     key: 'dog-walk',
     frames: anims.generateFrameNumbers('dog-walk', {
       start: 0,
-      end: 10
+      end: 7
     }),
     frameRate: 8,
     repeat: -1
@@ -192,8 +192,8 @@ export default (anims) => {
   anims.create({
     key: 'dog-duck',
     frames: anims.generateFrameNumbers('dog-jump', {
-      start: 5,
-      end: 5
+      start: 7,
+      end: 7
     }),
     frameRate: 4,
     repeat: -1
