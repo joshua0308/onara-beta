@@ -47,8 +47,32 @@
                  "type":"",
                  "visible":true,
                  "width":0,
-                 "x":976,
-                 "y":832
+                 "x":2416,
+                 "y":848
+                }, 
+                {
+                 "height":0,
+                 "id":51,
+                 "name":"doorZone3",
+                 "point":true,
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":0,
+                 "x":2544,
+                 "y":512
+                }, 
+                {
+                 "height":0,
+                 "id":52,
+                 "name":"doorZone2",
+                 "point":true,
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":0,
+                 "x":2640,
+                 "y":592
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -69,7 +93,7 @@
          "y":0
         }],
  "nextlayerid":17,
- "nextobjectid":51,
+ "nextobjectid":53,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.4.3",

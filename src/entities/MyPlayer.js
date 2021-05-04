@@ -5,8 +5,6 @@ import React from 'jsx-dom';
 class MyPlayer extends Phaser.GameObjects.Container {
   constructor(scene, x, y, socket, playerInfo) {
     super(scene, x, y);
-    // eslint-disable-next-line no-console
-    console.log('debug: playerInfo.gender', playerInfo.gender);
     this.setCharacterType(playerInfo.gender);
 
     this.playerInfo = playerInfo;
@@ -59,7 +57,7 @@ class MyPlayer extends Phaser.GameObjects.Container {
   }
 
   setupContainer() {
-    this.setSize(70, 230);
+    this.updateSize();
 
     // add existing context - this will add image and set gravity
     this.scene.add.existing(this);
@@ -95,14 +93,44 @@ class MyPlayer extends Phaser.GameObjects.Container {
     this.add(player);
   }
 
+  getSize() {
+    let size = [70, 230];
+
+    if (['dog', 'cat'].includes(this.characterType)) {
+      size = [70, 140];
+    }
+
+    return size;
+  }
+
   getScale() {
     let scale = 0.4;
 
     if (['dog', 'cat'].includes(this.characterType)) {
-      scale = 0.3;
+      scale = 0.2;
     }
 
     return scale;
+  }
+
+  getNameOrigin() {
+    let origin = [0.5, 6.2];
+
+    if (['dog', 'cat'].includes(this.characterType)) {
+      origin = [0.5, 4.2];
+    }
+
+    return origin;
+  }
+
+  getMessageOrigin() {
+    let origin = [0, -180];
+
+    if (['dog', 'cat'].includes(this.characterType)) {
+      origin = [0, -130];
+    }
+
+    return origin;
   }
 
   createPlayerName(name) {
@@ -123,7 +151,7 @@ class MyPlayer extends Phaser.GameObjects.Container {
     );
 
     this.nameChild = this.scene.add.dom(0, 0, NameElement);
-    this.nameChild.setOrigin(0.5, 6.2);
+    this.nameChild.setOrigin(...this.getNameOrigin());
     this.add(this.nameChild);
   }
 
@@ -175,7 +203,10 @@ class MyPlayer extends Phaser.GameObjects.Container {
       </div>
     );
 
-    const messageChild = this.scene.add.dom(0, -180, messageElement);
+    const messageChild = this.scene.add.dom(
+      ...this.getMessageOrigin(),
+      messageElement
+    );
     this.add(messageChild);
     this.messageChild = messageChild;
 
@@ -190,19 +221,26 @@ class MyPlayer extends Phaser.GameObjects.Container {
     this.remove(this.nameChild, true);
   }
 
+  updateCharacterType(type) {
+    this.setCharacterType(type);
+    this.updateSize();
+    this.updateScale();
+  }
+
   updatePlayerName(updatedName) {
     this.removePlayerName();
     this.createPlayerName(updatedName);
   }
 
   updateScale() {
-    const scale = this.getScale();
-    this.player.setScale(scale);
+    this.player.setScale(this.getScale());
   }
 
-  updateCharacterType(type) {
-    this.setCharacterType(type);
-    this.updateScale();
+  updateSize() {
+    console.log('updateSize', ...this.getSize());
+    this.setSize(...this.getSize());
+    // eslint-disable-next-line no-console
+    console.log('debug: this', this);
   }
 
   update() {

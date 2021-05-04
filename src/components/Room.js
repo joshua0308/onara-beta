@@ -7,6 +7,7 @@ function LevelThreeOption({ props }) {
     e.preventDefault();
     this.scene.socket.emit('leave-room', this.scene.barId);
     this.scene.registry.set('map', 'bar');
+    this.scene.registry.set('spawn', 'start');
     this.removeOnlineList();
     this.removeGeneralChat();
     this.removeBarQuestionnaireInterface();

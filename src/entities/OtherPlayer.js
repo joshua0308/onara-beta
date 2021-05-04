@@ -83,7 +83,7 @@ class OtherPlayer extends Phaser.GameObjects.Container {
     let scale = 0.4;
 
     if (['dog', 'cat'].includes(this.characterType)) {
-      scale = 0.3;
+      scale = 0.2;
     }
 
     return scale;

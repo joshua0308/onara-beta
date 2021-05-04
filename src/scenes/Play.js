@@ -63,6 +63,10 @@ class Play extends Phaser.Scene {
   }
 
   async create({ barId = 'town' }) {
+    if (!this.registry.get('map')) {
+      this.registry.set('map', 'town');
+    }
+
     this.isMobile = this.game.isMobile;
     this.firebase = this.game.firebase;
     this.firebaseAuth = this.game.firebaseAuth;
@@ -156,20 +160,17 @@ class Play extends Phaser.Scene {
     const layers = this.createLayers(this.map);
     this.playerZones = this.getPlayerZones(layers.playerZones);
 
+    const spawnZone = this.registry.get('spawn') || 'start';
+    // eslint-disable-next-line no-console
+    console.log('debug: spawnZone', this.registry.get('spawn'));
     this.myPlayerSprite = new MyPlayer(
       this,
-      this.playerZones.start.x,
-      this.playerZones.start.y,
+      this.playerZones[spawnZone].x,
+      this.playerZones[spawnZone].y,
       this.socket,
       this.myPlayer
     );
     this.myPlayerSprite.addCollider(layers.platformsColliders);
-
-    const doorZone = this.playerZones.door;
-
-    this.door = this.physics.add.sprite(doorZone.x, doorZone.y, 'door');
-    this.door.setSize(50, 100).setAlpha(0).setOrigin(0, 0);
-    this.physics.add.overlap(this.myPlayerSprite, this.door);
 
     this.setupFollowupCameraOn(this.myPlayerSprite);
 
@@ -178,28 +179,67 @@ class Play extends Phaser.Scene {
     }
 
     this.barQuestionnaireDisplayed = false;
-    this.physics.add.overlap(this.myPlayerSprite, this.door, () => {
-      if (this.barQuestionnaireDisplayed) {
-        return;
-      }
 
-      this.barQuestionnaireDisplayed = true;
-      const isBar = this.getCurrentMap() === 'bar';
-      this.userInterfaceManager.createBarQuestionnaireInterface(isBar);
+    if (this.playerZones.doorTwo) {
+      const doorZoneTwo = this.playerZones.doorTwo;
+      const doorTwo = this.physics.add.sprite(
+        doorZoneTwo.x,
+        doorZoneTwo.y,
+        'door'
+      );
 
-      // eslint-disable-next-line no-console
-      console.log('debug: this.myPlayer', this.myPlayer);
-      if (!this.myPlayer.interestedIn || !this.myPlayer.goodAt) {
-        let tabNum = 6;
-        if (this.myPlayer.interestedIn) {
-          tabNum = 7;
+      doorTwo.setSize(10, 100).setAlpha(0).setOrigin(0, 0);
+      this.physics.add.overlap(this.myPlayerSprite, doorTwo);
+
+      this.physics.add.overlap(
+        this.myPlayerSprite,
+        doorTwo,
+        function () {
+          const to = this.registry.get('map') === 'town' ? 'ocean' : 'town';
+
+          this.userInterfaceManager.removeOnlineList();
+          this.userInterfaceManager.removeGeneralChat();
+
+          this.registry.set('map', to);
+
+          if (to === 'town') {
+            this.registry.set('spawn', 'doorThree');
+          } else {
+            this.registry.set('spawn', 'start');
+          }
+
+          this.scene.restart({ barId: to });
+        }.bind(this)
+      );
+    }
+
+    if (this.playerZones.door) {
+      const doorZone = this.playerZones.door;
+      this.door = this.physics.add.sprite(doorZone.x, doorZone.y, 'door');
+      this.door.setSize(50, 100).setAlpha(0).setOrigin(0, 0);
+      this.physics.add.overlap(this.myPlayerSprite, this.door);
+
+      this.physics.add.overlap(this.myPlayerSprite, this.door, () => {
+        if (this.barQuestionnaireDisplayed) {
+          return;
         }
-        this.userInterfaceManager.createProfileFormInterface(
-          this.myPlayer,
-          tabNum
-        );
-      }
-    });
+
+        this.barQuestionnaireDisplayed = true;
+        const isBar = this.getCurrentMap() === 'bar';
+        this.userInterfaceManager.createBarQuestionnaireInterface(isBar);
+
+        if (!this.myPlayer.interestedIn || !this.myPlayer.goodAt) {
+          let tabNum = 6;
+          if (this.myPlayer.interestedIn) {
+            tabNum = 7;
+          }
+          this.userInterfaceManager.createProfileFormInterface(
+            this.myPlayer,
+            tabNum
+          );
+        }
+      });
+    }
   }
 
   update() {
@@ -208,12 +248,11 @@ class Play extends Phaser.Scene {
     if (this.myPlayerSprite.body.touching.none) {
       this.barQuestionnaireDisplayed = false;
       this.userInterfaceManager.removeBarQuestionnaireInterface();
-      // this.userInterfaceManager.removeProfileFormInterface();
     }
   }
 
   getCurrentMap() {
-    return this.registry.get('map') || 'town';
+    return this.registry.get('map');
   }
 
   setupSocket() {
@@ -468,7 +507,9 @@ class Play extends Phaser.Scene {
     const playerZones = playerZonesLayer.objects;
     return {
       start: playerZones.find((zone) => zone.name === 'startZone'),
-      door: playerZones.find((zone) => zone.name === 'doorZone')
+      door: playerZones.find((zone) => zone.name === 'doorZone'),
+      doorTwo: playerZones.find((zone) => zone.name === 'doorZone2'),
+      doorThree: playerZones.find((zone) => zone.name === 'doorZone3')
     };
   }
 

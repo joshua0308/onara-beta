@@ -119,11 +119,12 @@ function RoomOptionsContainer({ props }) {
     this.logger.log(this.scene.getCurrentMap());
     if (this.scene.getCurrentMap() === 'bar') {
       this.scene.registry.set('map', 'town');
+      this.scene.registry.set('spawn', 'door');
       this.scene.socket.emit('leave-room', this.scene.barId);
 
       this.removeOnlineList();
       this.removeGeneralChat();
-      this.scene.scene.restart({ barId: undefined });
+      this.scene.scene.restart({ barId: 'town' });
     }
     this.removeBarQuestionnaireInterface();
   };

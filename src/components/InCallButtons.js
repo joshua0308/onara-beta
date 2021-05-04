@@ -111,24 +111,23 @@ function InCallButtons({ props }) {
     }
 
     const screenshareIcon = document.getElementById('screenshare-icon');
-    if (screenshareIcon.classList.contains('fa-desktop')) {
+    if (screenshareIcon.style.color === 'white') {
       if (this.scene.nativePeerManager.mode === 'screenshare') {
         return alert(
           'You cannot share your screen when someone else is presenting.'
         );
       }
 
-      screenshareIcon.classList.remove('fa-desktop');
-      screenshareIcon.classList.add('fa-camera');
+      screenshareIcon.style.color = 'red';
+      pElement.style.color = 'red';
 
       this.scene.nativePeerManager.requestScreenshare(minimizeVideosWrapper);
       pElement.innerText = 'Stop sharing';
     } else {
-      screenshareIcon.classList.remove('fa-camera');
-      screenshareIcon.classList.add('fa-desktop');
+      screenshareIcon.style.color = 'grey';
+      pElement.style.color = 'grey';
 
       this.scene.nativePeerManager.switchToCameraTrack();
-      // maximizeVideosWrapper();
       pElement.innerText = 'Present now';
     }
   };
@@ -148,20 +147,30 @@ function InCallButtons({ props }) {
         <button id="toggle-audio-button" onClick={() => toggleAudio()}>
           <i id="audio-icon" className="fas fa-microphone fa-xs"></i>
         </button>
-        <button id="end-call-button-button" onClick={() => endCall()}>
-          <i id="end-call-icon" className="fas fa-phone-slash fa-xs"></i>
+      </div>
+      <div className="in-call-buttons-section">
+        <button
+          style={{ width: '50px', height: '50px', borderRadius: '50%' }}
+          id="end-call-button-button"
+          onClick={() => endCall()}
+        >
+          <i
+            id="end-call-icon"
+            style={{ color: 'white' }}
+            className="fas fa-phone fa-xs"
+          ></i>
         </button>
       </div>
       <div className="in-call-buttons-section">
         <button id="toggle-screenshare-button" onClick={toggleScreenshare}>
           <i id="screenshare-icon" className="fas fa-desktop fa-xs"></i>
-          <p id="toggle-screenshare-text" style={{ fontSize: '10px' }}>
+          <p id="toggle-screenshare-text" style={{ fontSize: '12px' }}>
             Present now
           </p>
         </button>
         <button id="toggle-background-button" onClick={toggleBackground}>
           <i id="background-icon" className="fas fa-eye fa-xs"></i>
-          <p id="toggle-background-text" style={{ fontSize: '10px' }}>
+          <p id="toggle-background-text" style={{ fontSize: '12px' }}>
             Focus mode
           </p>
         </button>

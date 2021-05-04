@@ -9,6 +9,7 @@ class Preload extends Phaser.Scene {
     console.time('load images');
     this.load.tilemapTiledJSON('bar-map', 'assets/updated-bar-map.json');
     this.load.tilemapTiledJSON('town-map', 'assets/updated-town-map.json');
+    this.load.tilemapTiledJSON('ocean-map', 'assets/updated-ocean-map.json');
     /**
      * BACKGROUND AND ASSETS
      */
@@ -17,6 +18,10 @@ class Preload extends Phaser.Scene {
     this.load.image(
       'final-background-town',
       'assets/final-background-town.png'
+    );
+    this.load.image(
+      'final-background-ocean',
+      'assets/final-background-ocean.jpeg'
     );
 
     this.load.spritesheet('boy-idle', 'assets/new-player/boy-idle.png', {
