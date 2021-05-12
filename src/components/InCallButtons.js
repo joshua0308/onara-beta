@@ -111,7 +111,7 @@ function InCallButtons({ props }) {
     }
 
     const screenshareIcon = document.getElementById('screenshare-icon');
-    if (screenshareIcon.style.color === 'white') {
+    if (screenshareIcon.style.color === 'grey') {
       if (this.scene.nativePeerManager.mode === 'screenshare') {
         return alert(
           'You cannot share your screen when someone else is presenting.'
